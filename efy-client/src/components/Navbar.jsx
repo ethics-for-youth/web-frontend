@@ -1,19 +1,19 @@
 import React from 'react';
+import logo from '../assets/logo.png'; 
 
 const Navbar = () => {
   return (
-    <nav className="bg-green-950 text-white shadow-sm shadow-green-800/30 px-6 py-5 flex items-center justify-between">
-      {/* Logo */}
-      <div className="flex items-center gap-3">
-        <img
-          src="/logo.png" // ✅ Replace with your actual logo path
-          alt="Ethics for Youth Logo"
-          className="w-10 h-10 object-cover rounded-full shadow-sm"
-        />
-        <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white">
-          Ethics for Youth
-        </h1>
-      </div>
+   <nav className="bg-emerald-800 text-white shadow-sm shadow-green-800/30 px-6 h-16 flex items-center justify-between">
+  {/* Logo */}
+  <div className="flex items-center">
+    <img
+      src={logo}
+      alt="Ethic for Youth Logo"
+      className="pl-5 h-24 w-auto object-contain"
+    />
+  </div>
+
+
 
       {/* Navigation Links */}
       <ul className="hidden md:flex gap-6 text-sm font-medium">

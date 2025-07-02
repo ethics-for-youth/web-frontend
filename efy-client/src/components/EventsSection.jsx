@@ -30,7 +30,7 @@ const EventsSection = () => {
             <li>✨ 30-minute interactive Q&A included</li>
           </ul>
         <button
-  onClick={() => navigate('/register')}
+  onClick={() => navigate('/application')}
   className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white py-2 rounded-lg font-medium  shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
 >
   Register Now

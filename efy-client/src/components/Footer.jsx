@@ -26,8 +26,8 @@ const Footer = () => {
         <div>
           <h5 className="text-lg font-semibold mb-2">Connect</h5>
           <ul className="space-y-1 text-gray-300">
-            <li>Email: info@ethicsforyouth.org</li>
-            <li>Phone: +1 (555) 123-4567</li>
+            <li>Email: ethicsforyouth@gmail.com</li>
+            <li>Phone: +91 8604615340</li>
             <li className="mt-2 flex gap-4 text-xl">
               <span className="hover:text-green-300 cursor-pointer">📘</span>
               <span className="hover:text-green-300 cursor-pointer">📷</span>

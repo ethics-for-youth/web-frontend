@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import EventDetails from '../components/EventDetails';
 import scannerImg from '../assets/scanner.jpeg'; 
+import Navbar from '../components/Navbar';
 
 export default function StudentRegistrationForm() {
   const [formData, setFormData] = useState({
@@ -56,6 +57,8 @@ export default function StudentRegistrationForm() {
   };
 
   return (
+  
+
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-6">
       <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
 
