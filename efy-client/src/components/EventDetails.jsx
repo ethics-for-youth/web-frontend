@@ -1,6 +1,5 @@
 import React from 'react';
 import bgImage from '../assets/bg.jpeg';
-import bgImage2 from '../assets/bg2.jpeg'; 
 
 const EventDetails = () => {
   return (
