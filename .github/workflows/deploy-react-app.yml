@@ -148,29 +148,29 @@ jobs:
           
           echo "✅ Deployment to S3 completed"
 
-      # - name: Set S3 bucket website configuration
-      #   if: steps.check_changes.outputs.has_changes == 'true'
-      #   run: |
-      #     echo "🌐 Configuring S3 bucket for static website hosting..."
+      - name: Set S3 bucket website configuration
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "🌐 Configuring S3 bucket for static website hosting..."
           
-      #     # Create website configuration
-      #     cat > website-config.json << EOF
-      #     {
-      #       "IndexDocument": {
-      #         "Suffix": "index.html"
-      #       },
-      #       "ErrorDocument": {
-      #         "Key": "index.html"
-      #       }
-      #     }
-      #     EOF
+          # Create website configuration
+          cat > website-config.json << EOF
+          {
+            "IndexDocument": {
+              "Suffix": "index.html"
+            },
+            "ErrorDocument": {
+              "Key": "index.html"
+            }
+          }
+          EOF
           
-      #     # Apply website configuration
-      #     aws s3api put-bucket-website \
-      #       --bucket ${{ env.S3_BUCKET }} \
-      #       --website-configuration file://website-config.json
+          # Apply website configuration
+          aws s3api put-bucket-website \
+            --bucket ${{ env.S3_BUCKET }} \
+            --website-configuration file://website-config.json
           
-      #     echo "✅ S3 website configuration applied"
+          echo "✅ S3 website configuration applied"
 
 
       - name: Run post-deployment tests
