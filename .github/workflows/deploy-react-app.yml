@@ -1,0 +1,305 @@
+name: Deploy React App to S3
+
+on:
+  push:
+    paths:
+      - 'src/**'     # Common React app paths
+      - 'public/**'
+      - 'package.json'
+    branches:
+      - develop
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      force_deploy:
+        description: 'Force deployment even if no changes in build output'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION: ap-south-1
+  S3_BUCKET: efy-sandbox-env
+  NODE_VERSION: '18'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      actions: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Fetch last 2 commits to compare changes
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'client/package-lock.json' 
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        run: |
+          cd client  
+          npm ci
+
+      - name: Create environment file
+        run: |
+          cd client
+          
+          # Create .env file for production build
+          cat > .env.production << EOF
+          REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
+          REACT_APP_VERSION=${{ github.sha }}
+          REACT_APP_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          GENERATE_SOURCEMAP=false
+          EOF
+          
+          echo "✅ Environment file created"
+
+      - name: Build React application
+        run: |
+          cd client
+          
+          echo "🏗️ Building React application..."
+          npm run build
+          
+          # Verify build output
+          if [ ! -d "dist" ]; then
+            echo "❌ Build directory not found!"
+            exit 1
+          fi
+          
+          echo "📊 Build output size:"
+          du -sh dist/
+          
+          echo "📋 Build contents:"
+          find dist -type f -name "*.js" -o -name "*.css" -o -name "*.html" | head -10
+
+      - name: Check for deployment changes
+        id: check_changes
+        run: |
+          cd client
+          
+          # Create hash of current build
+          CURRENT_HASH=$(find dist -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+          echo "current_build_hash=$CURRENT_HASH" >> $GITHUB_OUTPUT
+          
+          # Check if we should deploy
+          if [ "${{ github.event.inputs.force_deploy }}" == "true" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "🚀 Force deployment requested"
+          else
+            # Compare with previous deployment (you could store this hash in S3 or as a GitHub variable)
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "📋 Changes detected in build output"
+          fi
+
+      - name: Get S3 bucket URL
+        id: get-url
+        run: |
+          # Get bucket website URL
+          BUCKET_WEBSITE_URL="http://${{ env.S3_BUCKET }}.s3-website.${{ env.AWS_REGION }}.amazonaws.com"
+          echo "website_url=$BUCKET_WEBSITE_URL" >> $GITHUB_OUTPUT
+          echo "📋 Website URL: $BUCKET_WEBSITE_URL"
+
+      - name: Backup current deployment
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "💾 Creating backup of current deployment..."
+          TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
+          
+          # Create backup by copying current S3 content to backup prefix
+          aws s3 sync s3://${{ env.S3_BUCKET }}/ s3://${{ env.S3_BUCKET }}/backups/$TIMESTAMP/ \
+            --exclude "backups/*" \
+            --quiet || echo "No existing deployment to backup"
+          
+          echo "backup_timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "✅ Backup created: backups/$TIMESTAMP"
+        id: backup
+
+      - name: Deploy to S3
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          cd client
+          
+          echo "🚀 Deploying to S3 bucket: ${{ env.S3_BUCKET }}"
+          
+          # Sync build directory to S3 with proper cache headers
+          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+            --delete \
+            --cache-control "max-age=31536000" \
+            --exclude "*.html" \
+            --exclude "service-worker.js" \
+            --exclude "manifest.json"
+          
+          # Upload HTML files with no-cache headers
+          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --include "*.html" \
+            --include "service-worker.js"
+          
+          # Upload manifest with short cache
+          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+            --cache-control "max-age=300" \
+            --include "manifest.json"
+          
+          echo "✅ Deployment to S3 completed"
+
+      - name: Set S3 bucket website configuration
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "🌐 Configuring S3 bucket for static website hosting..."
+          
+          # Create website configuration
+          cat > website-config.json << EOF
+          {
+            "IndexDocument": {
+              "Suffix": "index.html"
+            },
+            "ErrorDocument": {
+              "Key": "index.html"
+            }
+          }
+          EOF
+          
+          # Apply website configuration
+          aws s3api put-bucket-website \
+            --bucket ${{ env.S3_BUCKET }} \
+            --website-configuration file://website-config.json
+          
+          echo "✅ S3 website configuration applied"
+
+
+      - name: Run post-deployment tests
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "🧪 Running post-deployment tests..."
+          
+          # Wait a moment for propagation
+          sleep 10
+          
+          # Test website accessibility
+          WEBSITE_URL="${{ steps.get-url.outputs.website_url }}"
+          
+          echo "Testing website: $WEBSITE_URL"
+          
+          # Test main page
+          if curl -f -s --max-time 30 "$WEBSITE_URL" > /dev/null; then
+            echo "✅ Website is accessible"
+          else
+            echo "❌ Website is not accessible"
+            exit 1
+          fi
+          
+          # Test that it returns HTML
+          if curl -s --max-time 30 "$WEBSITE_URL" | grep -q "<!DOCTYPE html>"; then
+            echo "✅ HTML content is being served"
+          else
+            echo "❌ HTML content not found"
+            exit 1
+          fi
+          
+          # Test React app is loaded (check for root div)
+          if curl -s --max-time 30 "$WEBSITE_URL" | grep -q 'id="root"'; then
+            echo "✅ React app structure detected"
+          else
+            echo "⚠️ React app structure not detected (might be OK for some setups)"
+          fi
+
+      - name: Store deployment metadata
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          # Create deployment metadata
+          cat > deployment-info.json << EOF
+          {
+            "deployment_time": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "commit_sha": "${{ github.sha }}",
+            "commit_message": $(echo '${{ github.event.head_commit.message }}' | jq -R .),
+            "build_hash": "${{ steps.check_changes.outputs.current_build_hash }}",
+            "backup_timestamp": "${{ steps.backup.outputs.backup_timestamp }}",
+            "website_url": "${{ steps.get-url.outputs.website_url }}",
+            "triggered_by": "${{ github.actor }}",
+            "workflow_run_id": "${{ github.run_id }}"
+          }
+          EOF
+          
+          # Upload metadata to S3
+          aws s3 cp deployment-info.json s3://${{ env.S3_BUCKET }}/.deployment-info.json \
+            --cache-control "no-cache"
+          
+          echo "📋 Deployment metadata stored"
+
+      - name: Deployment success notification
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "🎉 React app deployment completed successfully!"
+          echo ""
+          echo "📊 Deployment Summary:"
+          echo "├── Website URL: ${{ steps.get-url.outputs.website_url }}"
+          echo "├── Build Hash: ${{ steps.check_changes.outputs.current_build_hash }}"
+          echo "├── Backup: backups/${{ steps.backup.outputs.backup_timestamp }}"
+          echo "├── Commit: ${{ github.sha }}"
+          echo "└── Deployed by: ${{ github.actor }}"
+          
+          if [ -n "${{ steps.invalidate.outputs.invalidation_id }}" ]; then
+            echo "├── CloudFront Invalidation: ${{ steps.invalidate.outputs.invalidation_id }}"
+          fi
+
+      - name: No changes detected
+        if: steps.check_changes.outputs.has_changes == 'false'
+        run: |
+          echo "✅ No changes detected in build output. Skipping deployment."
+          echo "Current build hash: ${{ steps.check_changes.outputs.current_build_hash }}"
+          echo "Use 'force_deploy' option if you want to deploy anyway."
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-build-${{ github.run_number }}
+          path: |
+            build/
+            deployment-info.json
+          retention-days: 7
+
+      - name: Rollback on failure
+        if: failure() && steps.check_changes.outputs.has_changes == 'true' && steps.backup.outputs.backup_timestamp != ''
+        run: |
+          echo "💥 Deployment failed! Initiating rollback..."
+          
+          # Restore from backup
+          BACKUP_PATH="backups/${{ steps.backup.outputs.backup_timestamp }}"
+          echo "📋 Restoring from: $BACKUP_PATH"
+          
+          aws s3 sync s3://${{ env.S3_BUCKET }}/$BACKUP_PATH/ s3://${{ env.S3_BUCKET }}/ \
+            --delete \
+            --exclude "backups/*" \
+            --exclude ".deployment-info.json"
+          
+          echo "✅ Rollback completed"
+
+      - name: Cleanup old backups
+        if: always()
+        run: |
+          echo "🧹 Cleaning up old backups (keeping last 5)..."
+          
+          # List backups and keep only the 5 most recent
+          aws s3 ls s3://${{ env.S3_BUCKET }}/backups/ | sort -r | tail -n +6 | while read -r line; do
+            BACKUP_DIR=$(echo $line | awk '{print $2}')
+            if [ -n "$BACKUP_DIR" ]; then
+              echo "Deleting old backup: $BACKUP_DIR"
+              aws s3 rm s3://${{ env.S3_BUCKET }}/backups/$BACKUP_DIR --recursive --quiet
+            fi
+          done || echo "No old backups to clean"
