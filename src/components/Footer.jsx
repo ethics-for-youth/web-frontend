@@ -18,7 +18,7 @@ const Footer = () => {
           <ul className="space-y-1 text-gray-300">
             <li className="hover:text-green-300 transition-colors cursor-pointer">Terms & Conditions</li>
             <li className="hover:text-green-300 transition-colors cursor-pointer">Privacy Policy</li>
-            <li className="hover:text-green-300 transition-colors cursor-pointer">Contact Us</li>
+            <li className="hover:text-green-300 transition-colors cursor-pointer">Contact Us!</li>
           </ul>
         </div>
 
