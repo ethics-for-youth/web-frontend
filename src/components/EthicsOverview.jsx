@@ -5,7 +5,7 @@ const EthicsOverview = () => {
     <section className="py-16 px-6 bg-gradient-to-b from-white to-green-50 text-gray-800">
       <div className="max-w-3xl mx-auto text-center">
         <h3 className="text-3xl font-semibold text-green-700 mb-4 transition duration-300 hover:tracking-wide">
-          What are Ethics for Youth?
+          What are Ethics for Youth?????
         </h3>
 
         <div className="relative">
