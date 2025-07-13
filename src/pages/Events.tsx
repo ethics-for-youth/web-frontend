@@ -30,7 +30,7 @@ const Events = () => {
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {mockEvents.map((event) => (
-            <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group">
+            <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -65,16 +65,18 @@ const Events = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col flex-1">
                 <p className="text-muted-foreground mb-6 line-clamp-4">
                   {event.description}
                 </p>
-                <Button asChild className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
-                  <Link to={`/events/${event.id}`}>
-                    View Details & Register
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+                <div className="mt-auto">
+                  <Button asChild className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
+                    <Link to={`/events/${event.id}`}>
+                      View Details & Register
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}

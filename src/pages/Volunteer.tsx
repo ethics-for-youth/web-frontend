@@ -138,8 +138,8 @@ const Volunteer = () => {
                     <h4 className="font-semibold text-foreground mb-2">Preferred Qualities:</h4>
                     <ul className="space-y-1 text-muted-foreground">
                       <li>• Previous volunteer or leadership experience</li>
-                      <li>• Bilingual abilities (Arabic, Urdu, etc.)</li>
-                      <li>• Technical skills (social media, design, etc.)</li>
+                      <li>• Bilingual abilities (English, Hindi, Urdu, etc.)</li>
+                      <li>• Technical skills (Social Media, design, etc.)</li>
                       <li>• Public speaking comfort</li>
                       <li>• Event planning experience</li>
                     </ul>
@@ -170,8 +170,8 @@ const Volunteer = () => {
                       2
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground">Interview & Orientation</h4>
-                      <p className="text-muted-foreground">Brief interview and orientation session</p>
+                      <h4 className="font-semibold text-foreground">Introduction & Orientation</h4>
+                      <p className="text-muted-foreground">Brief Introduction and orientation session</p>
                     </div>
                   </div>
                   

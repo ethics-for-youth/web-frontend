@@ -33,7 +33,7 @@ const Courses = () => {
         {/* Courses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {activeCourses.map((course) => (
-            <Card key={course.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group">
+            <Card key={course.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full">
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   <CardTitle className="text-primary group-hover:text-primary-light transition-colors line-clamp-2">
@@ -56,16 +56,18 @@ const Courses = () => {
                   </div>
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col flex-1">
                 <p className="text-muted-foreground mb-6 line-clamp-4">
                   {course.description}
                 </p>
-                <Button asChild className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
-                  <Link to={`/courses/${course.id}`}>
-                    View Details & Enroll
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
+                <div className="mt-auto">
+                  <Button asChild className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
+                    <Link to={`/courses/${course.id}`}>
+                      View Details & Enroll
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
