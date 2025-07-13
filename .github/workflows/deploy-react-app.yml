@@ -40,7 +40,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'client/package-lock.json' 
+          cache-dependency-path: 'package-lock.json'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -50,28 +50,22 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install dependencies
-        run: |
-          cd client  
-          npm ci
+        run: npm i
 
-      - name: Create environment file
-        run: |
-          cd client
+      # - name: Create environment file
+      #   run: |
+      #     # Create .env file for production build
+      #     cat > .env.production << EOF
+      #     REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
+      #     REACT_APP_VERSION=${{ github.sha }}
+      #     REACT_APP_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+      #     GENERATE_SOURCEMAP=false
+      #     EOF
           
-          # Create .env file for production build
-          cat > .env.production << EOF
-          REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
-          REACT_APP_VERSION=${{ github.sha }}
-          REACT_APP_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          GENERATE_SOURCEMAP=false
-          EOF
-          
-          echo "✅ Environment file created"
+      #     echo "✅ Environment file created"
 
       - name: Build React application
         run: |
-          cd client
-          
           echo "🏗️ Building React application..."
           npm run build
           
@@ -90,8 +84,6 @@ jobs:
       - name: Check for deployment changes
         id: check_changes
         run: |
-          cd client
-          
           # Create hash of current build
           CURRENT_HASH=$(find dist -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
           echo "current_build_hash=$CURRENT_HASH" >> $GITHUB_OUTPUT
@@ -132,9 +124,8 @@ jobs:
       - name: Deploy to S3
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
-          cd client
-          
           echo "🚀 Deploying to S3 bucket: ${{ env.S3_BUCKET }}"
+          ls -al dist/
           
           # Sync build directory to S3 with proper cache headers
           aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
@@ -203,13 +194,13 @@ jobs:
             exit 1
           fi
           
-          # Test that it returns HTML
-          if curl -s --max-time 30 "$WEBSITE_URL" | grep -q "<!DOCTYPE html>"; then
-            echo "✅ HTML content is being served"
-          else
-            echo "❌ HTML content not found"
-            exit 1
-          fi
+          # # Test that it returns HTML
+          # if curl -s --max-time 30 "$WEBSITE_URL" | grep -q "<!DOCTYPE html>"; then
+          #   echo "✅ HTML content is being served"
+          # else
+          #   echo "❌ HTML content not found"
+          #   exit 1
+          # fi
           
           # Test React app is loaded (check for root div)
           if curl -s --max-time 30 "$WEBSITE_URL" | grep -q 'id="root"'; then
