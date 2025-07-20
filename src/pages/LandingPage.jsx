@@ -4,12 +4,13 @@ import HeroSection from '../components/HeroSection';
 import EthicsOverview from '../components/EthicsOverview';
 import EventsSection from '../components/EventsSection';
 import Footer from '../components/Footer';
+import HeroSection1 from '../components/HeroSection1';
 
 const LandingPage = () => {
   return (
     <div className="font-sans bg-gradient-to-b from-white to-green-50 text-gray-800">
       <Navbar />
-      <HeroSection />
+      <HeroSection1 />
       <EthicsOverview />
       <EventsSection />
       <Footer />

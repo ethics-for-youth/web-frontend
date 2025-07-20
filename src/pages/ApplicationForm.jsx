@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import EventDetails from '../components/EventDetails';
 import scannerImg from '../assets/scanner.jpeg'; 
 import Navbar from '../components/Navbar';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function StudentRegistrationForm() {
   const [formData, setFormData] = useState({
@@ -56,6 +58,7 @@ export default function StudentRegistrationForm() {
     });
   };
 
+  const navigate = useNavigate();
   return (
   
 
@@ -180,8 +183,9 @@ export default function StudentRegistrationForm() {
             >
               Reset Form
             </button>
-            <button
+            <button 
               type="submit"
+              onClick={() => navigate('/success')}
               className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow"
             >
               Register Now
