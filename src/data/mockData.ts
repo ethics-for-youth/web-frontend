@@ -1,32 +1,94 @@
-import { Event, Course } from '../types';
+import { Event, Course, Competition, Volunteer, Suggestion } from '../types';
 
 export const mockEvents: Event[] = [
   {
-    id: '1',
-    title: 'Islamic Ethics in Modern Society',
-    date: '2024-08-15',
-    time: '19:00',
-    location: 'Community Center, Downtown',
-    speaker: 'Dr. Ahmad Hassan',
-    description: 'Join us for an enlightening discussion on how Islamic ethics can guide us through modern societal challenges. This interactive session will explore practical applications of Islamic principles in daily life, covering topics such as honesty in business, social justice, and community responsibility.'
+    id: 'event_1706123456_abc123',
+    title: 'Islamic History Workshop',
+    description: 'Learn about the golden age of Islamic civilization and its contributions to modern society. This interactive session will explore historical achievements and their relevance today.',
+    date: '2024-02-15T14:00:00Z',
+    location: 'Community Center, Room 101',
+    category: 'educational',
+    maxParticipants: 50,
+    registrationDeadline: '2024-02-10T23:59:59Z',
+    status: 'active',
+    createdAt: '2024-01-25T10:00:00Z',
+    updatedAt: '2024-01-25T10:00:00Z'
   },
   {
-    id: '2',
+    id: 'event_1706123457_def456',
     title: 'Youth Leadership Workshop',
-    date: '2024-08-22',
-    time: '14:00',
+    description: 'Empower yourself with leadership skills rooted in Islamic values. This hands-on workshop will cover effective communication, team building, and leading with integrity.',
+    date: '2024-08-22T14:00:00Z',
     location: 'Ethics For Youth Center',
-    speaker: 'Sister Fatima Al-Zahra',
-    description: 'Empower yourself with leadership skills rooted in Islamic values. This hands-on workshop will cover effective communication, team building, and leading with integrity. Perfect for young Muslims looking to make a positive impact in their communities.'
+    category: 'educational',
+    maxParticipants: 30,
+    registrationDeadline: '2024-08-20T23:59:59Z',
+    status: 'active',
+    createdAt: '2024-08-01T10:00:00Z',
+    updatedAt: '2024-08-01T10:00:00Z'
   },
   {
-    id: '3',
+    id: 'event_1706123458_ghi789',
     title: 'Quran Study Circle',
-    date: '2024-08-29',
-    time: '18:30',
+    description: 'Weekly Quran study sessions focusing on understanding and reflection. This week we will be studying Surah Al-Baqarah and its teachings on community, faith, and personal development.',
+    date: '2024-08-29T18:30:00Z',
     location: 'Local Mosque',
-    speaker: 'Imam Abdullah',
-    description: 'Weekly Quran study sessions focusing on understanding and reflection. This week we will be studying Surah Al-Baqarah and its teachings on community, faith, and personal development. All levels welcome.'
+    category: 'religious',
+    maxParticipants: 25,
+    registrationDeadline: '2024-08-27T23:59:59Z',
+    status: 'active',
+    createdAt: '2024-08-15T10:00:00Z',
+    updatedAt: '2024-08-15T10:00:00Z'
+  }
+];
+
+export const mockCompetitions: Competition[] = [
+  {
+    id: 'comp_1706123456_xyz789',
+    title: 'Quran Recitation Competition',
+    description: 'Annual Quran recitation competition for youth',
+    category: 'religious',
+    startDate: '2024-03-01T09:00:00Z',
+    endDate: '2024-03-01T17:00:00Z',
+    registrationDeadline: '2024-02-25T23:59:59Z',
+    rules: ['Participants must be between 13-25 years old', 'Maximum 5 minutes recitation'],
+    prizes: ['First Place: $500', 'Second Place: $300', 'Third Place: $200'],
+    maxParticipants: 50,
+    status: 'open',
+    participants: [],
+    createdAt: '2024-01-25T10:00:00Z',
+    updatedAt: '2024-01-25T10:00:00Z'
+  }
+];
+
+export const mockVolunteers: Volunteer[] = [
+  {
+    id: 'volunteer_1706123456_vol123',
+    name: 'Fatima Rahman',
+    email: 'fatima.rahman@example.com',
+    phone: '+1234567890',
+    skills: ['Event Management', 'Social Media', 'Teaching'],
+    availability: 'Weekends and evenings',
+    status: 'pending',
+    appliedAt: '2024-01-25T10:00:00Z',
+    updatedAt: '2024-01-25T10:00:00Z'
+  }
+];
+
+export const mockSuggestions: Suggestion[] = [
+  {
+    id: 'suggestion_1706123456_sug456',
+    title: 'Mobile App Development',
+    description: 'Develop a mobile app to better engage youth with Islamic content',
+    category: 'technology',
+    submitterName: 'Omar Hassan',
+    submitterEmail: 'omar.hassan@example.com',
+    priority: 'medium',
+    tags: ['mobile', 'technology', 'youth-engagement'],
+    status: 'submitted',
+    votes: 0,
+    submittedAt: '2024-01-25T10:00:00Z',
+    updatedAt: '2024-01-25T10:00:00Z'
   }
 ];
 
