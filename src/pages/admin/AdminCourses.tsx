@@ -43,11 +43,11 @@ const AdminCourses = () => {
       );
     }
 
-    if (modeFilter) {
+    if (modeFilter && modeFilter !== 'all') {
       filtered = filtered.filter(course => course.mode === modeFilter);
     }
 
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== 'all') {
       filtered = filtered.filter(course => 
         statusFilter === 'active' ? course.isActive : !course.isActive
       );
@@ -270,7 +270,7 @@ const AdminCourses = () => {
                   <SelectValue placeholder="Filter by mode" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Modes</SelectItem>
+                  <SelectItem value="all">All Modes</SelectItem>
                   {modes.map((mode) => (
                     <SelectItem key={mode} value={mode}>{mode}</SelectItem>
                   ))}
@@ -283,7 +283,7 @@ const AdminCourses = () => {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Courses</SelectItem>
+                  <SelectItem value="all">All Courses</SelectItem>
                   <SelectItem value="active">Active Only</SelectItem>
                   <SelectItem value="inactive">Inactive Only</SelectItem>
                 </SelectContent>
@@ -293,8 +293,8 @@ const AdminCourses = () => {
               variant="outline"
               onClick={() => {
                 setSearchTerm('');
-                setModeFilter('');
-                setStatusFilter('');
+                setModeFilter('all');
+                setStatusFilter('all');
               }}
             >
               <Filter className="h-4 w-4 mr-2" />

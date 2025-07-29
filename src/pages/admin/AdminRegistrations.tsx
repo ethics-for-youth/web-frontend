@@ -126,15 +126,15 @@ const AdminRegistrations = () => {
       );
     }
 
-    if (typeFilter) {
+    if (typeFilter && typeFilter !== 'all') {
       filtered = filtered.filter(reg => reg.type === typeFilter);
     }
 
-    if (genderFilter) {
+    if (genderFilter && genderFilter !== 'all') {
       filtered = filtered.filter(reg => reg.gender === genderFilter);
     }
 
-    if (communityFilter) {
+    if (communityFilter && communityFilter !== 'all') {
       filtered = filtered.filter(reg => 
         communityFilter === 'yes' ? reg.joinCommunity : !reg.joinCommunity
       );
@@ -247,7 +247,7 @@ const AdminRegistrations = () => {
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="Event">Events</SelectItem>
                 <SelectItem value="Course">Courses</SelectItem>
                 <SelectItem value="Volunteer">Volunteers</SelectItem>
@@ -259,7 +259,7 @@ const AdminRegistrations = () => {
                 <SelectValue placeholder="Filter by gender" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Genders</SelectItem>
+                <SelectItem value="all">All Genders</SelectItem>
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
               </SelectContent>
@@ -270,7 +270,7 @@ const AdminRegistrations = () => {
                 <SelectValue placeholder="Join community" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="yes">Wants to Join</SelectItem>
                 <SelectItem value="no">Doesn't Want to Join</SelectItem>
               </SelectContent>
@@ -282,9 +282,9 @@ const AdminRegistrations = () => {
               variant="outline"
               onClick={() => {
                 setSearchTerm('');
-                setTypeFilter('');
-                setGenderFilter('');
-                setCommunityFilter('');
+                setTypeFilter('all');
+                setGenderFilter('all');
+                setCommunityFilter('all');
               }}
             >
               <Filter className="h-4 w-4 mr-2" />
