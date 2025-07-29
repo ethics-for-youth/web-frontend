@@ -11,7 +11,6 @@ import { Registration } from '@/types';
 import { mockEvents, mockCourses } from '@/data/mockData';
 
 const AdminRegistrations = () => {
-  console.log('AdminRegistrations component rendering...');
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [filteredRegistrations, setFilteredRegistrations] = useState<Registration[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -127,15 +126,15 @@ const AdminRegistrations = () => {
       );
     }
 
-    if (typeFilter) {
+    if (typeFilter && typeFilter !== 'all') {
       filtered = filtered.filter(reg => reg.type === typeFilter);
     }
 
-    if (genderFilter) {
+    if (genderFilter && genderFilter !== 'all') {
       filtered = filtered.filter(reg => reg.gender === genderFilter);
     }
 
-    if (communityFilter) {
+    if (communityFilter && communityFilter !== 'all') {
       filtered = filtered.filter(reg => 
         communityFilter === 'yes' ? reg.joinCommunity : !reg.joinCommunity
       );
@@ -213,15 +212,12 @@ const AdminRegistrations = () => {
     });
   };
 
-  console.log('AdminRegistrations: About to render, registrations count:', registrations.length);
-  console.log('AdminRegistrations: Filtered registrations count:', filteredRegistrations.length);
-
   return (
-    <div className="p-6" style={{ minHeight: '100vh', backgroundColor: '#fefefe' }}>
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground" style={{ color: '#000000' }}>Registration Management</h1>
-          <p className="text-muted-foreground" style={{ color: '#666666' }}>Manage all user registrations</p>
+          <h1 className="text-3xl font-bold text-foreground">Registration Management</h1>
+          <p className="text-muted-foreground">Manage all user registrations</p>
         </div>
         
         <Button onClick={exportToCSV} variant="outline">
@@ -251,7 +247,7 @@ const AdminRegistrations = () => {
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="Event">Events</SelectItem>
                 <SelectItem value="Course">Courses</SelectItem>
                 <SelectItem value="Volunteer">Volunteers</SelectItem>
@@ -263,7 +259,7 @@ const AdminRegistrations = () => {
                 <SelectValue placeholder="Filter by gender" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Genders</SelectItem>
+                <SelectItem value="all">All Genders</SelectItem>
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
               </SelectContent>
@@ -274,7 +270,7 @@ const AdminRegistrations = () => {
                 <SelectValue placeholder="Join community" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="yes">Wants to Join</SelectItem>
                 <SelectItem value="no">Doesn't Want to Join</SelectItem>
               </SelectContent>
@@ -286,9 +282,9 @@ const AdminRegistrations = () => {
               variant="outline"
               onClick={() => {
                 setSearchTerm('');
-                setTypeFilter('');
-                setGenderFilter('');
-                setCommunityFilter('');
+                setTypeFilter('all');
+                setGenderFilter('all');
+                setCommunityFilter('all');
               }}
             >
               <Filter className="h-4 w-4 mr-2" />
