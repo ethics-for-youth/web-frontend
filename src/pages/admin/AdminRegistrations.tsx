@@ -11,6 +11,7 @@ import { Registration } from '@/types';
 import { mockEvents, mockCourses } from '@/data/mockData';
 
 const AdminRegistrations = () => {
+  console.log('AdminRegistrations component rendering...');
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [filteredRegistrations, setFilteredRegistrations] = useState<Registration[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -212,12 +213,15 @@ const AdminRegistrations = () => {
     });
   };
 
+  console.log('AdminRegistrations: About to render, registrations count:', registrations.length);
+  console.log('AdminRegistrations: Filtered registrations count:', filteredRegistrations.length);
+
   return (
-    <div className="p-6">
+    <div className="p-6" style={{ minHeight: '100vh', backgroundColor: '#fefefe' }}>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Registration Management</h1>
-          <p className="text-muted-foreground">Manage all user registrations</p>
+          <h1 className="text-3xl font-bold text-foreground" style={{ color: '#000000' }}>Registration Management</h1>
+          <p className="text-muted-foreground" style={{ color: '#666666' }}>Manage all user registrations</p>
         </div>
         
         <Button onClick={exportToCSV} variant="outline">

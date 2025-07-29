@@ -13,6 +13,7 @@ import { Course } from '@/types';
 import { mockCourses } from '@/data/mockData';
 
 const AdminCourses = () => {
+  console.log('AdminCourses component rendering...');
   const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -140,12 +141,15 @@ const AdminCourses = () => {
 
   const modes = ['Online', 'In-person', 'Hybrid', 'Hybrid (Online + In-person)'];
 
+  console.log('AdminCourses: About to render, courses count:', courses.length);
+  console.log('AdminCourses: Filtered courses count:', filteredCourses.length);
+
   return (
-    <div className="p-6">
+    <div className="p-6" style={{ minHeight: '100vh', backgroundColor: '#fefefe' }}>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Course Management</h1>
-          <p className="text-muted-foreground">Manage all educational courses</p>
+          <h1 className="text-3xl font-bold text-foreground" style={{ color: '#000000' }}>Course Management</h1>
+          <p className="text-muted-foreground" style={{ color: '#666666' }}>Manage all educational courses</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
