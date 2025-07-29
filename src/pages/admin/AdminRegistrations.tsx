@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { Registration } from '@/types';
-import { mockEvents, mockCourses } from '@/data/mockData';
+import { mockEvents, mockCourses, mockRegistrations } from '@/data/mockData';
 
 const AdminRegistrations = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -19,101 +19,9 @@ const AdminRegistrations = () => {
   const [communityFilter, setCommunityFilter] = useState('');
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
 
-  // Mock registrations data
   useEffect(() => {
-    const mockRegistrations: Registration[] = [
-      {
-        id: '1',
-        name: 'Ahmed Hassan',
-        email: 'ahmed@example.com',
-        whatsappNumber: '+1234567890',
-        gender: 'Male',
-        age: 22,
-        education: 'Bachelor\'s Degree',
-        address: '123 Main St, City, State 12345',
-        joinCommunity: true,
-        type: 'Event',
-        relatedEventId: '1',
-        createdAt: '2024-07-12T10:30:00Z'
-      },
-      {
-        id: '2',
-        name: 'Fatima Al-Zahra',
-        email: 'fatima@example.com',
-        whatsappNumber: '+1234567891',
-        gender: 'Female',
-        age: 25,
-        education: 'Master\'s Degree',
-        address: '456 Oak Ave, City, State 12345',
-        joinCommunity: true,
-        type: 'Course',
-        relatedCourseId: '1',
-        createdAt: '2024-07-12T09:15:00Z'
-      },
-      {
-        id: '3',
-        name: 'Omar Ibrahim',
-        email: 'omar@example.com',
-        whatsappNumber: '+1234567892',
-        gender: 'Male',
-        age: 19,
-        education: 'High School',
-        address: '789 Pine St, City, State 12345',
-        joinCommunity: false,
-        type: 'Volunteer',
-        createdAt: '2024-07-11T16:45:00Z'
-      },
-      {
-        id: '4',
-        name: 'Aisha Khan',
-        email: 'aisha@example.com',
-        whatsappNumber: '+1234567893',
-        gender: 'Female',
-        age: 24,
-        education: 'Bachelor\'s Degree',
-        address: '321 Elm St, City, State 12345',
-        joinCommunity: true,
-        type: 'Event',
-        relatedEventId: '2',
-        createdAt: '2024-07-11T14:20:00Z'
-      },
-      {
-        id: '5',
-        name: 'Yusuf Ali',
-        email: 'yusuf@example.com',
-        whatsappNumber: '+1234567894',
-        gender: 'Male',
-        age: 28,
-        education: 'Master\'s Degree',
-        address: '654 Cedar Ave, City, State 12345',
-        joinCommunity: true,
-        type: 'Course',
-        relatedCourseId: '2',
-        createdAt: '2024-07-10T11:30:00Z'
-      },
-      {
-        id: '6',
-        name: 'Maryam Hassan',
-        email: 'maryam@example.com',
-        whatsappNumber: '+1234567895',
-        gender: 'Female',
-        age: 21,
-        education: 'Bachelor\'s Degree',
-        address: '987 Maple Dr, City, State 12345',
-        joinCommunity: true,
-        type: 'Volunteer',
-        createdAt: '2024-07-09T13:10:00Z'
-      }
-    ];
-    
-    // Add reviewed status to some registrations
-    const registrationsWithReview = mockRegistrations.map((reg, index) => ({
-      ...reg,
-      reviewed: index % 2 === 0 // Every other registration is reviewed
-    }));
-    
-    setRegistrations(registrationsWithReview);
-    setFilteredRegistrations(registrationsWithReview);
+    setRegistrations(mockRegistrations);
+    setFilteredRegistrations(mockRegistrations);
   }, []);
 
   useEffect(() => {

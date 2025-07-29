@@ -2,85 +2,13 @@ import { useState, useEffect } from 'react';
 import { Calendar, BookOpen, Users, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockEvents, mockCourses } from '@/data/mockData';
+import { mockEvents, mockCourses, mockRegistrations } from '@/data/mockData';
 import { Registration } from '@/types';
 
 const AdminDashboard = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
 
-  // Mock recent registrations data
   useEffect(() => {
-    const mockRegistrations: Registration[] = [
-      {
-        id: '1',
-        name: 'Ahmed Hassan',
-        email: 'ahmed@example.com',
-        whatsappNumber: '+1234567890',
-        gender: 'Male',
-        age: 22,
-        education: 'Bachelor\'s Degree',
-        address: '123 Main St, City',
-        joinCommunity: true,
-        type: 'Event',
-        relatedEventId: '1',
-        createdAt: '2024-07-12T10:30:00Z'
-      },
-      {
-        id: '2',
-        name: 'Fatima Al-Zahra',
-        email: 'fatima@example.com',
-        whatsappNumber: '+1234567891',
-        gender: 'Female',
-        age: 25,
-        education: 'Master\'s Degree',
-        address: '456 Oak Ave, City',
-        joinCommunity: true,
-        type: 'Course',
-        relatedCourseId: '1',
-        createdAt: '2024-07-12T09:15:00Z'
-      },
-      {
-        id: '3',
-        name: 'Omar Ibrahim',
-        email: 'omar@example.com',
-        whatsappNumber: '+1234567892',
-        gender: 'Male',
-        age: 19,
-        education: 'High School',
-        address: '789 Pine St, City',
-        joinCommunity: false,
-        type: 'Volunteer',
-        createdAt: '2024-07-11T16:45:00Z'
-      },
-      {
-        id: '4',
-        name: 'Aisha Khan',
-        email: 'aisha@example.com',
-        whatsappNumber: '+1234567893',
-        gender: 'Female',
-        age: 24,
-        education: 'Bachelor\'s Degree',
-        address: '321 Elm St, City',
-        joinCommunity: true,
-        type: 'Event',
-        relatedEventId: '2',
-        createdAt: '2024-07-11T14:20:00Z'
-      },
-      {
-        id: '5',
-        name: 'Yusuf Ali',
-        email: 'yusuf@example.com',
-        whatsappNumber: '+1234567894',
-        gender: 'Male',
-        age: 28,
-        education: 'Master\'s Degree',
-        address: '654 Cedar Ave, City',
-        joinCommunity: true,
-        type: 'Course',
-        relatedCourseId: '2',
-        createdAt: '2024-07-10T11:30:00Z'
-      }
-    ];
     setRegistrations(mockRegistrations);
   }, []);
 

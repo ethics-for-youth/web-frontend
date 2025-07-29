@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import RegistrationForm from '@/components/RegistrationForm';
-import { mockCourses } from '@/data/mockData';
+import { mockCourses, courseBenefits } from '@/data/mockData';
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,15 +26,6 @@ const CourseDetail = () => {
       </div>
     );
   }
-
-  const courseBenefits = [
-    'Structured learning path with clear objectives',
-    'Interactive sessions and Q&A opportunities', 
-    'Course materials and resources included',
-    'Certificate of completion',
-    'Access to course community',
-    'Lifetime access to course materials'
-  ];
 
   return (
     <div className="min-h-screen py-12">

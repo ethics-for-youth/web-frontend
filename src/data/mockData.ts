@@ -1,4 +1,4 @@
-import { Event, Course, Competition, Volunteer, Suggestion } from '../types';
+import { Event, Course, Competition, Volunteer, Suggestion, Registration } from '../types';
 
 export const mockEvents: Event[] = [
   {
@@ -90,6 +90,148 @@ export const mockSuggestions: Suggestion[] = [
     submittedAt: '2024-01-25T10:00:00Z',
     updatedAt: '2024-01-25T10:00:00Z'
   }
+];
+
+export const mockRegistrations: Registration[] = [
+  {
+    id: '1',
+    name: 'Ahmed Hassan',
+    email: 'ahmed@example.com',
+    whatsappNumber: '+1234567890',
+    gender: 'Male',
+    age: 22,
+    education: 'Bachelor\'s Degree',
+    address: '123 Main St, City, State 12345',
+    joinCommunity: true,
+    type: 'Event',
+    relatedEventId: 'event_1706123456_abc123',
+    createdAt: '2024-07-12T10:30:00Z',
+    reviewed: true
+  },
+  {
+    id: '2',
+    name: 'Fatima Al-Zahra',
+    email: 'fatima@example.com',
+    whatsappNumber: '+1234567891',
+    gender: 'Female',
+    age: 25,
+    education: 'Master\'s Degree',
+    address: '456 Oak Ave, City, State 12345',
+    joinCommunity: true,
+    type: 'Course',
+    relatedCourseId: '1',
+    createdAt: '2024-07-12T09:15:00Z',
+    reviewed: false
+  },
+  {
+    id: '3',
+    name: 'Omar Ibrahim',
+    email: 'omar@example.com',
+    whatsappNumber: '+1234567892',
+    gender: 'Male',
+    age: 19,
+    education: 'High School',
+    address: '789 Pine St, City, State 12345',
+    joinCommunity: false,
+    type: 'Volunteer',
+    createdAt: '2024-07-11T16:45:00Z',
+    reviewed: true
+  },
+  {
+    id: '4',
+    name: 'Aisha Khan',
+    email: 'aisha@example.com',
+    whatsappNumber: '+1234567893',
+    gender: 'Female',
+    age: 24,
+    education: 'Bachelor\'s Degree',
+    address: '321 Elm St, City, State 12345',
+    joinCommunity: true,
+    type: 'Event',
+    relatedEventId: 'event_1706123457_def456',
+    createdAt: '2024-07-11T14:20:00Z',
+    reviewed: false
+  },
+  {
+    id: '5',
+    name: 'Yusuf Ali',
+    email: 'yusuf@example.com',
+    whatsappNumber: '+1234567894',
+    gender: 'Male',
+    age: 28,
+    education: 'Master\'s Degree',
+    address: '654 Cedar Ave, City, State 12345',
+    joinCommunity: true,
+    type: 'Course',
+    relatedCourseId: '2',
+    createdAt: '2024-07-10T11:30:00Z',
+    reviewed: true
+  },
+  {
+    id: '6',
+    name: 'Maryam Hassan',
+    email: 'maryam@example.com',
+    whatsappNumber: '+1234567895',
+    gender: 'Female',
+    age: 21,
+    education: 'Bachelor\'s Degree',
+    address: '987 Maple Dr, City, State 12345',
+    joinCommunity: true,
+    type: 'Volunteer',
+    createdAt: '2024-07-09T13:10:00Z',
+    reviewed: false
+  }
+];
+
+export const volunteerOpportunities = [
+  {
+    icon: 'BookOpen',
+    title: 'Educational Support',
+    description: 'Help with course preparation, student mentoring, and educational material development.'
+  },
+  {
+    icon: 'Users',
+    title: 'Event Organization',
+    description: 'Assist in planning and executing community events, workshops, and gatherings.'
+  },
+  {
+    icon: 'Heart',
+    title: 'Community Outreach',
+    description: 'Engage with the community through social media, newsletters, and local partnerships.'
+  },
+  {
+    icon: 'Hand',
+    title: 'Youth Mentoring',
+    description: 'Guide and support younger community members in their personal and spiritual growth.'
+  },
+  {
+    icon: 'Globe',
+    title: 'Digital Dawah',
+    description: 'Help spread Islamic knowledge through online platforms and digital content creation.'
+  },
+  {
+    icon: 'Star',
+    title: 'Special Projects',
+    description: 'Contribute to unique initiatives and seasonal programs throughout the year.'
+  }
+];
+
+export const volunteerBenefits = [
+  'Personal and spiritual growth opportunities',
+  'Skill development and leadership training',
+  'Networking with like-minded individuals',
+  'Flexible commitment based on your availability',
+  'Recognition and appreciation for your contributions',
+  'Making a meaningful impact in the community'
+];
+
+export const courseBenefits = [
+  'Structured learning path with clear objectives',
+  'Interactive sessions and Q&A opportunities', 
+  'Course materials and resources included',
+  'Certificate of completion',
+  'Access to course community',
+  'Lifetime access to course materials'
 ];
 
 export const mockCourses: Course[] = [
