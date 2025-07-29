@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Download, Search, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, Download, Search, Filter, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,12 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from '@/hooks/useEvents';
 import { Event } from '@/types';
-import { mockEvents } from '@/data/mockData';
 
 const AdminEvents = () => {
-  const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -20,17 +19,20 @@ const AdminEvents = () => {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState({
     title: '',
+    description: '',
     date: '',
-    time: '',
     location: '',
-    speaker: '',
-    description: ''
+    category: '',
+    maxParticipants: '',
+    registrationDeadline: '',
+    status: 'active'
   });
 
-  useEffect(() => {
-    setEvents(mockEvents);
-    setFilteredEvents(mockEvents);
-  }, []);
+  // Use React Query hooks for API calls
+  const { data: events = [], isLoading, error } = useEvents();
+  const createEvent = useCreateEvent();
+  const updateEvent = useUpdateEvent();
+  const deleteEvent = useDeleteEvent();
 
   useEffect(() => {
     let filtered = events;
@@ -38,7 +40,7 @@ const AdminEvents = () => {
     if (searchTerm) {
       filtered = filtered.filter(event =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.speaker.toLowerCase().includes(searchTerm.toLowerCase())
+        event.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -49,45 +51,56 @@ const AdminEvents = () => {
     setFilteredEvents(filtered);
   }, [events, searchTerm, dateFilter]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingEvent) {
-      // Update existing event
-      const updatedEvents = events.map(event =>
-        event.id === editingEvent.id
-          ? { ...event, ...formData }
-          : event
-      );
-      setEvents(updatedEvents);
-      toast({
-        title: "Event Updated",
-        description: "Event has been successfully updated.",
-      });
-    } else {
-      // Create new event
-      const newEvent: Event = {
-        id: Date.now().toString(),
-        ...formData
-      };
-      setEvents([newEvent, ...events]);
-      toast({
-        title: "Event Created",
-        description: "New event has been successfully created.",
-      });
-    }
+    try {
+      if (editingEvent) {
+        // Update existing event
+        await updateEvent.mutateAsync({
+          id: editingEvent.id,
+          eventData: {
+            title: formData.title,
+            description: formData.description,
+            date: formData.date,
+            location: formData.location,
+            category: formData.category,
+            maxParticipants: parseInt(formData.maxParticipants) || 0,
+            registrationDeadline: formData.registrationDeadline,
+            status: formData.status,
+          }
+        });
+      } else {
+        // Create new event
+        await createEvent.mutateAsync({
+          title: formData.title,
+          description: formData.description,
+          date: formData.date,
+          location: formData.location,
+          category: formData.category,
+          maxParticipants: parseInt(formData.maxParticipants) || 0,
+          registrationDeadline: formData.registrationDeadline,
+          status: formData.status,
+        });
+      }
 
-    resetForm();
+      resetForm();
+    } catch (error) {
+      // Error handling is done in the mutation hooks
+      console.error('Event submission error:', error);
+    }
   };
 
   const resetForm = () => {
     setFormData({
       title: '',
+      description: '',
       date: '',
-      time: '',
       location: '',
-      speaker: '',
-      description: ''
+      category: '',
+      maxParticipants: '',
+      registrationDeadline: '',
+      status: 'active'
     });
     setEditingEvent(null);
     setIsDialogOpen(false);
@@ -97,34 +110,37 @@ const AdminEvents = () => {
     setEditingEvent(event);
     setFormData({
       title: event.title,
+      description: event.description,
       date: event.date,
-      time: event.time,
       location: event.location,
-      speaker: event.speaker,
-      description: event.description
+      category: event.category,
+      maxParticipants: event.maxParticipants.toString(),
+      registrationDeadline: event.registrationDeadline,
+      status: event.status
     });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (eventId: string) => {
+  const handleDelete = async (eventId: string) => {
     if (confirm('Are you sure you want to delete this event?')) {
-      setEvents(events.filter(event => event.id !== eventId));
-      toast({
-        title: "Event Deleted",
-        description: "Event has been successfully deleted.",
-      });
+      try {
+        await deleteEvent.mutateAsync(eventId);
+      } catch (error) {
+        console.error('Delete error:', error);
+      }
     }
   };
 
   const exportToCSV = () => {
     const csvContent = [
-      ['Title', 'Date', 'Time', 'Location', 'Speaker', 'Description'],
+      ['Title', 'Date', 'Location', 'Category', 'Max Participants', 'Status', 'Description'],
       ...filteredEvents.map(event => [
         event.title,
-        event.date,
-        event.time,
+        new Date(event.date).toLocaleDateString(),
         event.location,
-        event.speaker,
+        event.category,
+        event.maxParticipants.toString(),
+        event.status,
         event.description.replace(/,/g, ';') // Replace commas to avoid CSV issues
       ])
     ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
@@ -136,14 +152,49 @@ const AdminEvents = () => {
     a.download = `events-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
-
-    toast({
-      title: "Export Completed",
-      description: "Events have been exported to CSV successfully.",
-    });
   };
 
   const isUpcoming = (date: string) => new Date(date) > new Date();
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Event Management</h1>
+            <p className="text-muted-foreground">Manage all community events</p>
+          </div>
+        </div>
+        <Card className="p-8">
+          <div className="flex items-center space-x-2">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading events...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Event Management</h1>
+            <p className="text-muted-foreground">Manage all community events</p>
+          </div>
+        </div>
+        <Card className="p-8 border-destructive">
+          <div className="flex items-center space-x-2 text-destructive">
+            <AlertCircle className="w-6 h-6" />
+            <p>Failed to load events. Please try again later.</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const isSubmitting = createEvent.isPending || updateEvent.isPending;
 
   return (
     <div className="p-6">
@@ -187,22 +238,28 @@ const AdminEvents = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="speaker">Speaker *</Label>
-                    <Input
-                      id="speaker"
-                      value={formData.speaker}
-                      onChange={(e) => setFormData({...formData, speaker: e.target.value})}
-                      required
-                    />
+                    <Label htmlFor="category">Category *</Label>
+                    <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="educational">Educational</SelectItem>
+                        <SelectItem value="religious">Religious</SelectItem>
+                        <SelectItem value="social">Social</SelectItem>
+                        <SelectItem value="cultural">Cultural</SelectItem>
+                        <SelectItem value="sports">Sports</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="date">Date *</Label>
+                    <Label htmlFor="date">Date & Time *</Label>
                     <Input
                       id="date"
-                      type="date"
+                      type="datetime-local"
                       value={formData.date}
                       onChange={(e) => setFormData({...formData, date: e.target.value})}
                       required
@@ -210,25 +267,56 @@ const AdminEvents = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="time">Time *</Label>
+                    <Label htmlFor="registrationDeadline">Registration Deadline *</Label>
                     <Input
-                      id="time"
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => setFormData({...formData, time: e.target.value})}
+                      id="registrationDeadline"
+                      type="datetime-local"
+                      value={formData.registrationDeadline}
+                      onChange={(e) => setFormData({...formData, registrationDeadline: e.target.value})}
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location *</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location *</Label>
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => setFormData({...formData, location: e.target.value})}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="maxParticipants">Max Participants *</Label>
+                    <Input
+                      id="maxParticipants"
+                      type="number"
+                      min="1"
+                      value={formData.maxParticipants}
+                      onChange={(e) => setFormData({...formData, maxParticipants: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status *</Label>
+                    <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -243,11 +331,18 @@ const AdminEvents = () => {
                 </div>
 
                 <div className="flex justify-end space-x-2 pt-4">
-                  <Button type="button" variant="outline" onClick={resetForm}>
+                  <Button type="button" variant="outline" onClick={resetForm} disabled={isSubmitting}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-gradient-primary hover:opacity-90">
-                    {editingEvent ? 'Update Event' : 'Create Event'}
+                  <Button type="submit" className="bg-gradient-primary hover:opacity-90" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        {editingEvent ? 'Updating...' : 'Creating...'}
+                      </>
+                    ) : (
+                      editingEvent ? 'Update Event' : 'Create Event'
+                    )}
                   </Button>
                 </div>
               </form>
@@ -264,7 +359,7 @@ const AdminEvents = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder="Search events by title or speaker..."
+                  placeholder="Search events by title or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -309,11 +404,12 @@ const AdminEvents = () => {
                   <CardDescription>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                       <span><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</span>
-                      <span><strong>Time:</strong> {event.time}</span>
-                      <span><strong>Speaker:</strong> {event.speaker}</span>
+                      <span><strong>Category:</strong> {event.category}</span>
+                      <span><strong>Max Participants:</strong> {event.maxParticipants}</span>
                     </div>
-                    <div className="mt-1">
+                    <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                       <span><strong>Location:</strong> {event.location}</span>
+                      <span><strong>Status:</strong> <Badge variant="outline">{event.status}</Badge></span>
                     </div>
                   </CardDescription>
                 </div>

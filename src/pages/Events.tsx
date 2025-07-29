@@ -1,11 +1,77 @@
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, User, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, User, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockEvents } from '@/data/mockData';
+import { useEvents } from '@/hooks/useEvents';
 import eventsImage from '@/assets/events-illustration.jpg';
 
 const Events = () => {
+  const { data: events = [], isLoading, error } = useEvents();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <img 
+                src={eventsImage} 
+                alt="Community Events" 
+                className="w-64 h-48 object-cover rounded-lg shadow-soft"
+              />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Community Events
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Join our inspiring events designed to strengthen your faith, build meaningful 
+              connections, and contribute to our community's growth.
+            </p>
+          </div>
+          
+          <div className="flex justify-center">
+            <Card className="p-8">
+              <div className="flex items-center space-x-2">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <p className="text-muted-foreground">Loading events...</p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <img 
+                src={eventsImage} 
+                alt="Community Events" 
+                className="w-64 h-48 object-cover rounded-lg shadow-soft"
+              />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Community Events
+            </h1>
+          </div>
+          
+          <div className="flex justify-center">
+            <Card className="p-8 border-destructive">
+              <div className="flex items-center space-x-2 text-destructive">
+                <AlertCircle className="w-6 h-6" />
+                <p>Failed to load events. Please try again later.</p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,7 +95,7 @@ const Events = () => {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockEvents.map((event) => (
+          {events.map((event) => (
             <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -83,7 +149,7 @@ const Events = () => {
         </div>
 
         {/* No Events Fallback */}
-        {mockEvents.length === 0 && (
+                  {events.length === 0 && (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">No Events Available</h3>

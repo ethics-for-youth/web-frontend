@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
-import { Calendar, BookOpen, Users, ArrowRight } from 'lucide-react';
+import { Calendar, BookOpen, Users, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockEvents, mockCourses } from '@/data/mockData';
+import { useEvents } from '@/hooks/useEvents';
+import { mockCourses } from '@/data/mockData';
 import heroImage from '@/assets/hero-bg.jpg';
 
 const Home = () => {
-  const upcomingEvents = mockEvents.slice(0, 3);
+  const { data: allEvents = [], isLoading: eventsLoading } = useEvents();
+  const upcomingEvents = allEvents.slice(0, 3);
   const featuredCourses = mockCourses.filter(course => course.isActive).slice(0, 3);
 
   return (
@@ -61,19 +63,36 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {upcomingEvents.map((event) => (
-              <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card">
-                <CardHeader>
-                  <CardTitle className="text-primary">{event.title}</CardTitle>
-                  <CardDescription>
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(event.date).toLocaleDateString()} at {event.time}</span>
-                    </div>
-                    <div className="mt-1 text-muted-foreground">{event.location}</div>
-                  </CardDescription>
-                </CardHeader>
+          {eventsLoading ? (
+            <div className="flex justify-center mb-8">
+              <Card className="p-8">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <p className="text-muted-foreground">Loading upcoming events...</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {upcomingEvents.map((event) => (
+                <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card">
+                  <CardHeader>
+                    <CardTitle className="text-primary">{event.title}</CardTitle>
+                    <CardDescription>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <Calendar className="w-4 h-4" />
+                        <span>{new Date(event.date).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}</span>
+                      </div>
+                      <div className="mt-1 text-muted-foreground">{event.location}</div>
+                    </CardDescription>
+                  </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4 line-clamp-3">
                     {event.description}
@@ -85,9 +104,10 @@ const Home = () => {
                     </Link>
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="text-center">
             <Button asChild variant="outline" size="lg">

@@ -1,20 +1,38 @@
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, MapPin, User, ArrowLeft, Clock } from 'lucide-react';
+import { Calendar, MapPin, User, ArrowLeft, Clock, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import RegistrationForm from '@/components/RegistrationForm';
-import { mockEvents } from '@/data/mockData';
+import { useEvent } from '@/hooks/useEvents';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const event = mockEvents.find(e => e.id === id);
+  const { data: event, isLoading, error } = useEvent(id || '');
 
-  if (!event) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8">
+          <div className="flex items-center space-x-2">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading event details...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !event) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Event Not Found</h1>
-          <p className="text-muted-foreground mb-6">The event you're looking for doesn't exist.</p>
+          <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            {error ? 'Failed to Load Event' : 'Event Not Found'}
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            {error ? 'There was an error loading the event details.' : 'The event you\'re looking for doesn\'t exist.'}
+          </p>
           <Button asChild>
             <Link to="/events">
               <ArrowLeft className="w-4 h-4 mr-2" />
