@@ -15,8 +15,14 @@ export const competitionsApi = {
   // Get all competitions
   getCompetitions: async (params?: ListQueryParams): Promise<Competition[]> => {
     try {
-      const response = await apiClient.get<GetCompetitionsResponse>(API_ENDPOINTS.COMPETITIONS, { params });
-      return response.data.data;
+      const response = await apiClient.get(API_ENDPOINTS.COMPETITIONS, { params });
+      // According to spec: { success: boolean, message: string, data: { competitions: [], count: number } }
+      if (response.data.success && response.data.data && Array.isArray(response.data.data.competitions)) {
+        return response.data.data.competitions;
+      } else {
+        console.error('Unexpected competitions API response:', response.data);
+        return [];
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -25,8 +31,13 @@ export const competitionsApi = {
   // Get single competition by ID
   getCompetition: async (id: string): Promise<Competition> => {
     try {
-      const response = await apiClient.get<GetCompetitionResponse>(API_ENDPOINTS.COMPETITION_DETAIL(id));
-      return response.data.data;
+      const response = await apiClient.get(API_ENDPOINTS.COMPETITION_DETAIL(id));
+      // According to spec: { success: boolean, message: string, data: { competition: Competition } }
+      if (response.data.success && response.data.data && response.data.data.competition) {
+        return response.data.data.competition;
+      } else {
+        throw new Error('Competition not found or invalid response format');
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -38,11 +49,16 @@ export const competitionsApi = {
     registrationData: CompetitionRegistrationRequest
   ): Promise<{ registrationId: string }> => {
     try {
-      const response = await apiClient.post<CompetitionRegistrationResponse>(
+      const response = await apiClient.post(
         API_ENDPOINTS.COMPETITION_REGISTER(id), 
         registrationData
       );
-      return response.data.data;
+      // According to spec: { success: boolean, message: string, data: { participant: Participant, competition: {...} } }
+      if (response.data.success && response.data.data && response.data.data.participant) {
+        return { registrationId: response.data.data.participant.id };
+      } else {
+        throw new Error('Registration failed or invalid response format');
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }

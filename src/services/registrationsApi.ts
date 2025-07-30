@@ -12,13 +12,19 @@ export const registrationsApi = {
   // Create registration for event or course
   createRegistration: async (registrationData: CreateRegistrationRequest): Promise<{ registrationId: string }> => {
     try {
-      // For now using a generic /registrations endpoint
-      // This may need to be updated based on actual API structure
-      const response = await apiClient.post<CreateRegistrationResponse>(
+      // Note: This endpoint is not in the OpenAPI spec yet
+      // Using a generic /registrations endpoint - may need updating
+      const response = await apiClient.post(
         '/registrations', 
         registrationData
       );
-      return response.data.data;
+      
+      // Assuming similar structure to other endpoints
+      if (response.data.success && response.data.data) {
+        return { registrationId: response.data.data.registrationId || response.data.data.id };
+      } else {
+        throw new Error('Registration failed or invalid response format');
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }

@@ -51,9 +51,12 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
           name: formData.name,
           email: formData.email,
           phone: formData.whatsappNumber,
-          skills: [], // You might want to add a skills field to the form
-          availability: formData.address, // Using address field as availability for now
-          status: 'pending',
+          skills: ['General Volunteer'], // Default skill - you might want to add a skills field to the form
+          availability: formData.address || 'Flexible', // Using address field as availability for now
+          // Note: These fields are optional according to the API spec
+          experience: 'Filled via registration form',
+          motivation: 'Applied through website',
+          preferredRoles: ['General Support'],
         };
 
         await submitVolunteerApplication.mutateAsync(volunteerData);

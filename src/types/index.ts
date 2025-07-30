@@ -41,6 +41,13 @@ export interface Volunteer {
   status: string;
   appliedAt: string; // ISO date string
   updatedAt: string; // ISO date string
+  // Optional fields from OpenAPI spec
+  experience?: string;
+  motivation?: string;
+  preferredRoles?: string[];
+  assignedRole?: string;
+  team?: string;
+  approvedAt?: string;
 }
 
 export interface Suggestion {

@@ -17,20 +17,20 @@ export const eventsApi = {
     try {
       const response = await apiClient.get(API_ENDPOINTS.EVENTS, { params });
       
-      // Handle different possible response structures
+      // Handle the exact API response structure from OpenAPI spec
       if (API_CONFIG.enableLogging) {
         console.log('Events API Response:', response.data);
       }
       
-      if (Array.isArray(response.data)) {
+      // According to OpenAPI spec: { success: boolean, message: string, data: { events: [], count: number } }
+      if (response.data.success && response.data.data && Array.isArray(response.data.data.events)) {
+        return response.data.data.events;
+      } else if (Array.isArray(response.data)) {
+        // Fallback for direct array response
         return response.data;
-      } else if (response.data.data && Array.isArray(response.data.data)) {
-        return response.data.data;
-      } else if (response.data.events && Array.isArray(response.data.events)) {
-        return response.data.events;
       } else {
         console.error('Unexpected API response structure:', response.data);
-        console.error('Expected an array of events, but got:', typeof response.data);
+        console.error('Expected: { success: true, data: { events: [] } }, but got:', typeof response.data);
         return [];
       }
     } catch (error) {
@@ -43,9 +43,10 @@ export const eventsApi = {
     try {
       const response = await apiClient.get(API_ENDPOINTS.EVENT_DETAIL(id));
       
-      // Handle different possible response structures
-      if (response.data.data) {
-        return response.data.data;
+      // Handle the exact API response structure from OpenAPI spec
+      // According to spec: { success: boolean, message: string, data: { event: Event } }
+      if (response.data.success && response.data.data && response.data.data.event) {
+        return response.data.data.event;
       } else if (response.data.event) {
         return response.data.event;
       } else {
@@ -59,8 +60,13 @@ export const eventsApi = {
   // Create new event (admin only)
   createEvent: async (eventData: CreateEventRequest): Promise<Event> => {
     try {
-      const response = await apiClient.post<CreateEventResponse>(API_ENDPOINTS.EVENTS, eventData);
-      return response.data.data;
+      const response = await apiClient.post(API_ENDPOINTS.EVENTS, eventData);
+      // According to spec: { success: boolean, message: string, data: { event: Event } }
+      if (response.data.success && response.data.data && response.data.data.event) {
+        return response.data.data.event;
+      } else {
+        throw new Error('Invalid response format from server');
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -69,8 +75,13 @@ export const eventsApi = {
   // Update event (admin only)
   updateEvent: async (id: string, eventData: UpdateEventRequest): Promise<Event> => {
     try {
-      const response = await apiClient.put<CreateEventResponse>(API_ENDPOINTS.EVENT_DETAIL(id), eventData);
-      return response.data.data;
+      const response = await apiClient.put(API_ENDPOINTS.EVENT_DETAIL(id), eventData);
+      // According to spec: { success: boolean, message: string, data: { event: Event } }
+      if (response.data.success && response.data.data && response.data.data.event) {
+        return response.data.data.event;
+      } else {
+        throw new Error('Invalid response format from server');
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }
