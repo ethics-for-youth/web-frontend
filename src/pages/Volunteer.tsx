@@ -1,50 +1,19 @@
 import { Heart, Users, BookOpen, Hand, Globe, Star } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import RegistrationForm from '@/components/RegistrationForm';
+import { volunteerOpportunities, volunteerBenefits } from '@/data/mockData';
 import volunteerImage from '@/assets/volunteer-illustration.jpg';
 
 const Volunteer = () => {
-  const volunteerOpportunities = [
-    {
-      icon: BookOpen,
-      title: 'Educational Support',
-      description: 'Help with course preparation, student mentoring, and educational material development.'
-    },
-    {
-      icon: Users,
-      title: 'Event Organization',
-      description: 'Assist in planning and executing community events, workshops, and gatherings.'
-    },
-    {
-      icon: Heart,
-      title: 'Community Outreach',
-      description: 'Engage with the community through social media, newsletters, and local partnerships.'
-    },
-    {
-      icon: Hand,
-      title: 'Youth Mentoring',
-      description: 'Guide and support younger community members in their personal and spiritual growth.'
-    },
-    {
-      icon: Globe,
-      title: 'Digital Dawah',
-      description: 'Help spread Islamic knowledge through online platforms and digital content creation.'
-    },
-    {
-      icon: Star,
-      title: 'Special Projects',
-      description: 'Contribute to unique initiatives and seasonal programs throughout the year.'
-    }
-  ];
-
-  const volunteerBenefits = [
-    'Personal and spiritual growth opportunities',
-    'Skill development and leadership training',
-    'Networking with like-minded individuals',
-    'Flexible commitment based on your availability',
-    'Recognition and appreciation for your contributions',
-    'Making a meaningful impact in the community'
-  ];
+  // Icon mapping for volunteer opportunities
+  const iconMap = {
+    BookOpen,
+    Users,
+    Heart,
+    Hand,
+    Globe,
+    Star
+  };
 
   return (
     <div className="min-h-screen py-12">
@@ -74,7 +43,7 @@ const Volunteer = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {volunteerOpportunities.map((opportunity, index) => {
-              const IconComponent = opportunity.icon;
+              const IconComponent = iconMap[opportunity.icon as keyof typeof iconMap];
               return (
                 <Card key={index} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card">
                   <CardHeader>

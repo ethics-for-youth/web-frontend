@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Mail, MessageSquare, Phone, Send, MapPin, Clock } from 'lucide-react';
+import { Mail, MessageSquare, Phone, Send, MapPin, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
+import { useCreateMessage } from '@/hooks/useMessages';
+import { CreateMessageRequest } from '@/services';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -13,37 +14,38 @@ const Contact = () => {
     email: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Use the real messages API
+  const createMessage = useCreateMessage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      return;
+    }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Contact form submitted:', formData);
-      
-      toast({
-        title: "Message Sent Successfully!",
-        description: "Thank you for contacting us. We'll get back to you within 24 hours.",
-      });
+      const messageData: CreateMessageRequest = {
+        senderName: formData.name,
+        senderEmail: formData.email,
+        content: formData.message,
+        messageType: 'general',
+        isPublic: false,
+        priority: 'normal',
+      };
 
-      // Reset form
+      await createMessage.mutateAsync(messageData);
+
+      // Reset form on success
       setFormData({
         name: '',
         email: '',
         message: ''
       });
     } catch (error) {
-      toast({
-        title: "Message Failed to Send",
-        description: "There was an error sending your message. Please try again or contact us directly.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+      // Error handling is done in the hook
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -207,10 +209,13 @@ const Contact = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
-                    disabled={isSubmitting}
+                    disabled={createMessage.isPending}
                   >
-                    {isSubmitting ? (
-                      'Sending...'
+                    {createMessage.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Sending...
+                      </>
                     ) : (
                       <>
                         <Send className="w-4 h-4 mr-2" />

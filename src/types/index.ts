@@ -3,11 +3,66 @@
 export interface Event {
   id: string;
   title: string;
-  date: string; // ISO date string
-  time: string;
-  location: string;
-  speaker: string;
   description: string;
+  date: string; // ISO date string
+  location: string;
+  category: string;
+  maxParticipants: number;
+  registrationDeadline: string; // ISO date string
+  status: string;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+export interface Competition {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
+  registrationDeadline: string; // ISO date string
+  rules: string[];
+  prizes: string[];
+  maxParticipants: number;
+  status: string;
+  participants: string[];
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+export interface Volunteer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  skills: string[];
+  availability: string;
+  status: string;
+  appliedAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+  // Optional fields from OpenAPI spec
+  experience?: string;
+  motivation?: string;
+  preferredRoles?: string[];
+  assignedRole?: string;
+  team?: string;
+  approvedAt?: string;
+}
+
+export interface Suggestion {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  submitterName: string;
+  submitterEmail: string;
+  priority: string;
+  tags: string[];
+  status: string;
+  votes: number;
+  submittedAt: string; // ISO date string
+  updatedAt: string; // ISO date string
 }
 
 export interface Course {
