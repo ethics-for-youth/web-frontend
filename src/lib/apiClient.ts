@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL, API_CONFIG } from '@/config/api';
 
 // Create axios instance
@@ -10,12 +10,7 @@ const apiClient: AxiosInstance = axios.create({
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
-    // Add timestamp for cache busting if needed
-    if (config.method === 'get') {
-      config.params = { ...config.params, _t: Date.now() };
-    }
-
+  (config: InternalAxiosRequestConfig) => {
     // Add auth token if available (for future admin features)
     const token = localStorage.getItem('auth_token');
     if (token && config.headers) {

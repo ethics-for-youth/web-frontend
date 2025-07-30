@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from '@/hooks/useEvents';
 import { Event } from '@/types';
+import { formatDateForInput } from '@/utils/dateUtils';
 
 const AdminEvents = () => {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
@@ -55,6 +56,8 @@ const AdminEvents = () => {
 
     setFilteredEvents(filtered);
   }, [events, searchTerm, dateFilter]);
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,18 +114,23 @@ const AdminEvents = () => {
     setIsDialogOpen(false);
   };
 
+
+
+
+
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
-    setFormData({
-      title: event.title,
-      description: event.description,
-      date: event.date,
-      location: event.location,
-      category: event.category,
-      maxParticipants: event.maxParticipants.toString(),
-      registrationDeadline: event.registrationDeadline,
-      status: event.status
-    });
+    const newFormData = {
+      title: event.title || '',
+      description: event.description || '',
+      date: formatDateForInput(event.date),
+      location: event.location || '',
+      category: event.category || '',
+      maxParticipants: event.maxParticipants?.toString() || '',
+      registrationDeadline: formatDateForInput(event.registrationDeadline),
+      status: event.status || 'active'
+    };
+    setFormData(newFormData);
     setIsDialogOpen(true);
   };
 

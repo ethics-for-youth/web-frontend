@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 export const eventsQueryKeys = {
   all: ['events'] as const,
   lists: () => [...eventsQueryKeys.all, 'list'] as const,
-  list: (params?: ListQueryParams) => [...eventsQueryKeys.lists(), params] as const,
+  list: (params?: ListQueryParams) => [...eventsQueryKeys.lists(), params ? JSON.stringify(params) : 'all'] as const,
   details: () => [...eventsQueryKeys.all, 'detail'] as const,
   detail: (id: string) => [...eventsQueryKeys.details(), id] as const,
 };

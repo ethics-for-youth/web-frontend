@@ -1,15 +1,13 @@
 // Events API Service
 import apiClient, { handleApiError } from '@/lib/apiClient';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS, API_CONFIG } from '@/config/api';
 import {
-  GetEventsResponse,
-  GetEventResponse,
   CreateEventRequest,
-  CreateEventResponse,
   UpdateEventRequest,
   ListQueryParams,
 } from '@/types/api';
 import { Event } from '@/types';
+import { transformDynamoDBArray, transformDynamoDBObject, isDynamoDBFormatted } from '@/utils/dynamoDbTransform';
 
 export const eventsApi = {
   // Get all events
@@ -22,17 +20,32 @@ export const eventsApi = {
         console.log('Events API Response:', response.data);
       }
       
+      let events: Event[] = [];
+      
       // According to OpenAPI spec: { success: boolean, message: string, data: { events: [], count: number } }
       if (response.data.success && response.data.data && Array.isArray(response.data.data.events)) {
-        return response.data.data.events;
+        events = response.data.data.events;
+      } else if (response.data.success && response.data.data && Array.isArray(response.data.data)) {
+        // Handle case where data is directly an array
+        events = response.data.data;
       } else if (Array.isArray(response.data)) {
         // Fallback for direct array response
-        return response.data;
+        events = response.data;
       } else {
         console.error('Unexpected API response structure:', response.data);
         console.error('Expected: { success: true, data: { events: [] } }, but got:', typeof response.data);
         return [];
       }
+
+      // Transform DynamoDB formatted data if needed
+      if (events.length > 0 && isDynamoDBFormatted(events[0])) {
+        if (API_CONFIG.enableLogging) {
+          console.log('Transforming DynamoDB formatted events data');
+        }
+        return transformDynamoDBArray(events);
+      }
+
+      return events;
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -45,13 +58,25 @@ export const eventsApi = {
       
       // Handle the exact API response structure from OpenAPI spec
       // According to spec: { success: boolean, message: string, data: { event: Event } }
+      let event: Event;
+      
       if (response.data.success && response.data.data && response.data.data.event) {
-        return response.data.data.event;
+        event = response.data.data.event;
       } else if (response.data.event) {
-        return response.data.event;
+        event = response.data.event;
       } else {
-        return response.data;
+        event = response.data;
       }
+
+      // Transform DynamoDB formatted data if needed
+      if (isDynamoDBFormatted(event)) {
+        if (API_CONFIG.enableLogging) {
+          console.log('Transforming DynamoDB formatted event data');
+        }
+        return transformDynamoDBObject(event);
+      }
+
+      return event;
     } catch (error) {
       throw new Error(handleApiError(error));
     }

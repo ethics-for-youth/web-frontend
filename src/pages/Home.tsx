@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useEvents } from '@/hooks/useEvents';
 import { mockCourses } from '@/data/mockData';
 import heroImage from '@/assets/hero-bg.jpg';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const Home = () => {
   const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();
@@ -98,14 +99,7 @@ const Home = () => {
                     <CardDescription>
                       <span className="flex items-center space-x-2 text-sm">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(event.date).toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}</span>
+                        <span>{formatDateForDisplay(event.date)}</span>
                       </span>
                       <span className="block mt-1 text-muted-foreground">{event.location}</span>
                     </CardDescription>
@@ -156,12 +150,12 @@ const Home = () => {
                 <CardHeader>
                   <CardTitle className="text-primary">{course.title}</CardTitle>
                   <CardDescription>
-                    <div className="flex items-center justify-between">
+                    <span className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">{course.duration}</span>
                       <span className="text-sm font-medium text-accent-foreground bg-accent px-2 py-1 rounded">
                         {course.mode}
                       </span>
-                    </div>
+                    </span>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

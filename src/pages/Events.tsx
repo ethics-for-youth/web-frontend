@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEvents } from '@/hooks/useEvents';
 import eventsImage from '@/assets/events-illustration.jpg';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const Events = () => {
   const { data: events = [], isLoading, error } = useEvents();
@@ -107,14 +108,7 @@ const Events = () => {
                       <span className="space-y-2 block">
                         <span className="flex items-center space-x-2 text-sm">
                           <Calendar className="w-4 h-4 text-primary" />
-                          <span>{new Date(event.date).toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}</span>
+                          <span>{formatDateForDisplay(event.date)}</span>
                         </span>
                         <span className="flex items-center space-x-2 text-sm block mt-1">
                           <MapPin className="w-4 h-4 text-primary" />
@@ -163,7 +157,7 @@ const Events = () => {
         )}
 
         {/* Call to Action */}
-        {mockEvents.length > 0 && (
+        {events.length > 0 && (
           <div className="mt-16 text-center bg-muted/50 rounded-lg p-8">
             <h2 className="text-2xl font-bold text-foreground mb-4">
               Stay Updated with Our Events
