@@ -12,9 +12,8 @@ To access the **admin panel**, navigate to:
 **[http://efy-sandbox-env.s3-website.ap-south-1.amazonaws.com/admin](http://efy-sandbox-env.s3-website.ap-south-1.amazonaws.com/admin)**
 
 ### 🎫 Admin Credentials:
-- **Username:** `admin@efy.org`
-- **Password:** `Test@1234`  
-> _(Update if needed and share securely.)_
+- **Username:** `admin@ethicsforyouth.org`
+- **Password:** `admin123`  
 
 ---
 
