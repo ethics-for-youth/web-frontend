@@ -7,10 +7,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCreateRegistration, useVolunteerApplication } from '@/hooks/useRegistrations';
-import { CreateRegistrationRequest, VolunteerJoinRequest } from '@/types/api';
+import { NewCreateRegistrationRequest } from '@/services';
+import { VolunteerJoinRequest } from '@/types/api';
 
 interface RegistrationFormProps {
-  type: 'Event' | 'Course' | 'Volunteer';
+  type: 'Event' | 'Course' | 'Competition' | 'Volunteer';
   relatedId?: string;
   title: string;
   showPaymentConfirmation?: boolean;
@@ -61,19 +62,15 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
 
         await submitVolunteerApplication.mutateAsync(volunteerData);
       } else {
-        // Submit event/course registration
-        const registrationData: CreateRegistrationRequest = {
-          name: formData.name,
-          email: formData.email,
-          whatsappNumber: formData.whatsappNumber,
-          gender: formData.gender as 'Male' | 'Female',
-          age: parseInt(formData.age),
-          education: formData.education,
-          address: formData.address,
-          joinCommunity: formData.joinCommunity,
-          type,
-          ...(type === 'Event' && { relatedEventId: relatedId }),
-          ...(type === 'Course' && { relatedCourseId: relatedId }),
+        // Submit event/course registration using new API structure
+        const registrationData: NewCreateRegistrationRequest = {
+          userId: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generate a user ID
+          itemId: relatedId || '',
+          itemType: type.toLowerCase() as 'event' | 'course' | 'competition',
+          userEmail: formData.email,
+          userName: formData.name,
+          userPhone: formData.whatsappNumber,
+          notes: `Registration via ${type} form. Age: ${formData.age}, Gender: ${formData.gender}, Education: ${formData.education}, Address: ${formData.address}${formData.joinCommunity ? ', Wants to join community' : ''}`,
         };
 
         await createRegistration.mutateAsync(registrationData);

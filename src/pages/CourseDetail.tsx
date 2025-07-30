@@ -1,19 +1,53 @@
 import { useParams, Link } from 'react-router-dom';
-import { BookOpen, Clock, Monitor, ArrowLeft, Users, CheckCircle } from 'lucide-react';
+import { BookOpen, Clock, Monitor, ArrowLeft, Users, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import RegistrationForm from '@/components/RegistrationForm';
-import { mockCourses, courseBenefits } from '@/data/mockData';
+import { useCourse } from '@/hooks/useCourses';
+import { courseBenefits } from '@/data/mockData';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const course = mockCourses.find(c => c.id === id);
+  const { data: course, isLoading, error } = useCourse(id || '');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading course details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 mx-auto mb-4 text-destructive" />
+          <h1 className="text-2xl font-bold text-foreground mb-4">Failed to Load Course</h1>
+          <p className="text-muted-foreground mb-6">
+            There was an error loading the course details. Please try again.
+          </p>
+          <Button asChild>
+            <Link to="/courses">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Courses
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!course) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
+          <BookOpen className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
           <h1 className="text-2xl font-bold text-foreground mb-4">Course Not Found</h1>
           <p className="text-muted-foreground mb-6">The course you're looking for doesn't exist.</p>
           <Button asChild>
@@ -49,8 +83,8 @@ const CourseDetail = () => {
                   <h1 className="text-3xl md:text-4xl font-bold text-foreground">
                     {course.title}
                   </h1>
-                  <Badge variant={course.isActive ? "default" : "secondary"} className="ml-4">
-                    {course.isActive ? 'Active' : 'Inactive'}
+                  <Badge variant={course.status === 'active' ? "default" : "secondary"} className="ml-4">
+                    {course.status === 'active' ? 'Active' : course.status === 'inactive' ? 'Inactive' : 'Completed'}
                   </Badge>
                 </div>
 
@@ -65,18 +99,18 @@ const CourseDetail = () => {
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <Monitor className="w-5 h-5 text-primary" />
+                    <Users className="w-5 h-5 text-primary" />
                     <div>
-                      <p className="font-medium text-foreground">Mode</p>
-                      <p className="text-muted-foreground">{course.mode}</p>
+                      <p className="font-medium text-foreground">Instructor</p>
+                      <p className="text-muted-foreground">{course.instructor || 'TBA'}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <Users className="w-5 h-5 text-primary" />
+                    <BookOpen className="w-5 h-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Level</p>
-                      <p className="text-muted-foreground">All Levels</p>
+                      <p className="text-muted-foreground">{course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : 'All Levels'}</p>
                     </div>
                   </div>
                 </div>
@@ -112,7 +146,7 @@ const CourseDetail = () => {
                     <li>• Commitment to attend weekly sessions</li>
                     <li>• Open mind and willingness to learn</li>
                     <li>• Note-taking materials</li>
-                    {course.mode.includes('Online') && <li>• Reliable internet connection</li>}
+                    {course.materials && <li>• Required Materials: {course.materials}</li>}
                   </ul>
                 </div>
 
@@ -120,22 +154,30 @@ const CourseDetail = () => {
                 <div className="p-6 bg-muted/50 rounded-lg">
                   <h3 className="font-semibold text-foreground mb-3">Course Schedule</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                    <div>
-                      <p className="font-medium text-foreground mb-1">Next Intake:</p>
-                      <p>September 1, 2024</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground mb-1">Class Time:</p>
-                      <p>Saturdays, 2:00 PM - 4:00 PM</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground mb-1">Registration Deadline:</p>
-                      <p>August 25, 2024</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground mb-1">Course Fee:</p>
-                      <p>$150 (Financial aid available)</p>
-                    </div>
+                    {course.startDate && (
+                      <div>
+                        <p className="font-medium text-foreground mb-1">Start Date:</p>
+                        <p>{formatDateForDisplay(course.startDate)}</p>
+                      </div>
+                    )}
+                    {course.endDate && (
+                      <div>
+                        <p className="font-medium text-foreground mb-1">End Date:</p>
+                        <p>{formatDateForDisplay(course.endDate)}</p>
+                      </div>
+                    )}
+                    {course.schedule && (
+                      <div>
+                        <p className="font-medium text-foreground mb-1">Schedule:</p>
+                        <p>{course.schedule}</p>
+                      </div>
+                    )}
+                    {course.maxParticipants && (
+                      <div>
+                        <p className="font-medium text-foreground mb-1">Max Participants:</p>
+                        <p>{course.maxParticipants} students</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -144,7 +186,7 @@ const CourseDetail = () => {
 
           {/* Enrollment Form */}
           <div className="lg:col-span-1">
-            {course.isActive ? (
+            {course.status === 'active' ? (
               <RegistrationForm
                 type="Course"
                 relatedId={course.id}

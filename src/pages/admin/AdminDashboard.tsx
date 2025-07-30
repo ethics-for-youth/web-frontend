@@ -1,68 +1,81 @@
-import { useState, useEffect } from 'react';
-import { Calendar, BookOpen, Users, TrendingUp } from 'lucide-react';
+import { Calendar, BookOpen, Users, TrendingUp, MessageSquare, Loader2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockEvents, mockCourses, mockRegistrations } from '@/data/mockData';
-import { Registration } from '@/types';
+import { useAdminStats } from '@/hooks/useAdminStats';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const AdminDashboard = () => {
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const { data: adminStats, isLoading, error } = useAdminStats();
 
-  useEffect(() => {
-    setRegistrations(mockRegistrations);
-  }, []);
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Loading dashboard statistics...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const stats = [
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <AlertCircle className="w-8 h-8 mx-auto mb-4 text-destructive" />
+            <p className="text-destructive mb-4">Failed to load dashboard statistics</p>
+            <p className="text-sm text-muted-foreground">Please try refreshing the page</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!adminStats) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No statistics available</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { stats } = adminStats;
+
+  const dashboardStats = [
     {
       title: 'Total Events',
-      value: mockEvents.length,
-      description: 'Active events in the system',
+      value: stats.overview.totalEvents,
+      description: `${stats.events.active} active, ${stats.events.upcoming} upcoming`,
       icon: Calendar,
       color: 'text-blue-600'
     },
     {
       title: 'Total Courses',
-      value: mockCourses.filter(c => c.isActive).length,
-      description: 'Active courses available',
+      value: stats.overview.totalCourses,
+      description: 'Currently offered courses',
       icon: BookOpen,
       color: 'text-green-600'
     },
     {
       title: 'Total Registrations',
-      value: registrations.length,
-      description: 'All-time registrations',
+      value: stats.overview.totalRegistrations,
+      description: `${stats.registrations.recent} recent registrations`,
       icon: Users,
       color: 'text-purple-600'
     },
     {
-      title: 'Growth Rate',
-      value: '12%',
-      description: 'Monthly growth in registrations',
-      icon: TrendingUp,
+      title: 'Messages',
+      value: stats.overview.totalMessages,
+      description: `${stats.messages.pending} pending review`,
+      icon: MessageSquare,
       color: 'text-orange-600'
     }
   ];
-
-  const getRelatedName = (registration: Registration) => {
-    if (registration.type === 'Event' && registration.relatedEventId) {
-      const event = mockEvents.find(e => e.id === registration.relatedEventId);
-      return event?.title || 'Unknown Event';
-    }
-    if (registration.type === 'Course' && registration.relatedCourseId) {
-      const course = mockCourses.find(c => c.id === registration.relatedCourseId);
-      return course?.title || 'Unknown Course';
-    }
-    return 'General Volunteer';
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'Event': return 'bg-blue-100 text-blue-800';
-      case 'Course': return 'bg-green-100 text-green-800';
-      case 'Volunteer': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   return (
     <div className="p-6">
@@ -73,7 +86,7 @@ const AdminDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => {
+        {dashboardStats.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
             <Card key={index} className="shadow-card">
@@ -92,44 +105,63 @@ const AdminDashboard = () => {
         })}
       </div>
 
-      {/* Recent Registrations */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="text-foreground">Recent Registrations</CardTitle>
-          <CardDescription>Latest 5 registrations across all programs</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {registrations.map((registration) => (
-              <div key={registration.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <div>
-                      <h4 className="font-medium text-foreground">{registration.name}</h4>
-                      <p className="text-sm text-muted-foreground">{registration.email}</p>
-                    </div>
-                  </div>
-                  <div className="mt-2 flex items-center space-x-4 text-sm text-muted-foreground">
-                    <span>Age: {registration.age}</span>
-                    <span>•</span>
-                    <span>{registration.gender}</span>
-                    <span>•</span>
-                    <span>{getRelatedName(registration)}</span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Badge className={getTypeColor(registration.type)}>
-                    {registration.type}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date(registration.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
+      {/* Platform Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Quick Stats */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="text-foreground">Platform Overview</CardTitle>
+            <CardDescription>Key metrics and participation statistics</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Volunteers</span>
+                <span className="font-medium">{stats.overview.totalVolunteers}</span>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Participants</span>
+                <span className="font-medium">{stats.overview.totalParticipants}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Competitions</span>
+                <span className="font-medium">{stats.overview.totalCompetitions}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Upcoming Competitions</span>
+                <span className="font-medium">{stats.competitions.upcoming}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Message Breakdown */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="text-foreground">Messages by Type</CardTitle>
+            <CardDescription>Community feedback and communication breakdown</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Object.entries(stats.messages.byType).map(([type, count]) => (
+                <div key={type} className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground capitalize">
+                    {type.replace('-', ' ')}
+                  </span>
+                  <span className="font-medium">{count}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Last Updated */}
+      <div className="mt-6 text-center">
+        <p className="text-xs text-muted-foreground">
+          Last updated: {formatDateForDisplay(adminStats.lastUpdated)}
+        </p>
+      </div>
     </div>
   );
 };

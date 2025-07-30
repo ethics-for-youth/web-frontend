@@ -3,14 +3,15 @@ import { Calendar, BookOpen, Users, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEvents } from '@/hooks/useEvents';
-import { mockCourses } from '@/data/mockData';
+import { useCourses } from '@/hooks/useCourses';
 import heroImage from '@/assets/hero-bg.jpg';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const Home = () => {
   const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();
+  const { data: allCourses = [], isLoading: coursesLoading } = useCourses();
   const upcomingEvents = Array.isArray(allEvents) ? allEvents.slice(0, 3) : [];
-  const featuredCourses = mockCourses.filter(course => course.isActive).slice(0, 3);
+  const featuredCourses = Array.isArray(allCourses) ? allCourses.filter(course => course.status === 'active').slice(0, 3) : [];
 
   return (
     <div className="min-h-screen">
@@ -153,7 +154,7 @@ const Home = () => {
                     <span className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">{course.duration}</span>
                       <span className="text-sm font-medium text-accent-foreground bg-accent px-2 py-1 rounded">
-                        {course.mode}
+                        {course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : 'All Levels'}
                       </span>
                     </span>
                   </CardDescription>
