@@ -1,0 +1,353 @@
+name: Documentation Issue
+description: Report issues with documentation or request documentation improvements
+title: "[DOCS] "
+labels: ["documentation", "docs"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Documentation Issue
+        
+        Use this template to report:
+        - Missing or outdated documentation
+        - Unclear or confusing documentation
+        - Documentation errors
+        - Requests for new documentation
+        - Improvements to existing documentation
+
+  - type: dropdown
+    id: documentation_type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation issue is this?
+      options:
+        - API Documentation
+        - User Guide/Tutorial
+        - Developer Guide
+        - Setup/Installation Guide
+        - AWS Infrastructure Documentation
+        - Deployment Guide
+        - Troubleshooting Guide
+        - Code Comments/README
+        - Wiki/Knowledge Base
+        - Release Notes
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Issue Type
+      description: What type of documentation issue is this?
+      options:
+        - Missing Documentation
+        - Outdated Documentation
+        - Unclear/Confusing Documentation
+        - Documentation Error
+        - Request for New Documentation
+        - Improvement Request
+        - Translation Request
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this documentation issue?
+      options:
+        - Critical - Blocking development or deployment
+        - High - Important for user experience
+        - Medium - Nice to have improvement
+        - Low - Minor improvement
+    validations:
+      required: true
+
+  - type: input
+    id: affected_docs
+    attributes:
+      label: Affected Documentation
+      description: Which documentation is affected?
+      placeholder: "README.md, API docs, deployment guide, etc."
+    validations:
+      required: true
+
+  - type: input
+    id: issue_title
+    attributes:
+      label: Brief Description
+      description: Provide a concise summary of the documentation issue
+      placeholder: "API endpoint documentation missing authentication details"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed Description
+      description: Provide a detailed description of the documentation issue
+      placeholder: |
+        ## What is the documentation issue?
+        Describe the documentation problem in detail...
+        
+        ## What is the impact?
+        How does this affect users, developers, or the project?
+        
+        ## What should be documented?
+        What information is missing or unclear?
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_documentation
+    attributes:
+      label: Current Documentation
+      description: Describe what is currently documented (if applicable)
+      placeholder: |
+        ## Current Documentation
+        
+        ### What is currently documented?
+        - [Current content 1]
+        - [Current content 2]
+        - [Current content 3]
+        
+        ### Where is it documented?
+        - File: [file path]
+        - URL: [URL if applicable]
+        - Section: [section name]
+        
+        ### What is missing or unclear?
+        - [Missing information 1]
+        - [Missing information 2]
+        - [Unclear content 1]
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected_documentation
+    attributes:
+      label: Expected Documentation
+      description: Describe what the documentation should include
+      placeholder: |
+        ## Expected Documentation
+        
+        ### What should be documented?
+        - [Required information 1]
+        - [Required information 2]
+        - [Required information 3]
+        
+        ### How should it be structured?
+        - [Structure suggestion 1]
+        - [Structure suggestion 2]
+        - [Structure suggestion 3]
+        
+        ### Examples or templates needed?
+        - [Example 1]
+        - [Example 2]
+        - [Template 1]
+    validations:
+      required: true
+
+  - type: textarea
+    id: target_audience
+    attributes:
+      label: Target Audience
+      description: Who is the intended audience for this documentation?
+      placeholder: |
+        ## Target Audience
+        
+        ### Primary Audience
+        - [User type 1]: [description]
+        - [User type 2]: [description]
+        - [User type 3]: [description]
+        
+        ### Technical Level
+        - Beginner: [what they need to know]
+        - Intermediate: [what they need to know]
+        - Advanced: [what they need to know]
+        
+        ### Use Cases
+        - [Use case 1]: [description]
+        - [Use case 2]: [description]
+        - [Use case 3]: [description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples_references
+    attributes:
+      label: Examples and References
+      description: Include examples, references, or similar documentation
+      placeholder: |
+        ## Examples and References
+        
+        ### Similar Documentation
+        - [Reference 1]: [URL or description]
+        - [Reference 2]: [URL or description]
+        - [Reference 3]: [URL or description]
+        
+        ### Code Examples Needed
+        ```javascript
+        // Example API call
+        const response = await fetch('/api/endpoint', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer token'
+          },
+          body: JSON.stringify(data)
+        });
+        ```
+        
+        ### Screenshots or Diagrams
+        - [Screenshot 1]: [description]
+        - [Diagram 1]: [description]
+        - [Flow chart]: [description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: specific_requests
+    attributes:
+      label: Specific Requests
+      description: List specific documentation requests or improvements
+      placeholder: |
+        ## Specific Requests
+        
+        ### Missing Information
+        - [ ] [Specific missing information 1]
+        - [ ] [Specific missing information 2]
+        - [ ] [Specific missing information 3]
+        
+        ### Improvements Needed
+        - [ ] [Improvement 1]
+        - [ ] [Improvement 2]
+        - [ ] [Improvement 3]
+        
+        ### New Documentation Needed
+        - [ ] [New doc 1]: [description]
+        - [ ] [New doc 2]: [description]
+        - [ ] [New doc 3]: [description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical_details
+    attributes:
+      label: Technical Details
+      description: Include any technical details relevant to the documentation
+      placeholder: |
+        ## Technical Details
+        
+        ### API Endpoints
+        - Endpoint: [endpoint]
+        - Method: [GET/POST/PUT/DELETE]
+        - Authentication: [required/optional]
+        - Parameters: [list]
+        - Response: [format]
+        
+        ### AWS Services
+        - Service: [service name]
+        - Configuration: [details]
+        - Permissions: [required permissions]
+        - Integration: [how it integrates]
+        
+        ### Dependencies
+        - Package: [package name]
+        - Version: [version]
+        - Purpose: [what it's used for]
+        - Configuration: [how to configure]
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed_structure
+    attributes:
+      label: Proposed Structure
+      description: Suggest a structure for the documentation
+      placeholder: |
+        ## Proposed Documentation Structure
+        
+        ### Main Sections
+        1. [Section 1]: [description]
+        2. [Section 2]: [description]
+        3. [Section 3]: [description]
+        
+        ### Subsections
+        - [Section 1.1]: [description]
+        - [Section 1.2]: [description]
+        - [Section 2.1]: [description]
+        
+        ### Appendices
+        - [Appendix A]: [description]
+        - [Appendix B]: [description]
+        - [Appendix C]: [description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: contribution_offer
+    attributes:
+      label: Contribution Offer
+      description: Are you willing to contribute to the documentation?
+      placeholder: |
+        ## Contribution Offer
+        
+        ### Can you contribute?
+        - [ ] Yes, I can write the documentation
+        - [ ] Yes, I can provide technical details
+        - [ ] Yes, I can review the documentation
+        - [ ] No, I can only report the issue
+        
+        ### What can you contribute?
+        - [Technical expertise]: [description]
+        - [Writing skills]: [description]
+        - [Review time]: [description]
+        - [Examples]: [description]
+        
+        ### Timeline
+        - When can you contribute: [timeline]
+        - How much time can you dedicate: [estimate]
+        - Preferred communication method: [method]
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: documentation_characteristics
+    attributes:
+      label: Documentation Characteristics
+      description: Check any items that apply to this documentation issue
+      options:
+        - label: This affects API documentation
+        - label: This affects deployment documentation
+        - label: This affects AWS infrastructure documentation
+        - label: This affects user guides
+        - label: This affects developer guides
+        - label: This affects troubleshooting guides
+        - label: This affects code comments
+        - label: This affects README files
+        - label: This affects wiki pages
+        - label: This affects release notes
+        - label: This requires technical expertise
+        - label: This requires user research
+
+  - type: input
+    id: related_issues
+    attributes:
+      label: Related Issues
+      description: Link any related issues or pull requests
+      placeholder: "Related to #123, Follow-up to #456, Similar to #789"
+    validations:
+      required: false
+
+  - type: input
+    id: labels
+    attributes:
+      label: Additional Labels
+      description: Add any additional labels that might be relevant
+      placeholder: "api-docs, user-guide, developer-guide, aws-docs, etc."
+    validations:
+      required: false

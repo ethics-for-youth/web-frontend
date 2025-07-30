@@ -1,0 +1,320 @@
+name: General Issue
+description: Report any other issues or concerns not covered by other templates
+title: "[GENERAL] "
+labels: ["general", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # General Issue
+        
+        Use this template for any issues or concerns that don't fit into the other specific templates.
+        
+        Before creating a general issue, please check if it fits better into one of the specialized templates:
+        - [Bug Report](https://github.com/your-org/efy-frontend/issues/new?template=bug-report.yml)
+        - [Feature Request](https://github.com/your-org/efy-frontend/issues/new?template=feature-request.yml)
+        - [Infrastructure Issue](https://github.com/your-org/efy-frontend/issues/new?template=infrastructure-issue.yml)
+        - [Security Issue](https://github.com/your-org/efy-frontend/issues/new?template=security-issue.yml)
+        - [Documentation Issue](https://github.com/your-org/efy-frontend/issues/new?template=documentation-issue.yml)
+
+  - type: dropdown
+    id: issue_category
+    attributes:
+      label: Issue Category
+      description: What category does this issue fall into?
+      options:
+        - Question/Inquiry
+        - Suggestion/Idea
+        - Performance Concern
+        - Usability Issue
+        - Accessibility Issue
+        - Testing Issue
+        - Code Quality Issue
+        - Process/Workflow Issue
+        - Third-party Integration Issue
+        - Environment/Setup Issue
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this issue?
+      options:
+        - Critical - Immediate attention required
+        - High - Important, should be addressed soon
+        - Medium - Nice to have, moderate priority
+        - Low - Minor issue, low priority
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Which environment is this related to?
+      options:
+        - Production
+        - Staging
+        - Development
+        - Local Development
+        - All Environments
+        - Not Applicable
+    validations:
+      required: true
+
+  - type: input
+    id: issue_title
+    attributes:
+      label: Brief Description
+      description: Provide a concise summary of the issue
+      placeholder: "Question about API rate limiting implementation"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed Description
+      description: Provide a detailed description of the issue or concern
+      placeholder: |
+        ## What is the issue or question?
+        Describe the issue, question, or concern in detail...
+        
+        ## Context
+        Provide any relevant context or background information...
+        
+        ## What would you like to know or achieve?
+        What is your goal or what information are you seeking?
+    validations:
+      required: true
+
+  - type: textarea
+    id: background_context
+    attributes:
+      label: Background Context
+      description: Provide any relevant background information
+      placeholder: |
+        ## Background
+        
+        ### What led to this issue/question?
+        - [Context 1]
+        - [Context 2]
+        - [Context 3]
+        
+        ### What have you tried so far?
+        - [Attempt 1]: [Result]
+        - [Attempt 2]: [Result]
+        - [Attempt 3]: [Result]
+        
+        ### What is your current understanding?
+        - [Understanding 1]
+        - [Understanding 2]
+        - [Understanding 3]
+    validations:
+      required: false
+
+  - type: textarea
+    id: specific_questions
+    attributes:
+      label: Specific Questions
+      description: If this is a question, list your specific questions
+      placeholder: |
+        ## Specific Questions
+        
+        ### Technical Questions
+        - [Question 1]: [details]
+        - [Question 2]: [details]
+        - [Question 3]: [details]
+        
+        ### Process Questions
+        - [Question 1]: [details]
+        - [Question 2]: [details]
+        - [Question 3]: [details]
+        
+        ### Implementation Questions
+        - [Question 1]: [details]
+        - [Question 2]: [details]
+        - [Question 3]: [details]
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact_assessment
+    attributes:
+      label: Impact Assessment
+      description: Describe the impact of this issue or the benefits of addressing it
+      placeholder: |
+        ## Impact Assessment
+        
+        ### Current Impact
+        - [Impact 1]: [description]
+        - [Impact 2]: [description]
+        - [Impact 3]: [description]
+        
+        ### Potential Benefits
+        - [Benefit 1]: [description]
+        - [Benefit 2]: [description]
+        - [Benefit 3]: [description]
+        
+        ### Affected Users/Teams
+        - [User/Team 1]: [how affected]
+        - [User/Team 2]: [how affected]
+        - [User/Team 3]: [how affected]
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples_references
+    attributes:
+      label: Examples and References
+      description: Include any relevant examples, references, or similar cases
+      placeholder: |
+        ## Examples and References
+        
+        ### Similar Issues
+        - [Reference 1]: [URL or description]
+        - [Reference 2]: [URL or description]
+        - [Reference 3]: [URL or description]
+        
+        ### Code Examples
+        ```javascript
+        // Example code
+        const example = {
+          property: 'value',
+          method: () => {
+            // implementation
+          }
+        };
+        ```
+        
+        ### Screenshots or Diagrams
+        - [Screenshot 1]: [description]
+        - [Diagram 1]: [description]
+        - [Flow chart]: [description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed_solutions
+    attributes:
+      label: Proposed Solutions (Optional)
+      description: If you have ideas for solutions, describe them here
+      placeholder: |
+        ## Proposed Solutions
+        
+        ### Solution 1: [Brief description]
+        - Pros: [list]
+        - Cons: [list]
+        - Implementation: [description]
+        
+        ### Solution 2: [Brief description]
+        - Pros: [list]
+        - Cons: [list]
+        - Implementation: [description]
+        
+        ### Solution 3: [Brief description]
+        - Pros: [list]
+        - Cons: [list]
+        - Implementation: [description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information or context
+      placeholder: |
+        ## Additional Context
+        
+        ### Related Information
+        - [Info 1]: [details]
+        - [Info 2]: [details]
+        - [Info 3]: [details]
+        
+        ### Constraints or Limitations
+        - [Constraint 1]: [description]
+        - [Constraint 2]: [description]
+        - [Constraint 3]: [description]
+        
+        ### Timeline or Urgency
+        - [Timeline 1]: [description]
+        - [Timeline 2]: [description]
+        - [Timeline 3]: [description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: next_steps
+    attributes:
+      label: Next Steps
+      description: What would you like to happen next?
+      placeholder: |
+        ## Next Steps
+        
+        ### Immediate Actions
+        - [Action 1]: [description]
+        - [Action 2]: [description]
+        - [Action 3]: [description]
+        
+        ### Follow-up Actions
+        - [Action 1]: [description]
+        - [Action 2]: [description]
+        - [Action 3]: [description]
+        
+        ### Communication Preferences
+        - Preferred method: [method]
+        - Preferred timeline: [timeline]
+        - Preferred contact: [contact info]
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: issue_characteristics
+    attributes:
+      label: Issue Characteristics
+      description: Check any items that apply to this issue
+      options:
+        - label: This is a question seeking information
+        - label: This is a suggestion for improvement
+        - label: This affects multiple components
+        - label: This involves third-party services
+        - label: This requires research or investigation
+        - label: This affects user experience
+        - label: This affects development workflow
+        - label: This involves performance considerations
+        - label: This involves security considerations
+        - label: This requires team discussion
+        - label: This is time-sensitive
+        - label: This requires external consultation
+
+  - type: input
+    id: contact_info
+    attributes:
+      label: Contact Information (Optional)
+      description: If you'd like to be contacted directly, provide your contact information
+      placeholder: "Email: your.email@example.com, Slack: @username"
+    validations:
+      required: false
+
+  - type: input
+    id: related_issues
+    attributes:
+      label: Related Issues
+      description: Link any related issues or pull requests
+      placeholder: "Related to #123, Similar to #456, Follow-up to #789"
+    validations:
+      required: false
+
+  - type: input
+    id: labels
+    attributes:
+      label: Additional Labels
+      description: Add any additional labels that might be relevant
+      placeholder: "question, suggestion, performance, usability, etc."
+    validations:
+      required: false
