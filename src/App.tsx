@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
+import AdminMessages from "./pages/admin/AdminMessages";
 
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -78,6 +79,15 @@ const App = () => (
                 <AdminLayout>
                   <ErrorBoundary>
                     <AdminRegistrations />
+                  </ErrorBoundary>
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/messages" element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminMessages />
                   </ErrorBoundary>
                 </AdminLayout>
               </ProtectedRoute>

@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCreateMessage } from '@/hooks/useMessages';
 import { CreateMessageRequest } from '@/services';
@@ -12,7 +14,10 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    category: '',
+    phone: '',
+    isPublic: false
   });
 
   // Use the real messages API
@@ -29,9 +34,10 @@ const Contact = () => {
       const messageData: CreateMessageRequest = {
         senderName: formData.name,
         senderEmail: formData.email,
+        senderPhone: formData.phone || undefined,
         content: formData.message,
-        messageType: 'general',
-        isPublic: false,
+        messageType: (formData.category as any) || 'general',
+        isPublic: formData.isPublic,
         priority: 'normal',
       };
 
@@ -41,7 +47,10 @@ const Contact = () => {
       setFormData({
         name: '',
         email: '',
-        message: ''
+        message: '',
+        category: '',
+        phone: '',
+        isPublic: false
       });
     } catch (error) {
       // Error handling is done in the hook
@@ -49,9 +58,17 @@ const Contact = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  const categoryOptions = [
+    { value: 'feedback', label: 'Feedback' },
+    { value: 'complaint', label: 'Complaint' },
+    { value: 'thank-you', label: 'Testimonial' },
+    { value: 'suggestion', label: 'Suggestion' },
+    { value: 'general', label: 'General Inquiry' }
+  ];
 
   const contactMethods = [
     {
@@ -194,6 +211,35 @@ const Contact = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categoryOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone (Optional)</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="Your phone number"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="message">Message *</Label>
                     <Textarea
@@ -204,6 +250,17 @@ const Contact = () => {
                       placeholder="Tell us about your inquiry, questions, or how we can help you..."
                       rows={6}
                     />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="isPublic"
+                      checked={formData.isPublic}
+                      onCheckedChange={(checked) => handleInputChange('isPublic', checked as boolean)}
+                    />
+                    <Label htmlFor="isPublic" className="text-sm">
+                      I agree that this message can be published as a testimonial (optional)
+                    </Label>
                   </div>
 
                   <Button 
