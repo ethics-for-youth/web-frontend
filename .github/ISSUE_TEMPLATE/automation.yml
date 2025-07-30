@@ -1,0 +1,243 @@
+name: Automation Issue
+description: Report issues or request improvements for automation workflows, CI/CD, testing, deployment, or monitoring
+title: "[AUTOMATION] "
+labels: ["automation", "ci/cd"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Automation Issue Template
+        
+        Use this template to report issues or request improvements for automation workflows, CI/CD pipelines, testing, deployment, or monitoring systems.
+  
+  - type: dropdown
+    id: automation_type
+    attributes:
+      label: Automation Type
+      description: What type of automation is this issue related to?
+      options:
+        - CI/CD Pipeline
+        - Testing Automation
+        - Deployment Automation
+        - Monitoring & Alerting
+        - Infrastructure Automation
+        - Code Quality Automation
+        - Security Automation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this automation issue?
+      options:
+        - Low - Nice to have improvement
+        - Medium - Should be addressed soon
+        - High - Blocking development/deployment
+        - Critical - System down or security issue
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Which environment does this affect?
+      options:
+        - Development
+        - Staging
+        - Production
+        - All Environments
+        - Local Development
+    validations:
+      required: true
+
+  - type: input
+    id: issue_title
+    attributes:
+      label: Brief Description
+      description: Provide a concise summary of the automation issue
+      placeholder: "e.g., Build pipeline failing on TypeScript errors"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed Description
+      description: Provide a detailed description of the automation issue or improvement request
+      placeholder: |
+        ## What happened?
+        Describe the issue or improvement needed...
+        
+        ## Expected behavior
+        What should happen instead?
+        
+        ## Steps to reproduce
+        1. Step one
+        2. Step two
+        3. Step three
+        
+        ## Additional context
+        Any other relevant information...
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current Behavior
+      description: Describe what is currently happening with the automation
+      placeholder: |
+        - What is the current automation doing?
+        - Are there any error messages or logs?
+        - What is the impact on development/deployment?
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe what the automation should do
+      placeholder: |
+        - What should the automation accomplish?
+        - What are the success criteria?
+        - How should it integrate with existing workflows?
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to Reproduce
+      description: If this is a bug, provide steps to reproduce the issue
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+        
+        **Note:** Include any relevant configuration, environment variables, or setup steps.
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and Error Messages
+      description: Include any relevant logs, error messages, or console output
+      placeholder: |
+        ```
+        [ERROR] Build failed with exit code 1
+        [INFO] Running tests...
+        [FAIL] Test suite failed
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration Details
+      description: Include relevant configuration files, environment variables, or settings
+      placeholder: |
+        **Workflow file:** `.github/workflows/deploy-react-app.yml`
+        **Environment variables:** `AWS_REGION`, `S3_BUCKET`
+        **Package.json scripts:** `build`, `lint`, `test`
+        
+        ```yaml
+        # Example configuration
+        env:
+          NODE_VERSION: '18'
+          AWS_REGION: ap-south-1
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Assessment
+      description: Describe the impact of this issue on the development process
+      placeholder: |
+        - **Development Impact:** How does this affect developers?
+        - **Deployment Impact:** How does this affect deployments?
+        - **User Impact:** How does this affect end users?
+        - **Business Impact:** Any business implications?
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution (Optional)
+      description: If you have ideas for how to fix or improve this automation, describe them here
+      placeholder: |
+        ## Suggested approach
+        - Step 1: ...
+        - Step 2: ...
+        - Step 3: ...
+        
+        ## Alternative solutions
+        - Option A: ...
+        - Option B: ...
+        
+        ## Resources needed
+        - Time estimate: ...
+        - Dependencies: ...
+        - Testing requirements: ...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: additional_info
+    attributes:
+      label: Additional Information
+      description: Check any items that apply to this automation issue
+      options:
+        - label: This issue affects the production deployment pipeline
+        - label: This issue affects the development workflow
+        - label: This issue involves security concerns
+        - label: This issue requires infrastructure changes
+        - label: This issue affects multiple environments
+        - label: This issue is related to performance optimization
+        - label: This issue involves third-party integrations
+        - label: This issue requires database or data migration
+        - label: This issue affects monitoring or alerting systems
+        - label: This issue is a feature request for new automation
+
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Attachments
+      description: Include any relevant files, screenshots, or documentation
+      placeholder: |
+        - Screenshots of error messages
+        - Configuration files
+        - Log files
+        - Documentation links
+        - Related issue links
+    validations:
+      required: false
+
+  - type: input
+    id: related_issues
+    attributes:
+      label: Related Issues
+      description: Link any related issues or pull requests
+      placeholder: "Fixes #123, Related to #456"
+    validations:
+      required: false
+
+  - type: input
+    id: labels
+    attributes:
+      label: Additional Labels
+      description: Add any additional labels that might be relevant
+      placeholder: "bug, enhancement, documentation, etc."
+    validations:
+      required: false
