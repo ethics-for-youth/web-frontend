@@ -35,7 +35,12 @@ const AdminEvents = () => {
   const deleteEvent = useDeleteEvent();
 
   useEffect(() => {
-    let filtered = events;
+    if (!events || !Array.isArray(events)) {
+      setFilteredEvents([]);
+      return;
+    }
+
+    let filtered = [...events]; // Create a new array to avoid mutations
 
     if (searchTerm) {
       filtered = filtered.filter(event =>

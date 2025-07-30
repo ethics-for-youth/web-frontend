@@ -20,7 +20,9 @@ export const useEvents = (params?: ListQueryParams) => {
     queryKey: eventsQueryKeys.list(params),
     queryFn: () => eventsApi.getEvents(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (updated from cacheTime)
+    refetchOnWindowFocus: false, // Prevents unnecessary refetches
+    refetchOnMount: false, // Only refetch if data is stale
   });
 };
 
@@ -31,7 +33,9 @@ export const useEvent = (id: string) => {
     queryFn: () => eventsApi.getEvent(id),
     enabled: !!id, // Only run query if id exists
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000, // Updated from cacheTime
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 };
 

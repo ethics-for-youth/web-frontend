@@ -25,7 +25,12 @@ const AdminRegistrations = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = registrations;
+    if (!registrations || !Array.isArray(registrations)) {
+      setFilteredRegistrations([]);
+      return;
+    }
+
+    let filtered = [...registrations]; // Create a new array to avoid mutations
 
     if (searchTerm) {
       filtered = filtered.filter(reg =>

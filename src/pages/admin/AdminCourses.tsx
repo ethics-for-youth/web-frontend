@@ -35,7 +35,12 @@ const AdminCourses = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = courses;
+    if (!courses || !Array.isArray(courses)) {
+      setFilteredCourses([]);
+      return;
+    }
+
+    let filtered = [...courses]; // Create a new array to avoid mutations
 
     if (searchTerm) {
       filtered = filtered.filter(course =>
