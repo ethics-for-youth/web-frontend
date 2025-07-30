@@ -104,4 +104,25 @@ export const getISOString = (dateValue: unknown): string => {
 // Helper function to validate if a date value is valid
 export const isValidDate = (dateValue: unknown): boolean => {
   return parseDate(dateValue) !== null;
+};
+
+// Helper function to format date and time for display in admin tables
+export const formatDateTimeForDisplay = (dateValue: unknown): string => {
+  const date = parseDate(dateValue);
+  if (!date) {
+    return 'Date not available';
+  }
+
+  try {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch (error) {
+    console.error('Error formatting date-time for display:', error);
+    return 'Date not available';
+  }
 }; 
