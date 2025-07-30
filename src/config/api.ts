@@ -21,6 +21,20 @@ export const API_ENDPOINTS = {
   
   // Suggestions
   SUGGESTIONS: '/suggestions',
+  
+  // Registrations
+  REGISTRATIONS: '/registrations',
+  REGISTRATION_DETAIL: (id: string) => `/registrations/${id}`,
+  
+  // Courses
+  COURSES: '/courses',
+  COURSE_DETAIL: (id: string) => `/courses/${id}`,
+  
+  // Messages
+  MESSAGES: '/messages',
+  
+  // Admin Stats
+  ADMIN_STATS: '/admin/stats',
 } as const;
 
 // API Configuration
