@@ -7,8 +7,8 @@ import { mockCourses } from '@/data/mockData';
 import heroImage from '@/assets/hero-bg.jpg';
 
 const Home = () => {
-  const { data: allEvents = [], isLoading: eventsLoading } = useEvents();
-  const upcomingEvents = allEvents.slice(0, 3);
+  const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();
+  const upcomingEvents = Array.isArray(allEvents) ? allEvents.slice(0, 3) : [];
   const featuredCourses = mockCourses.filter(course => course.isActive).slice(0, 3);
 
   return (
@@ -72,6 +72,23 @@ const Home = () => {
                 </div>
               </Card>
             </div>
+          ) : eventsError ? (
+            <div className="flex justify-center mb-8">
+              <Card className="p-8">
+                <div className="text-center">
+                  <p className="text-muted-foreground">Unable to load events at the moment.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Please check back later.</p>
+                </div>
+              </Card>
+            </div>
+          ) : upcomingEvents.length === 0 ? (
+            <div className="flex justify-center mb-8">
+              <Card className="p-8">
+                <div className="text-center">
+                  <p className="text-muted-foreground">No upcoming events available.</p>
+                </div>
+              </Card>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {upcomingEvents.map((event) => (
@@ -79,7 +96,7 @@ const Home = () => {
                   <CardHeader>
                     <CardTitle className="text-primary">{event.title}</CardTitle>
                     <CardDescription>
-                      <div className="flex items-center space-x-2 text-sm">
+                      <span className="flex items-center space-x-2 text-sm">
                         <Calendar className="w-4 h-4" />
                         <span>{new Date(event.date).toLocaleDateString('en-US', { 
                           weekday: 'long', 
@@ -89,8 +106,8 @@ const Home = () => {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}</span>
-                      </div>
-                      <div className="mt-1 text-muted-foreground">{event.location}</div>
+                      </span>
+                      <span className="block mt-1 text-muted-foreground">{event.location}</span>
                     </CardDescription>
                   </CardHeader>
                 <CardContent>

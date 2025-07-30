@@ -15,8 +15,24 @@ export const eventsApi = {
   // Get all events
   getEvents: async (params?: ListQueryParams): Promise<Event[]> => {
     try {
-      const response = await apiClient.get<GetEventsResponse>(API_ENDPOINTS.EVENTS, { params });
-      return response.data.data;
+      const response = await apiClient.get(API_ENDPOINTS.EVENTS, { params });
+      
+      // Handle different possible response structures
+      if (API_CONFIG.enableLogging) {
+        console.log('Events API Response:', response.data);
+      }
+      
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else if (response.data.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      } else if (response.data.events && Array.isArray(response.data.events)) {
+        return response.data.events;
+      } else {
+        console.error('Unexpected API response structure:', response.data);
+        console.error('Expected an array of events, but got:', typeof response.data);
+        return [];
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }
@@ -25,8 +41,16 @@ export const eventsApi = {
   // Get single event by ID
   getEvent: async (id: string): Promise<Event> => {
     try {
-      const response = await apiClient.get<GetEventResponse>(API_ENDPOINTS.EVENT_DETAIL(id));
-      return response.data.data;
+      const response = await apiClient.get(API_ENDPOINTS.EVENT_DETAIL(id));
+      
+      // Handle different possible response structures
+      if (response.data.data) {
+        return response.data.data;
+      } else if (response.data.event) {
+        return response.data.event;
+      } else {
+        return response.data;
+      }
     } catch (error) {
       throw new Error(handleApiError(error));
     }

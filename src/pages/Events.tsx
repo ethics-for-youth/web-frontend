@@ -104,29 +104,27 @@ const Events = () => {
                       {event.title}
                     </CardTitle>
                     <CardDescription className="mt-2">
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-sm">
+                      <span className="space-y-2 block">
+                        <span className="flex items-center space-x-2 text-sm">
                           <Calendar className="w-4 h-4 text-primary" />
                           <span>{new Date(event.date).toLocaleDateString('en-US', { 
                             weekday: 'long', 
                             year: 'numeric', 
                             month: 'long', 
-                            day: 'numeric' 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
                           })}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm">
-                          <span className="w-4 h-4 flex items-center justify-center text-primary font-bold">⏰</span>
-                          <span>{event.time}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm">
+                        </span>
+                        <span className="flex items-center space-x-2 text-sm block mt-1">
                           <MapPin className="w-4 h-4 text-primary" />
                           <span>{event.location}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm">
+                        </span>
+                        <span className="flex items-center space-x-2 text-sm block mt-1">
                           <User className="w-4 h-4 text-primary" />
-                          <span>Speaker: {event.speaker}</span>
-                        </div>
-                      </div>
+                          <span>Category: {event.category}</span>
+                        </span>
+                      </span>
                     </CardDescription>
                   </div>
                 </div>
