@@ -68,14 +68,14 @@ To access the **admin panel**, navigate to:
 
 ### 📝 7. Registrations
 - [x] Use `/registrations` form from competitions/events if wired in frontend.
-- [ ] Test registration flow and check data via API or admin panel if integrated.
+- [x] Test registration flow and check data via API or admin panel if integrated.
 
 ### 📊 8. Admin Dashboard
 **Page:** `/admin`
 
 - [x] Admin login works.
-- [x] Admin can view stats (events count, volunteers, messages, etc.).
-- [x] All admin sections (Events, Messages, Volunteers, Courses) load properly.
+- [ ] Admin can view stats (events count, volunteers, messages, etc.).
+- [ ] All admin sections (Events, Messages, Volunteers, Courses) load properly.
 - [x] Admin actions like delete/edit/save work and reflect in frontend.
 
 ### 🌐 9. API Integration (Cross-Origin Testing)
