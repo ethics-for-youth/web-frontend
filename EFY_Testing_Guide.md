@@ -47,7 +47,7 @@ To access the **admin panel**, navigate to:
 
 - [x] User can submit the volunteer form with required fields.
 - [x] Confirm the form triggers API and shows success.
-- [ ] Test with both complete and partial data (to trigger validation).
+- [x] Test with both complete and partial data (to trigger validation).
 - [x] Admin can view volunteers in admin panel.
 
 ### 💬 5. Messages (Contact Us)
@@ -63,7 +63,7 @@ To access the **admin panel**, navigate to:
 **Page:** `/courses`
 
 - [x] User can view list of available courses.
-- [ ] Admin can add/edit/delete courses.
+- [x] Admin can add/edit/delete courses.
 - [x] Course detail view opens with accurate data.
 
 ### 📝 7. Registrations
