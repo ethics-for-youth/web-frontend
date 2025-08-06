@@ -74,8 +74,8 @@ To access the **admin panel**, navigate to:
 **Page:** `/admin`
 
 - [x] Admin login works.
-- [ ] Admin can view stats (events count, volunteers, messages, etc.).
-- [ ] All admin sections (Events, Messages, Volunteers, Courses) load properly.
+- [x] Admin can view stats (events count, volunteers, messages, etc.).
+- [x] All admin sections (Events, Messages, Volunteers, Courses) load properly.
 - [x] Admin actions like delete/edit/save work and reflect in frontend.
 
 ### 🌐 9. API Integration (Cross-Origin Testing)
