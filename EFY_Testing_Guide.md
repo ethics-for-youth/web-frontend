@@ -73,10 +73,10 @@ To access the **admin panel**, navigate to:
 ### 📊 8. Admin Dashboard
 **Page:** `/admin`
 
-- [ ] ~~Admin login works.~~
-- [ ] Admin can view stats (events count, volunteers, messages, etc.).
+- [x] Admin login works.
+- [x] Admin can view stats (events count, volunteers, messages, etc.).
 - [x] All admin sections (Events, Messages, Volunteers, Courses) load properly.
-- [ ] Admin actions like delete/edit/save work and reflect in frontend.
+- [x] Admin actions like delete/edit/save work and reflect in frontend.
 
 ### 🌐 9. API Integration (Cross-Origin Testing)
 - [ ] Confirm frontend on S3 can successfully call the deployed API Gateway endpoints.
