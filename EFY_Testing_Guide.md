@@ -20,68 +20,68 @@ To access the **admin panel**, navigate to:
 ## 🧪 Testing Checklist
 
 ### 🟢 1. General Access
-- [ ] Website loads without error.
-- [ ] Navigation links (Home, Events, Contact, etc.) are working.
-- [ ] Responsive design works well on desktop and mobile.
+- [x] Website loads without error.
+- [x] Navigation links (Home, Events, Contact, etc.) are working.
+- [x] Responsive design works well on desktop and mobile.
 
 ### 🗓️ 2. Events Module
 **Page:** `/events`
 
-- [ ] User can view list of events.
-- [ ] Clicking on an event shows its details.
-- [ ] (Admin only) Create/Edit/Delete events via admin panel.
-- [ ] Verify edge case: Empty event list shows “No events found”.
+- [x] User can view list of events.
+- [x] Clicking on an event shows its details.
+- [] (Admin only) Create/Edit/Delete events via admin panel.
+- [x] Verify edge case: Empty event list shows “No events found”.
 
 ### 🏆 3. Competitions Module
 **Page:** `/competitions`
 
-- [ ] User can see all competitions.
-- [ ] User can click a competition and see details.
-- [ ] User can register for a competition (via form).
-- [ ] Submission form validates required fields.
+- [x] User can see all competitions.
+- [x] User can click a competition and see details.
+- [x] User can register for a competition (via form).
+- [x] Submission form validates required fields.
 - [ ] (Admin only) View registration count and competition entries (if applicable).
-- [ ] Verify response from `GET /competitions/:id/results`.
+- [x] Verify response from `GET /competitions/:id/results`.
 
 ### 📝 4. Volunteer Registration
 **Page:** `/volunteers`
 
-- [ ] User can submit the volunteer form with required fields.
-- [ ] Confirm the form triggers API and shows success.
-- [ ] Test with both complete and partial data (to trigger validation).
+- [x] User can submit the volunteer form with required fields.
+- [x] Confirm the form triggers API and shows success.
+- [x] Test with both complete and partial data (to trigger validation).
 - [ ] Admin can view volunteers in admin panel.
 
 ### 💬 5. Messages (Contact Us)
 **Page:** `/contact-us`
 
-- [ ] User can submit a message (test all fields: name, email, category, etc.).
-- [ ] Optional fields like phone and isPublic work.
-- [ ] After submission, user sees a success confirmation.
-- [ ] Admin can view all messages under `/admin/messages`.
-- [ ] Admin filters (search, category, isPublic toggle) work as expected.
+- [x] User can submit a message (test all fields: name, email, category, etc.).
+- [x] Optional fields like phone and isPublic work.
+- [x] After submission, user sees a success confirmation.
+- [x] Admin can view all messages under `/admin/messages`.
+- [x] Admin filters (search, category, isPublic toggle) work as expected.
 
 ### 📚 6. Courses
 **Page:** `/courses`
 
-- [ ] User can view list of available courses.
-- [ ] Admin can add/edit/delete courses.
+- [x] User can view list of available courses.
+- [x] Admin can add/edit/delete courses.
 - [ ] Course detail view opens with accurate data.
 
 ### 📝 7. Registrations
-- [ ] Use `/registrations` form from competitions/events if wired in frontend.
-- [ ] Test registration flow and check data via API or admin panel if integrated.
+- [x] Use `/registrations` form from competitions/events if wired in frontend.
+- [x] Test registration flow and check data via API or admin panel if integrated.
 
 ### 📊 8. Admin Dashboard
 **Page:** `/admin`
 
-- [ ] Admin login works.
+- [x] Admin login works.
 - [ ] Admin can view stats (events count, volunteers, messages, etc.).
 - [ ] All admin sections (Events, Messages, Volunteers, Courses) load properly.
-- [ ] Admin actions like delete/edit/save work and reflect in frontend.
+- [x] Admin actions like delete/edit/save work and reflect in frontend.
 
 ### 🌐 9. API Integration (Cross-Origin Testing)
-- [ ] Confirm frontend on S3 can successfully call the deployed API Gateway endpoints.
-- [ ] No CORS errors when using POST/PUT from the browser.
-- [ ] OPTIONS requests return proper headers.
+- [x] Confirm frontend on S3 can successfully call the deployed API Gateway endpoints.
+- [x] No CORS errors when using POST/PUT from the browser.
+- [x] OPTIONS requests return proper headers.
 
 ---
 
