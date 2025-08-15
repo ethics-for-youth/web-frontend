@@ -18,7 +18,7 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  S3_BUCKET: efy-web-backend-dev-static-efy-static-hosting-dev
+  S3_BUCKET: efy-web-backend-qa-static-efy-static-hosting-qa
   NODE_VERSION: '18'
 
 jobs:
