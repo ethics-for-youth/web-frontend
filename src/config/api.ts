@@ -1,7 +1,7 @@
 // API Configuration for Ethics For Youth Platform
 
 // Base API URL - uses environment variable with fallback
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://d4ca8ryveb.execute-api.ap-south-1.amazonaws.com/default';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://efy.org.in/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {
