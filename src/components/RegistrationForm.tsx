@@ -142,7 +142,7 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
                 value={formData.whatsappNumber}
                 onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
                 required
-                placeholder="+1 (555) 123-4567"
+                placeholder="9879879879"
               />
             </div>
 
