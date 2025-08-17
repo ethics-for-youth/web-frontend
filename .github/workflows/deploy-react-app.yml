@@ -101,21 +101,60 @@ jobs:
       - name: Install dependencies
         run: npm i
 
-      - name: Create environment file
+      - name: Set environment variables
         run: |
-          # Create .env file for environment-specific build
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          
+          # Set API base URL based on environment
+          case $ENVIRONMENT in
+            "develop")
+              API_BASE_URL="https://dev.efy.org.in/api"
+              ;;
+            "qa")
+              API_BASE_URL="https://qa.efy.org.in/api"
+              ;;
+            "production")
+              API_BASE_URL="https://efy.org.in/api"
+              ;;
+            *)
+              echo "❌ Unknown environment: $ENVIRONMENT"
+              exit 1
+              ;;
+          esac
+          
+          # Create runtime environment file
           cat > .env << EOF
-          VITE_ENVIRONMENT=${{ needs.determine-environment.outputs.environment }}
+          VITE_API_BASE_URL=$API_BASE_URL
+          VITE_ENVIRONMENT=$ENVIRONMENT
           VITE_VERSION=${{ github.sha }}
           VITE_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          VITE_API_TIMEOUT=10000
+          VITE_API_LOGGING=$( [ "$ENVIRONMENT" = "develop" ] && echo "true" || echo "false" )
           EOF
           
-          echo "✅ Environment file created for ${{ needs.determine-environment.outputs.environment }}"
+          echo "✅ Environment variables set for $ENVIRONMENT"
+          echo "📋 API Base URL: $API_BASE_URL"
 
       - name: Build React application
         run: |
-          echo "🏗️ Building React application..."
-          npm run build
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          echo "🏗️ Building React application for $ENVIRONMENT..."
+          
+          # Use appropriate build script based on environment
+          case $ENVIRONMENT in
+            "develop")
+              npm run build:dev
+              ;;
+            "qa")
+              npm run build:qa
+              ;;
+            "production")
+              npm run build:prod
+              ;;
+            *)
+              npm run build
+              ;;
+          esac
           
           # Verify build output
           if [ ! -d "dist" ]; then
