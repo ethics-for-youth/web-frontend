@@ -57,7 +57,7 @@ export const getEnvironmentColor = (): string => {
     case 'development':
       return 'bg-yellow-500';
     case 'qa':
-      return 'bg-orange-500';
+      return 'bg-lime-400';
     default:
       return '';
   }

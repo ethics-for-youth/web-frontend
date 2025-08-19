@@ -27,9 +27,9 @@ const Navbar = () => {
               <img src="/icon.png" alt="EFY Logo" className="w-8 h-8 object-contain" />
               <span className="font-bold text-xl text-foreground">Ethics For Youth</span>
             </Link>
-            {/* Environment Indicator */}
+            {/* Environment Indicator - Desktop Only */}
             {isTestingEnvironment() && (
-              <div className={`ml-3 px-2 py-1 rounded text-xs font-bold text-white ${getEnvironmentColor()}`}>
+              <div className={`hidden md:block ml-3 px-2 py-1 rounded text-xs font-bold text-white ${getEnvironmentColor()}`}>
                 {getEnvironmentDisplayName()}
               </div>
             )}
@@ -54,9 +54,9 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            {/* Environment Indicator for Mobile */}
+            {/* Environment Indicator for Mobile Only */}
             {isTestingEnvironment() && (
-              <div className={`px-2 py-1 rounded text-xs font-bold text-white ${getEnvironmentColor()}`}>
+              <div className={`md:hidden px-2 py-1 rounded text-xs font-bold text-white ${getEnvironmentColor()}`}>
                 {getEnvironmentDisplayName()}
               </div>
             )}
