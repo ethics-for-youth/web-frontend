@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { isTestingEnvironment, getEnvironmentDisplayName, getEnvironmentColor } from '@/utils/environment';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +27,12 @@ const Navbar = () => {
               <img src="/icon.png" alt="EFY Logo" className="w-8 h-8 object-contain" />
               <span className="font-bold text-xl text-foreground">Ethics For Youth</span>
             </Link>
+            {/* Environment Indicator */}
+            {isTestingEnvironment() && (
+              <div className={`ml-3 px-2 py-1 rounded text-xs font-bold text-white ${getEnvironmentColor()}`}>
+                {getEnvironmentDisplayName()}
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation */}
@@ -46,7 +53,13 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Environment Indicator for Mobile */}
+            {isTestingEnvironment() && (
+              <div className={`px-2 py-1 rounded text-xs font-bold text-white ${getEnvironmentColor()}`}>
+                {getEnvironmentDisplayName()}
+              </div>
+            )}
             <Button
               variant="ghost"
               size="icon"
