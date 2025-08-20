@@ -75,8 +75,8 @@ const Contact = () => {
       icon: MessageSquare,
       title: 'WhatsApp',
       description: 'Quick response via WhatsApp',
-      value: '+1 (555) 123-4567',
-      action: 'https://wa.me/15551234567',
+      value: '+919214808891',
+      action: 'https://wa.me/919214808891',
       actionText: 'Message on WhatsApp'
     },
     {
@@ -91,8 +91,8 @@ const Contact = () => {
       icon: Mail,
       title: 'Email',
       description: 'Send us an email',
-      value: 'info@ethicsforyouth.org',
-      action: 'mailto:info@ethicsforyouth.org',
+      value: 'ethicsforyouth@gmail.com',
+      action: 'mailto:ethicsforyouth@gmail.com',
       actionText: 'Send Email'
     }
   ];
