@@ -105,6 +105,7 @@ const Home = () => {
                       <span className="block mt-1 text-muted-foreground">{event.location}</span>
                     </CardDescription>
                   </CardHeader>
+
                   <CardContent>
                     <p className="text-muted-foreground mb-4 line-clamp-3">
                       {event.description}
@@ -116,6 +117,7 @@ const Home = () => {
                       </Link>
                     </Button>
                   </CardContent>
+
                 </Card>
               ))}
             </div>
