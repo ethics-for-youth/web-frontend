@@ -25,6 +25,7 @@ const AdminEvents = () => {
     location: '',
     category: '',
     maxParticipants: '',
+    registrationFee: '',
     registrationDeadline: '',
     status: 'active'
   });
@@ -74,6 +75,7 @@ const AdminEvents = () => {
             location: formData.location,
             category: formData.category,
             maxParticipants: parseInt(formData.maxParticipants) || 0,
+            registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
             registrationDeadline: formData.registrationDeadline,
             status: formData.status,
           }
@@ -87,6 +89,7 @@ const AdminEvents = () => {
           location: formData.location,
           category: formData.category,
           maxParticipants: parseInt(formData.maxParticipants) || 0,
+          registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
           registrationDeadline: formData.registrationDeadline,
           status: formData.status,
         });
@@ -107,6 +110,7 @@ const AdminEvents = () => {
       location: '',
       category: '',
       maxParticipants: '',
+      registrationFee: '',
       registrationDeadline: '',
       status: 'active'
     });
@@ -127,6 +131,7 @@ const AdminEvents = () => {
       location: event.location || '',
       category: event.category || '',
       maxParticipants: event.maxParticipants?.toString() || '',
+      registrationFee: event.registrationFee?.toString() || '',
       registrationDeadline: formatDateForInput(event.registrationDeadline),
       status: event.status || 'active'
     };
@@ -317,6 +322,19 @@ const AdminEvents = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label htmlFor="registrationFee">Registration Fee (₹)</Label>
+                    <Input
+                      id="registrationFee"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g., 250 (leave blank for free)"
+                      value={formData.registrationFee}
+                      onChange={(e) => setFormData({...formData, registrationFee: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="status">Status *</Label>
                     <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
                       <SelectTrigger>
@@ -331,6 +349,7 @@ const AdminEvents = () => {
                     </Select>
                   </div>
                 </div>
+
 
                 <div className="space-y-2">
                   <Label htmlFor="description">Description *</Label>
@@ -420,8 +439,9 @@ const AdminEvents = () => {
                       <span><strong>Category:</strong> {event.category}</span>
                       <span><strong>Max Participants:</strong> {event.maxParticipants}</span>
                     </div>
-                    <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div className="mt-1 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                       <span><strong>Location:</strong> {event.location}</span>
+                      <span><strong>Registration Fee:</strong> {event.registrationFee && event.registrationFee > 0 ? `₹${event.registrationFee.toLocaleString('en-IN')}` : 'Free'}</span>
                       <span><strong>Status:</strong> <Badge variant="outline">{event.status}</Badge></span>
                     </div>
                   </CardDescription>

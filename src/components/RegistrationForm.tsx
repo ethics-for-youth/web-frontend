@@ -14,7 +14,7 @@ interface RegistrationFormProps {
   type: 'Event' | 'Course' | 'Competition' | 'Volunteer';
   relatedId?: string;
   title: string;
-  showPaymentConfirmation?: boolean;
+  showPaymentConfirmation?: boolean; // Kept for backwards compatibility but not used
 }
 
 const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = false }: RegistrationFormProps) => {
@@ -54,6 +54,7 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
           phone: formData.whatsappNumber,
           skills: ['General Volunteer'], // Default skill - you might want to add a skills field to the form
           availability: formData.address || 'Flexible', // Using address field as availability for now
+          status: 'pending', // Default status for new applications
           // Note: These fields are optional according to the API spec
           experience: 'Filled via registration form',
           motivation: 'Applied through website',
@@ -199,21 +200,6 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
             />
           </div>
 
-          {showPaymentConfirmation && (
-            <div className="space-y-2">
-              <Label htmlFor="payment">Payment Confirmation *</Label>
-              <Input
-                id="payment"
-                type="file"
-                accept="image/*,.pdf"
-                required
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground"
-              />
-              <p className="text-sm text-muted-foreground">
-                Upload screenshot or receipt of payment confirmation
-              </p>
-            </div>
-          )}
 
           <div className="flex items-center space-x-2">
             <Checkbox

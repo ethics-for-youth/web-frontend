@@ -32,6 +32,7 @@ const AdminCourses = () => {
     category: '',
     level: 'beginner' as 'beginner' | 'intermediate' | 'advanced',
     maxParticipants: '',
+    registrationFee: '',
     startDate: '',
     endDate: '',
     schedule: '',
@@ -77,6 +78,7 @@ const AdminCourses = () => {
           category: formData.category || undefined,
           level: formData.level,
           maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
+          registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
@@ -94,6 +96,7 @@ const AdminCourses = () => {
           category: formData.category || undefined,
           level: formData.level,
           maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
+          registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
@@ -119,6 +122,7 @@ const AdminCourses = () => {
       category: '',
       level: 'beginner',
       maxParticipants: '',
+      registrationFee: '',
       startDate: '',
       endDate: '',
       schedule: '',
@@ -138,6 +142,7 @@ const AdminCourses = () => {
       category: course.category || '',
       level: course.level || 'beginner',
       maxParticipants: course.maxParticipants?.toString() || '',
+      registrationFee: course.registrationFee?.toString() || '',
       startDate: formatDateForInput(course.startDate) || '',
       endDate: formatDateForInput(course.endDate) || '',
       schedule: course.schedule || '',
@@ -298,6 +303,21 @@ const AdminCourses = () => {
                     placeholder="e.g., 30"
                     value={formData.maxParticipants}
                     onChange={(e) => setFormData({...formData, maxParticipants: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="registrationFee">Registration Fee (₹)</Label>
+                  <Input
+                    id="registrationFee"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 500 (leave blank for free)"
+                    value={formData.registrationFee}
+                    onChange={(e) => setFormData({...formData, registrationFee: e.target.value})}
                   />
                 </div>
               </div>
@@ -468,6 +488,7 @@ const AdminCourses = () => {
                       {course.category && (
                         <span><strong>Category:</strong> {course.category}</span>
                       )}
+                      <span><strong>Registration Fee:</strong> {course.registrationFee && course.registrationFee > 0 ? `₹${course.registrationFee.toLocaleString('en-IN')}` : 'Free'}</span>
                     </div>
                   </CardDescription>
                 </div>

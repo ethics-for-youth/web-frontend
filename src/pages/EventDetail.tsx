@@ -3,12 +3,19 @@ import { Calendar, MapPin, User, ArrowLeft, Clock, Loader2, AlertCircle } from '
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import RegistrationForm from '@/components/RegistrationForm';
+import EventRegistrationPayment from '@/components/EventRegistrationPayment';
 import { useEvent } from '@/hooks/useEvents';
 import { formatDateForDisplay, formatTimeForDisplay, isDateInFuture } from '@/utils/dateUtils';
+import { RazorpayResponse } from '@/types';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: event, isLoading, error } = useEvent(id || '');
+
+  const handleEventRegistrationSuccess = (response: RazorpayResponse) => {
+    console.log('Event registration successful:', response);
+    // You can add additional success handling here
+  };
 
   if (isLoading) {
     return (
@@ -113,8 +120,8 @@ const EventDetail = () => {
                   </div>
                 </div>
 
-                {/* Event Status */}
-                <div className="mb-6">
+                {/* Event Status and Fee */}
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                     isUpcoming 
                       ? 'bg-primary/10 text-primary' 
@@ -122,6 +129,16 @@ const EventDetail = () => {
                   }`}>
                     {isUpcoming ? 'Upcoming Event' : 'Past Event'}
                   </span>
+                  
+                  {/* Registration Fee */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-foreground">Registration Fee:</span>
+                    <span className="text-lg font-bold text-primary">
+                      {event.registrationFee && event.registrationFee > 0 
+                        ? `₹${event.registrationFee.toLocaleString('en-IN')}` 
+                        : 'Free'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Event Description */}
@@ -152,12 +169,26 @@ const EventDetail = () => {
           {/* Registration Form */}
           <div className="lg:col-span-1">
             {isUpcoming ? (
-              <RegistrationForm
-                type="Event"
-                relatedId={event.id}
-                title={event.title}
-                showPaymentConfirmation={false}
-              />
+              <>
+                {/* Show payment component if event has registration fee */}
+                {event.registrationFee && event.registrationFee > 0 ? (
+                  <EventRegistrationPayment
+                    event={{
+                      ...event,
+                      registrationFee: event.registrationFee
+                    }}
+                    onRegistrationSuccess={handleEventRegistrationSuccess}
+                  />
+                ) : (
+                  /* Fallback to registration form for free events */
+                  <RegistrationForm
+                    type="Event"
+                    relatedId={event.id}
+                    title={event.title}
+                    showPaymentConfirmation={false}
+                  />
+                )}
+              </>
             ) : (
               <Card className="shadow-card">
                 <CardContent className="p-6 text-center">
