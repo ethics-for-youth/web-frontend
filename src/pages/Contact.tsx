@@ -1,63 +1,82 @@
 import { useState } from 'react';
-import { Mail, MessageSquare, Phone, Send, MapPin, Clock } from 'lucide-react';
+import { Mail, MessageSquare, Phone, Send, MapPin, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
+import { useCreateMessage } from '@/hooks/useMessages';
+import { CreateMessageRequest } from '@/services';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    category: '',
+    phone: '',
+    isPublic: false
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Use the real messages API
+  const createMessage = useCreateMessage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      return;
+    }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Contact form submitted:', formData);
-      
-      toast({
-        title: "Message Sent Successfully!",
-        description: "Thank you for contacting us. We'll get back to you within 24 hours.",
-      });
+      const messageData: CreateMessageRequest = {
+        senderName: formData.name,
+        senderEmail: formData.email,
+        senderPhone: formData.phone || undefined,
+        content: formData.message,
+        messageType: (formData.category as any) || 'general',
+        isPublic: formData.isPublic,
+        priority: 'normal',
+      };
 
-      // Reset form
+      await createMessage.mutateAsync(messageData);
+
+      // Reset form on success
       setFormData({
         name: '',
         email: '',
-        message: ''
+        message: '',
+        category: '',
+        phone: '',
+        isPublic: false
       });
     } catch (error) {
-      toast({
-        title: "Message Failed to Send",
-        description: "There was an error sending your message. Please try again or contact us directly.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+      // Error handling is done in the hook
+      console.error('Failed to send message:', error);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  const categoryOptions = [
+    { value: 'feedback', label: 'Feedback' },
+    { value: 'complaint', label: 'Complaint' },
+    { value: 'thank-you', label: 'Testimonial' },
+    { value: 'suggestion', label: 'Suggestion' },
+    { value: 'general', label: 'General Inquiry' }
+  ];
 
   const contactMethods = [
     {
       icon: MessageSquare,
       title: 'WhatsApp',
       description: 'Quick response via WhatsApp',
-      value: '+1 (555) 123-4567',
-      action: 'https://wa.me/15551234567',
+      value: '+919214808891',
+      action: 'https://wa.me/919214808891',
       actionText: 'Message on WhatsApp'
     },
     {
@@ -72,8 +91,8 @@ const Contact = () => {
       icon: Mail,
       title: 'Email',
       description: 'Send us an email',
-      value: 'info@ethicsforyouth.org',
-      action: 'mailto:info@ethicsforyouth.org',
+      value: 'ethicsforyouth@gmail.com',
+      action: 'mailto:ethicsforyouth@gmail.com',
       actionText: 'Send Email'
     }
   ];
@@ -192,6 +211,35 @@ const Contact = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categoryOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone (Optional)</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="Your phone number"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="message">Message *</Label>
                     <Textarea
@@ -204,13 +252,27 @@ const Contact = () => {
                     />
                   </div>
 
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="isPublic"
+                      checked={formData.isPublic}
+                      onCheckedChange={(checked) => handleInputChange('isPublic', checked as boolean)}
+                    />
+                    <Label htmlFor="isPublic" className="text-sm">
+                      I agree that this message can be published as a testimonial (optional)
+                    </Label>
+                  </div>
+
                   <Button 
                     type="submit" 
                     className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
-                    disabled={isSubmitting}
+                    disabled={createMessage.isPending}
                   >
-                    {isSubmitting ? (
-                      'Sending...'
+                    {createMessage.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Sending...
+                      </>
                     ) : (
                       <>
                         <Send className="w-4 h-4 mr-2" />

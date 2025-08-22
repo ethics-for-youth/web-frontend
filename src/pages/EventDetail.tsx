@@ -1,20 +1,39 @@
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, MapPin, User, ArrowLeft, Clock } from 'lucide-react';
+import { Calendar, MapPin, User, ArrowLeft, Clock, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import RegistrationForm from '@/components/RegistrationForm';
-import { mockEvents } from '@/data/mockData';
+import { useEvent } from '@/hooks/useEvents';
+import { formatDateForDisplay, formatTimeForDisplay, isDateInFuture } from '@/utils/dateUtils';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const event = mockEvents.find(e => e.id === id);
+  const { data: event, isLoading, error } = useEvent(id || '');
 
-  if (!event) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8">
+          <div className="flex items-center space-x-2">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading event details...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !event) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Event Not Found</h1>
-          <p className="text-muted-foreground mb-6">The event you're looking for doesn't exist.</p>
+          <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            {error ? 'Failed to Load Event' : 'Event Not Found'}
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            {error ? 'There was an error loading the event details.' : 'The event you\'re looking for doesn\'t exist.'}
+          </p>
           <Button asChild>
             <Link to="/events">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -26,8 +45,8 @@ const EventDetail = () => {
     );
   }
 
-  const eventDate = new Date(event.date);
-  const isUpcoming = eventDate > new Date();
+  // Use centralized date utilities
+  const isUpcoming = isDateInFuture(event.date);
 
   return (
     <div className="min-h-screen py-12">
@@ -48,7 +67,7 @@ const EventDetail = () => {
             <Card className="shadow-card bg-gradient-card">
               <CardContent className="p-8">
                 <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                  {event.title}
+                  {event.title || 'Event Title Not Available'}
                 </h1>
 
                 {/* Event Meta Information */}
@@ -59,12 +78,7 @@ const EventDetail = () => {
                       <div>
                         <p className="font-medium text-foreground">Date</p>
                         <p className="text-muted-foreground">
-                          {eventDate.toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                          })}
+                          {formatDateForDisplay(event.date)}
                         </p>
                       </div>
                     </div>
@@ -73,7 +87,9 @@ const EventDetail = () => {
                       <Clock className="w-5 h-5 text-primary" />
                       <div>
                         <p className="font-medium text-foreground">Time</p>
-                        <p className="text-muted-foreground">{event.time}</p>
+                        <p className="text-muted-foreground">
+                          {formatTimeForDisplay(event.date)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -83,15 +99,15 @@ const EventDetail = () => {
                       <MapPin className="w-5 h-5 text-primary" />
                       <div>
                         <p className="font-medium text-foreground">Location</p>
-                        <p className="text-muted-foreground">{event.location}</p>
+                        <p className="text-muted-foreground">{event.location || 'Location not available'}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center space-x-3">
                       <User className="w-5 h-5 text-primary" />
                       <div>
-                        <p className="font-medium text-foreground">Speaker</p>
-                        <p className="text-muted-foreground">{event.speaker}</p>
+                        <p className="font-medium text-foreground">Category</p>
+                        <p className="text-muted-foreground">{event.category || 'Category not available'}</p>
                       </div>
                     </div>
                   </div>
@@ -113,7 +129,7 @@ const EventDetail = () => {
                   <h2 className="text-xl font-semibold text-foreground mb-4">About This Event</h2>
                   <div className="prose prose-slate max-w-none">
                     <p className="text-muted-foreground leading-relaxed">
-                      {event.description}
+                      {event.description || 'No description available for this event.'}
                     </p>
                   </div>
                 </div>

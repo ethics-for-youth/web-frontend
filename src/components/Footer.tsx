@@ -56,8 +56,8 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Connect With Us</h3>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li>Email: info@ethicsforyouth.org</li>
-              <li>WhatsApp: +1 (555) 123-4567</li>
+              <li>Email: ethicsforyouth@gmail.com</li>
+              <li>WhatsApp: +919214808891</li>
               <li>Telegram: @EthicsForYouth</li>
             </ul>
           </div>

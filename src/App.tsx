@@ -19,9 +19,22 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
-import NotFound from "./pages/NotFound";
+import AdminMessages from "./pages/admin/AdminMessages";
 
-const queryClient = new QueryClient();
+import NotFound from "./pages/NotFound";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -54,12 +67,29 @@ const App = () => (
             } />
             <Route path="/admin/courses" element={
               <ProtectedRoute>
-                <AdminLayout><AdminCourses /></AdminLayout>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminCourses />
+                  </ErrorBoundary>
+                </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/registrations" element={
               <ProtectedRoute>
-                <AdminLayout><AdminRegistrations /></AdminLayout>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminRegistrations />
+                  </ErrorBoundary>
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/messages" element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminMessages />
+                  </ErrorBoundary>
+                </AdminLayout>
               </ProtectedRoute>
             } />
             

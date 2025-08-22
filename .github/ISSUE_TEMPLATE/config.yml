@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: EFY Frontend Documentation
+    url: https://github.com/your-org/efy-frontend/wiki
+    about: Please check our documentation before creating an issue.
+  - name: EFY Frontend Discussions
+    url: https://github.com/your-org/efy-frontend/discussions
+    about: Ask questions and share ideas in our community discussions.
+  - name: EFY Frontend Security Policy
+    url: https://github.com/your-org/efy-frontend/security/policy
+    about: Report security vulnerabilities through our security policy.
