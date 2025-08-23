@@ -1,13 +1,17 @@
 import { Link } from 'react-router-dom';
-import { Calendar, BookOpen, Users, ArrowRight } from 'lucide-react';
+import { Calendar, BookOpen, Users, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockEvents, mockCourses } from '@/data/mockData';
+import { useEvents } from '@/hooks/useEvents';
+import { useCourses } from '@/hooks/useCourses';
 import heroImage from '@/assets/hero-bg.jpg';
+import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const Home = () => {
-  const upcomingEvents = mockEvents.slice(0, 3);
-  const featuredCourses = mockCourses.filter(course => course.isActive).slice(0, 3);
+  const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();
+  const { data: allCourses = [], isLoading: coursesLoading } = useCourses();
+  const upcomingEvents = Array.isArray(allEvents) ? allEvents.slice(0, 3) : [];
+  const featuredCourses = Array.isArray(allCourses) ? allCourses.filter(course => course.status === 'active').slice(0, 3) : [];
 
   return (
     <div className="min-h-screen">
@@ -61,19 +65,46 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {upcomingEvents.map((event) => (
-              <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card">
-                <CardHeader>
-                  <CardTitle className="text-primary">{event.title}</CardTitle>
-                  <CardDescription>
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(event.date).toLocaleDateString()} at {event.time}</span>
-                    </div>
-                    <div className="mt-1 text-muted-foreground">{event.location}</div>
-                  </CardDescription>
-                </CardHeader>
+          {eventsLoading ? (
+            <div className="flex justify-center mb-8">
+              <Card className="p-8">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <p className="text-muted-foreground">Loading upcoming events...</p>
+                </div>
+              </Card>
+            </div>
+          ) : eventsError ? (
+            <div className="flex justify-center mb-8">
+              <Card className="p-8">
+                <div className="text-center">
+                  <p className="text-muted-foreground">Unable to load events at the moment.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Please check back later.</p>
+                </div>
+              </Card>
+            </div>
+          ) : upcomingEvents.length === 0 ? (
+            <div className="flex justify-center mb-8">
+              <Card className="p-8">
+                <div className="text-center">
+                  <p className="text-muted-foreground">No upcoming events available.</p>
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {upcomingEvents.map((event) => (
+                <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card">
+                  <CardHeader>
+                    <CardTitle className="text-primary">{event.title}</CardTitle>
+                    <CardDescription>
+                      <span className="flex items-center space-x-2 text-sm">
+                        <Calendar className="w-4 h-4" />
+                        <span>{formatDateForDisplay(event.date)}</span>
+                      </span>
+                      <span className="block mt-1 text-muted-foreground">{event.location}</span>
+                    </CardDescription>
+                  </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4 line-clamp-3">
                     {event.description}
@@ -85,9 +116,10 @@ const Home = () => {
                     </Link>
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="text-center">
             <Button asChild variant="outline" size="lg">
@@ -119,12 +151,12 @@ const Home = () => {
                 <CardHeader>
                   <CardTitle className="text-primary">{course.title}</CardTitle>
                   <CardDescription>
-                    <div className="flex items-center justify-between">
+                    <span className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">{course.duration}</span>
                       <span className="text-sm font-medium text-accent-foreground bg-accent px-2 py-1 rounded">
-                        {course.mode}
+                        {course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : 'All Levels'}
                       </span>
-                    </div>
+                    </span>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -6,11 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-import { Registration } from '@/types';
+import { useCreateRegistration, useVolunteerApplication } from '@/hooks/useRegistrations';
+import { NewCreateRegistrationRequest } from '@/services';
+import { VolunteerJoinRequest } from '@/types/api';
 
 interface RegistrationFormProps {
-  type: 'Event' | 'Course' | 'Volunteer';
+  type: 'Event' | 'Course' | 'Competition' | 'Volunteer';
   relatedId?: string;
   title: string;
   showPaymentConfirmation?: boolean;
@@ -27,34 +28,55 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
     address: '',
     joinCommunity: false,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Use appropriate mutation based on type
+  const createRegistration = useCreateRegistration();
+  const submitVolunteerApplication = useVolunteerApplication();
+
+  const isSubmitting = type === 'Volunteer' 
+    ? submitVolunteerApplication.isPending 
+    : createRegistration.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.whatsappNumber || !formData.gender || !formData.age) {
+      return;
+    }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const registration: Partial<Registration> = {
-        ...formData,
-        age: parseInt(formData.age),
-        gender: formData.gender as 'Male' | 'Female',
-        type,
-        ...(type === 'Event' && { relatedEventId: relatedId }),
-        ...(type === 'Course' && { relatedCourseId: relatedId }),
-        createdAt: new Date().toISOString(),
-      };
+      if (type === 'Volunteer') {
+        // Submit volunteer application
+        const volunteerData: VolunteerJoinRequest = {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.whatsappNumber,
+          skills: ['General Volunteer'], // Default skill - you might want to add a skills field to the form
+          availability: formData.address || 'Flexible', // Using address field as availability for now
+          // Note: These fields are optional according to the API spec
+          experience: 'Filled via registration form',
+          motivation: 'Applied through website',
+          preferredRoles: ['General Support'],
+        };
 
-      console.log('Registration submitted:', registration);
-      
-      toast({
-        title: "Registration Successful!",
-        description: `Thank you for registering for ${title}. We'll contact you soon with further details.`,
-      });
+        await submitVolunteerApplication.mutateAsync(volunteerData);
+      } else {
+        // Submit event/course registration using new API structure
+        const registrationData: NewCreateRegistrationRequest = {
+          userId: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generate a user ID
+          itemId: relatedId || '',
+          itemType: type.toLowerCase() as 'event' | 'course' | 'competition',
+          userEmail: formData.email,
+          userName: formData.name,
+          userPhone: formData.whatsappNumber,
+          notes: `Registration via ${type} form. Age: ${formData.age}, Gender: ${formData.gender}, Education: ${formData.education}, Address: ${formData.address}${formData.joinCommunity ? ', Wants to join community' : ''}`,
+        };
 
-      // Reset form
+        await createRegistration.mutateAsync(registrationData);
+      }
+
+      // Reset form on success
       setFormData({
         name: '',
         email: '',
@@ -66,13 +88,8 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
         joinCommunity: false,
       });
     } catch (error) {
-      toast({
-        title: "Registration Failed",
-        description: "There was an error submitting your registration. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+      // Error handling is done in the mutation hooks
+      console.error('Submission error:', error);
     }
   };
 
@@ -125,7 +142,7 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
                 value={formData.whatsappNumber}
                 onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
                 required
-                placeholder="+1 (555) 123-4567"
+                placeholder="9879879879"
               />
             </div>
 
