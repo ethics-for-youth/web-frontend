@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Download, Search, Filter, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import { Event } from '@/types';
 import { formatDateForInput } from '@/utils/dateUtils';
 
 const AdminEvents = () => {
+  const navigate = useNavigate();
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -41,30 +43,23 @@ const AdminEvents = () => {
       return;
     }
 
-    let filtered = [...events]; // Create a new array to avoid mutations
-
+    let filtered = [...events];
     if (searchTerm) {
       filtered = filtered.filter(event =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (dateFilter) {
       filtered = filtered.filter(event => event.date >= dateFilter);
     }
-
     setFilteredEvents(filtered);
   }, [events, searchTerm, dateFilter]);
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       if (editingEvent) {
-        // Update existing event
         await updateEvent.mutateAsync({
           id: editingEvent.id,
           eventData: {
@@ -79,7 +74,6 @@ const AdminEvents = () => {
           }
         });
       } else {
-        // Create new event
         await createEvent.mutateAsync({
           title: formData.title,
           description: formData.description,
@@ -91,10 +85,8 @@ const AdminEvents = () => {
           status: formData.status,
         });
       }
-
       resetForm();
     } catch (error) {
-      // Error handling is done in the mutation hooks
       console.error('Event submission error:', error);
     }
   };
@@ -113,10 +105,6 @@ const AdminEvents = () => {
     setEditingEvent(null);
     setIsDialogOpen(false);
   };
-
-
-
-
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
@@ -144,6 +132,15 @@ const AdminEvents = () => {
     }
   };
 
+  const handleEventClick = (event: Event) => {
+    navigate('/admin/registrations', {
+      state: {
+        itemType: 'event',
+        title: event.title,
+      },
+    });
+  };
+
   const exportToCSV = () => {
     const csvContent = [
       ['Title', 'Date', 'Location', 'Category', 'Max Participants', 'Status', 'Description'],
@@ -154,7 +151,7 @@ const AdminEvents = () => {
         event.category,
         event.maxParticipants.toString(),
         event.status,
-        event.description.replace(/,/g, ';') // Replace commas to avoid CSV issues
+        event.description.replace(/,/g, ';')
       ])
     ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
 
@@ -216,13 +213,11 @@ const AdminEvents = () => {
           <h1 className="text-3xl font-bold text-foreground">Event Management</h1>
           <p className="text-muted-foreground">Manage all community events</p>
         </div>
-        
         <div className="flex space-x-2">
           <Button onClick={exportToCSV} variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
-          
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-primary hover:opacity-90">
@@ -237,7 +232,6 @@ const AdminEvents = () => {
                   {editingEvent ? 'Update the event details below.' : 'Fill in the details for the new event.'}
                 </DialogDescription>
               </DialogHeader>
-              
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -245,14 +239,13 @@ const AdminEvents = () => {
                     <Input
                       id="title"
                       value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       required
                     />
                   </div>
-                  
                   <div className="space-y-2">
                     <Label htmlFor="category">Category *</Label>
-                    <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                    <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -266,7 +259,6 @@ const AdminEvents = () => {
                     </Select>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="date">Date & Time *</Label>
@@ -274,34 +266,31 @@ const AdminEvents = () => {
                       id="date"
                       type="datetime-local"
                       value={formData.date}
-                      onChange={(e) => setFormData({...formData, date: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       required
                     />
                   </div>
-                  
                   <div className="space-y-2">
                     <Label htmlFor="registrationDeadline">Registration Deadline *</Label>
                     <Input
                       id="registrationDeadline"
                       type="datetime-local"
                       value={formData.registrationDeadline}
-                      onChange={(e) => setFormData({...formData, registrationDeadline: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, registrationDeadline: e.target.value })}
                       required
                     />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="location">Location *</Label>
                     <Input
                       id="location"
                       value={formData.location}
-                      onChange={(e) => setFormData({...formData, location: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       required
                     />
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="maxParticipants">Max Participants *</Label>
                     <Input
@@ -309,16 +298,15 @@ const AdminEvents = () => {
                       type="number"
                       min="1"
                       value={formData.maxParticipants}
-                      onChange={(e) => setFormData({...formData, maxParticipants: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
                       required
                     />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="status">Status *</Label>
-                    <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                    <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
@@ -331,18 +319,16 @@ const AdminEvents = () => {
                     </Select>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="description">Description *</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
                     required
                   />
                 </div>
-
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button type="button" variant="outline" onClick={resetForm} disabled={isSubmitting}>
                     Cancel
@@ -404,7 +390,11 @@ const AdminEvents = () => {
       {/* Events List */}
       <div className="grid grid-cols-1 gap-4">
         {filteredEvents.map((event) => (
-          <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow">
+          <Card
+            key={event.id}
+            className="shadow-card hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => handleEventClick(event)}
+          >
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -430,14 +420,20 @@ const AdminEvents = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleEdit(event)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(event);
+                    }}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleDelete(event.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(event.id);
+                    }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

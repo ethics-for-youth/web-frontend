@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom'; // Add useLocation
 import { Eye, Download, Search, Filter, CheckCircle, Circle, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,41 +12,56 @@ import { Registration } from '@/services';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const AdminRegistrations = () => {
-  const { data: registrations = [], isLoading, error } = useRegistrations();
-  const updateRegistration = useUpdateRegistration();
-  
-  const [filteredRegistrations, setFilteredRegistrations] = useState<Registration[]>([]);
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'event' | 'course' | 'competition'>('all');
+  const [titleFilter, setTitleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'registered' | 'completed' | 'cancelled'>('all');
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
 
   useEffect(() => {
-    if (!registrations || !Array.isArray(registrations)) {
-      setFilteredRegistrations([]);
-      return;
+    if (location.state) {
+      const { itemType, title } = location.state;
+      if (itemType && ['event', 'course', 'competition'].includes(itemType)) {
+        setTypeFilter(itemType);
+      }
+      if (title) {
+        setTitleFilter(title);
+      }
     }
+  }, [location.state]);
 
-    let filtered = [...registrations]; // Create a new array to avoid mutations
+  // Backend filters
+  const filters: { itemType?: string; title?: string; status?: string } = {};
+  if (typeFilter !== 'all') filters.itemType = typeFilter;
+  if (titleFilter !== 'all') filters.title = titleFilter;
 
-    if (searchTerm) {
-      filtered = filtered.filter(reg =>
-        reg.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (reg.notes && reg.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+  const { data, isLoading, error, refetch } = useRegistrations(filters);
+  const registrations = data?.registrations || [];
+  const availableTitles = data?.availableTitles || [];
+
+  const updateRegistration = useUpdateRegistration();
+
+  // Refetch whenever backend filters change
+  useEffect(() => {
+    refetch();
+  }, [typeFilter, titleFilter, statusFilter, refetch]);
+
+  // Filter registrations on frontend using searchTerm and status
+  const filteredRegistrations = useMemo(() => {
+    return registrations
+      .filter(reg =>
+        searchTerm
+          ? reg.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (reg.notes && reg.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+          : true
+      )
+      .filter(reg =>
+        statusFilter === 'all' ? true : reg.status === statusFilter
       );
-    }
+  }, [registrations, searchTerm, statusFilter]);
 
-    if (typeFilter && typeFilter !== 'all') {
-      filtered = filtered.filter(reg => reg.itemType === typeFilter);
-    }
-
-    if (statusFilter && statusFilter !== 'all') {
-      filtered = filtered.filter(reg => reg.status === statusFilter);
-    }
-
-    setFilteredRegistrations(filtered);
-  }, [registrations, searchTerm, typeFilter, statusFilter]);
 
   const getTypeColor = (itemType: string) => {
     switch (itemType) {
@@ -68,12 +84,8 @@ const AdminRegistrations = () => {
   const toggleRegistrationStatus = async (registrationId: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'registered' ? 'completed' : 'registered';
-      await updateRegistration.mutateAsync({ 
-        id: registrationId, 
-        updateData: { status: newStatus } 
-      });
+      await updateRegistration.mutateAsync({ id: registrationId, updateData: { status: newStatus } });
     } catch (error) {
-      // Error handling is done in the hook
       console.error('Failed to update registration status:', error);
     }
   };
@@ -138,10 +150,8 @@ const AdminRegistrations = () => {
           <h1 className="text-3xl font-bold text-foreground">Registration Management</h1>
           <p className="text-muted-foreground">Manage all user registrations</p>
         </div>
-        
         <Button onClick={exportToCSV} variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
+          <Download className="h-4 w-4 mr-2" /> Export CSV
         </Button>
       </div>
 
@@ -155,21 +165,29 @@ const AdminRegistrations = () => {
                 <Input
                   placeholder="Search by name or email..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
-            
+
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Filter by type" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="event">Events</SelectItem>
                 <SelectItem value="course">Courses</SelectItem>
                 <SelectItem value="competition">Competitions</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={titleFilter} onValueChange={setTitleFilter} disabled={typeFilter === 'all'}>
+              <SelectTrigger><SelectValue placeholder="Filter by title" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Titles</SelectItem>
+                {availableTitles.map(title => (
+                  <SelectItem key={title.id} value={title.title}>{title.title}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -185,18 +203,10 @@ const AdminRegistrations = () => {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchTerm('');
-                setTypeFilter('all');
-                setStatusFilter('all');
-              }}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Clear Filters
+            <Button variant="outline" onClick={() => { setSearchTerm(''); setTypeFilter('all'); setTitleFilter('all'); setStatusFilter('all'); }}>
+              <Filter className="h-4 w-4 mr-2" /> Clear Filters
             </Button>
           </div>
         </CardContent>
@@ -204,7 +214,7 @@ const AdminRegistrations = () => {
 
       {/* Registrations List */}
       <div className="grid grid-cols-1 gap-4">
-        {filteredRegistrations.map((registration) => (
+        {filteredRegistrations.map(registration => (
           <Card key={registration.id} className="shadow-card hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
@@ -221,12 +231,11 @@ const AdminRegistrations = () => {
                   <CardDescription>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                       <span><strong>Email:</strong> {registration.userEmail}</span>
-                      {registration.userPhone && (
-                        <span><strong>Phone:</strong> {registration.userPhone}</span>
-                      )}
+                      {registration.userPhone && <span><strong>Phone:</strong> {registration.userPhone}</span>}
                     </div>
                     <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                       <span><strong>Item ID:</strong> {registration.itemId}</span>
+                      <span><strong>Item Title:</strong> {registration.itemTitle}</span>
                       <span><strong>Submitted:</strong> {formatDateForDisplay(registration.registeredAt)}</span>
                     </div>
                     {registration.notes && (
@@ -236,39 +245,24 @@ const AdminRegistrations = () => {
                     )}
                   </CardDescription>
                 </div>
+
                 <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => toggleRegistrationStatus(registration.id, registration.status)}
-                    title={registration.status === 'registered' ? 'Mark as completed' : 'Mark as registered'}
-                    disabled={updateRegistration.isPending}
-                  >
-                    {registration.status === 'completed' ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <Circle className="h-4 w-4 text-gray-400" />
-                    )}
+                  <Button variant="outline" size="icon" onClick={() => toggleRegistrationStatus(registration.id, registration.status)}>
+                    {registration.status === 'completed' ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Circle className="h-4 w-4 text-gray-400" />}
                   </Button>
-                  
+
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setSelectedRegistration(registration)}
-                      >
+                      <Button variant="outline" size="icon" onClick={() => setSelectedRegistration(registration)}>
                         <Eye className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
                         <DialogTitle>Registration Details</DialogTitle>
-                        <DialogDescription>
-                          Complete information for {registration.userName}
-                        </DialogDescription>
+                        <DialogDescription>Complete information for {registration.userName}</DialogDescription>
                       </DialogHeader>
-                      
+
                       {selectedRegistration && (
                         <div className="space-y-4">
                           <div className="grid grid-cols-2 gap-4">
@@ -277,25 +271,24 @@ const AdminRegistrations = () => {
                               <div className="space-y-2 text-sm">
                                 <p><strong>Name:</strong> {selectedRegistration.userName}</p>
                                 <p><strong>Email:</strong> {selectedRegistration.userEmail}</p>
-                                {selectedRegistration.userPhone && (
-                                  <p><strong>Phone:</strong> {selectedRegistration.userPhone}</p>
-                                )}
+                                {selectedRegistration.userPhone && <p><strong>Phone:</strong> {selectedRegistration.userPhone}</p>}
                                 <p><strong>User ID:</strong> {selectedRegistration.userId}</p>
                               </div>
                             </div>
-                            
+
                             <div>
                               <h4 className="font-semibold text-foreground">Registration Details</h4>
                               <div className="space-y-2 text-sm">
                                 <p><strong>Type:</strong> {selectedRegistration.itemType.charAt(0).toUpperCase() + selectedRegistration.itemType.slice(1)}</p>
                                 <p><strong>Item ID:</strong> {selectedRegistration.itemId}</p>
+                                <p><strong>Item Title:</strong> {selectedRegistration.itemTitle}</p>
                                 <p><strong>Status:</strong> {selectedRegistration.status.charAt(0).toUpperCase() + selectedRegistration.status.slice(1)}</p>
                                 <p><strong>Registered:</strong> {formatDateForDisplay(selectedRegistration.registeredAt)}</p>
                                 <p><strong>Last Updated:</strong> {formatDateForDisplay(selectedRegistration.updatedAt)}</p>
                               </div>
                             </div>
                           </div>
-                          
+
                           {selectedRegistration.notes && (
                             <div>
                               <h4 className="font-semibold text-foreground">Notes</h4>
