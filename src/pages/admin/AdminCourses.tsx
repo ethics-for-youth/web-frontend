@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Filter, ToggleLeft, ToggleRight, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, ToggleLeft, ToggleRight, Loader2, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,7 @@ const AdminCourses = () => {
   const createCourse = useCreateCourse();
   const updateCourse = useUpdateCourse();
   const deleteCourse = useDeleteCourse();
-  
+
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
@@ -65,7 +65,7 @@ const AdminCourses = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingCourse) {
         // Update existing course
@@ -82,7 +82,7 @@ const AdminCourses = () => {
           schedule: formData.schedule || undefined,
           materials: formData.materials || undefined,
         };
-        
+
         await updateCourse.mutateAsync({ id: editingCourse.id, courseData: updateData });
       } else {
         // Create new course
@@ -99,7 +99,7 @@ const AdminCourses = () => {
           schedule: formData.schedule || undefined,
           materials: formData.materials || undefined,
         };
-        
+
         await createCourse.mutateAsync(courseData);
       }
 
@@ -163,9 +163,9 @@ const AdminCourses = () => {
 
     try {
       const newStatus = course.status === 'active' ? 'inactive' : 'active';
-      await updateCourse.mutateAsync({ 
-        id: courseId, 
-        courseData: { status: newStatus } 
+      await updateCourse.mutateAsync({
+        id: courseId,
+        courseData: { status: newStatus }
       });
     } catch (error) {
       // Error handling is done in the hook
@@ -210,7 +210,7 @@ const AdminCourses = () => {
           <h1 className="text-3xl font-bold text-foreground">Course Management</h1>
           <p className="text-muted-foreground">Manage all educational courses</p>
         </div>
-        
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary hover:opacity-90">
@@ -218,150 +218,170 @@ const AdminCourses = () => {
               Add Course
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingCourse ? 'Edit Course' : 'Create New Course'}</DialogTitle>
-              <DialogDescription>
-                {editingCourse ? 'Update the course details below.' : 'Fill in the details for the new course.'}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0 [&>button]:hidden">
+            {/* Fixed Header */}
+            <div className="relative bg-background p-6 pb-4 flex-shrink-0">
+              <DialogHeader className="pb-2">
+                <DialogTitle>{editingCourse ? 'Edit Course' : 'Create New Course'}</DialogTitle>
+                <DialogDescription>
+                  {editingCourse ? 'Update the course details below.' : 'Fill in the details for the new course.'}
+                </DialogDescription>
+              </DialogHeader>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
+                onClick={resetForm}
+              >
+
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-6 pb-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Course Title *</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="instructor">Instructor *</Label>
+                    <Input
+                      id="instructor"
+                      placeholder="e.g., Dr. Ahmed Al-Hafiz"
+                      value={formData.instructor}
+                      onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Duration *</Label>
+                    <Input
+                      id="duration"
+                      placeholder="e.g., 8 weeks"
+                      value={formData.duration}
+                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="level">Level</Label>
+                    <Select value={formData.level} onValueChange={(value) => setFormData({ ...formData, level: value as 'beginner' | 'intermediate' | 'advanced' })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {levels.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level.charAt(0).toUpperCase() + level.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Input
+                      id="category"
+                      placeholder="e.g., religious-studies"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="maxParticipants">Max Participants</Label>
+                    <Input
+                      id="maxParticipants"
+                      type="number"
+                      placeholder="e.g., 30"
+                      value={formData.maxParticipants}
+                      onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="title">Course Title *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={4}
                     required
                   />
                 </div>
-                
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate">Start Date</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate">End Date</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="instructor">Instructor *</Label>
+                  <Label htmlFor="schedule">Schedule</Label>
                   <Input
-                    id="instructor"
-                    placeholder="e.g., Dr. Ahmed Al-Hafiz"
-                    value={formData.instructor}
-                    onChange={(e) => setFormData({...formData, instructor: e.target.value})}
-                    required
+                    id="schedule"
+                    placeholder="e.g., Tuesdays & Thursdays 6-8 PM"
+                    value={formData.schedule}
+                    onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="duration">Duration *</Label>
-                  <Input
-                    id="duration"
-                    placeholder="e.g., 8 weeks"
-                    value={formData.duration}
-                    onChange={(e) => setFormData({...formData, duration: e.target.value})}
-                    required
+                  <Label htmlFor="materials">Required Materials</Label>
+                  <Textarea
+                    id="materials"
+                    placeholder="e.g., Mushaf, notebook, recording app"
+                    value={formData.materials}
+                    onChange={(e) => setFormData({ ...formData, materials: e.target.value })}
+                    rows={3}
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="level">Level</Label>
-                  <Select value={formData.level} onValueChange={(value) => setFormData({...formData, level: value as 'beginner' | 'intermediate' | 'advanced'})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {levels.map((level) => (
-                        <SelectItem key={level} value={level}>
-                          {level.charAt(0).toUpperCase() + level.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              </form>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    placeholder="e.g., religious-studies"
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="maxParticipants">Max Participants</Label>
-                  <Input
-                    id="maxParticipants"
-                    type="number"
-                    placeholder="e.g., 30"
-                    value={formData.maxParticipants}
-                    onChange={(e) => setFormData({...formData, maxParticipants: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  rows={4}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date</Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="endDate">End Date</Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="schedule">Schedule</Label>
-                <Input
-                  id="schedule"
-                  placeholder="e.g., Tuesdays & Thursdays 6-8 PM"
-                  value={formData.schedule}
-                  onChange={(e) => setFormData({...formData, schedule: e.target.value})}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="materials">Required Materials</Label>
-                <Textarea
-                  id="materials"
-                  placeholder="e.g., Mushaf, notebook, recording app"
-                  value={formData.materials}
-                  onChange={(e) => setFormData({...formData, materials: e.target.value})}
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-4">
+            {/* Fixed Footer */}
+            <div className="bg-background px-6 py-4 flex-shrink-0">
+              <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  onClick={handleSubmit}
                   className="bg-gradient-primary hover:opacity-90"
                   disabled={createCourse.isPending || updateCourse.isPending}
                 >
@@ -375,7 +395,7 @@ const AdminCourses = () => {
                   )}
                 </Button>
               </div>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
