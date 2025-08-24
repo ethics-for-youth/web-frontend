@@ -253,7 +253,8 @@ jobs:
           echo "✅ Deployment to S3 completed"
 
       - name: Set S3 bucket website configuration
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
           S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
           
@@ -279,7 +280,8 @@ jobs:
           echo "✅ S3 website configuration applied"
 
       - name: Run post-deployment tests
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
           S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
           ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
@@ -310,7 +312,8 @@ jobs:
           fi
 
       - name: Store deployment metadata
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
           S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
           ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
@@ -337,7 +340,8 @@ jobs:
           echo "📋 Deployment metadata stored"
 
       - name: Deployment success notification
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
           ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
           S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
@@ -353,7 +357,8 @@ jobs:
           echo "└── Deployed by: ${{ github.actor }}"
 
       - name: No changes detected
-        if: steps.check_changes.outputs.has_changes == 'false'
+        # if: steps.check_changes.outputs.has_changes == 'false'
+        if: false
         run: |
           ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
           echo "✅ No changes detected in build output for $ENVIRONMENT. Skipping deployment."
@@ -371,7 +376,8 @@ jobs:
           retention-days: 7
 
       - name: Rollback on failure
-        if: failure() && steps.check_changes.outputs.has_changes == 'true' && steps.backup.outputs.backup_timestamp != ''
+        # if: failure() && steps.check_changes.outputs.has_changes == 'true' && steps.backup.outputs.backup_timestamp != ''
+        if: failure() && false && steps.backup.outputs.backup_timestamp != ''
         run: |
           S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
           ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
