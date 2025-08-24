@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Search, Filter, ToggleLeft, ToggleRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,11 +14,12 @@ import { Course, CreateCourseRequest, UpdateCourseRequest } from '@/services';
 import { formatDateForInput } from '@/utils/dateUtils';
 
 const AdminCourses = () => {
+  const navigate = useNavigate();
   const { data: courses = [], isLoading, error } = useCourses();
   const createCourse = useCreateCourse();
   const updateCourse = useUpdateCourse();
   const deleteCourse = useDeleteCourse();
-  
+
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
@@ -45,31 +47,25 @@ const AdminCourses = () => {
       return;
     }
 
-    let filtered = [...courses]; // Create a new array to avoid mutations
-
+    let filtered = [...courses];
     if (searchTerm) {
       filtered = filtered.filter(course =>
         course.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (levelFilter && levelFilter !== 'all') {
       filtered = filtered.filter(course => course.level === levelFilter);
     }
-
     if (statusFilter && statusFilter !== 'all') {
       filtered = filtered.filter(course => course.status === statusFilter);
     }
-
     setFilteredCourses(filtered);
   }, [courses, searchTerm, levelFilter, statusFilter]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       if (editingCourse) {
-        // Update existing course
         const updateData: UpdateCourseRequest = {
           title: formData.title,
           description: formData.description,
@@ -84,10 +80,8 @@ const AdminCourses = () => {
           schedule: formData.schedule || undefined,
           materials: formData.materials || undefined,
         };
-        
         await updateCourse.mutateAsync({ id: editingCourse.id, courseData: updateData });
       } else {
-        // Create new course
         const courseData: CreateCourseRequest = {
           title: formData.title,
           description: formData.description,
@@ -102,13 +96,10 @@ const AdminCourses = () => {
           schedule: formData.schedule || undefined,
           materials: formData.materials || undefined,
         };
-        
         await createCourse.mutateAsync(courseData);
       }
-
       resetForm();
     } catch (error) {
-      // Error handling is done in the hooks
       console.error('Failed to save course:', error);
     }
   };
@@ -156,7 +147,6 @@ const AdminCourses = () => {
       try {
         await deleteCourse.mutateAsync(courseId);
       } catch (error) {
-        // Error handling is done in the hook
         console.error('Failed to delete course:', error);
       }
     }
@@ -168,14 +158,22 @@ const AdminCourses = () => {
 
     try {
       const newStatus = course.status === 'active' ? 'inactive' : 'active';
-      await updateCourse.mutateAsync({ 
-        id: courseId, 
-        courseData: { status: newStatus } 
+      await updateCourse.mutateAsync({
+        id: courseId,
+        courseData: { status: newStatus }
       });
     } catch (error) {
-      // Error handling is done in the hook
       console.error('Failed to toggle course status:', error);
     }
+  };
+
+  const handleCourseClick = (course: Course) => {
+    navigate('/admin/registrations', {
+      state: {
+        itemType: 'course',
+        title: course.title,
+      },
+    });
   };
 
   if (isLoading) {
@@ -215,7 +213,6 @@ const AdminCourses = () => {
           <h1 className="text-3xl font-bold text-foreground">Course Management</h1>
           <p className="text-muted-foreground">Manage all educational courses</p>
         </div>
-        
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary hover:opacity-90">
@@ -230,7 +227,6 @@ const AdminCourses = () => {
                 {editingCourse ? 'Update the course details below.' : 'Fill in the details for the new course.'}
               </DialogDescription>
             </DialogHeader>
-            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -238,18 +234,17 @@ const AdminCourses = () => {
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
                   />
                 </div>
-                
                 <div className="space-y-2">
                   <Label htmlFor="instructor">Instructor *</Label>
                   <Input
                     id="instructor"
                     placeholder="e.g., Dr. Ahmed Al-Hafiz"
                     value={formData.instructor}
-                    onChange={(e) => setFormData({...formData, instructor: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
                     required
                   />
                 </div>
@@ -262,14 +257,14 @@ const AdminCourses = () => {
                     id="duration"
                     placeholder="e.g., 8 weeks"
                     value={formData.duration}
-                    onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="level">Level</Label>
-                  <Select value={formData.level} onValueChange={(value) => setFormData({...formData, level: value as 'beginner' | 'intermediate' | 'advanced'})}>
+                  <Select value={formData.level} onValueChange={(value) => setFormData({ ...formData, level: value as 'beginner' | 'intermediate' | 'advanced' })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select level" />
                     </SelectTrigger>
@@ -291,10 +286,10 @@ const AdminCourses = () => {
                     id="category"
                     placeholder="e.g., religious-studies"
                     value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="maxParticipants">Max Participants</Label>
                   <Input
@@ -317,7 +312,7 @@ const AdminCourses = () => {
                     step="0.01"
                     placeholder="e.g., 500 (leave blank for free)"
                     value={formData.registrationFee}
-                    onChange={(e) => setFormData({...formData, registrationFee: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value })}
                   />
                 </div>
               </div>
@@ -327,7 +322,7 @@ const AdminCourses = () => {
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
                   required
                 />
@@ -340,17 +335,17 @@ const AdminCourses = () => {
                     id="startDate"
                     type="date"
                     value={formData.startDate}
-                    onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="endDate">End Date</Label>
                   <Input
                     id="endDate"
                     type="date"
                     value={formData.endDate}
-                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                   />
                 </div>
               </div>
@@ -361,7 +356,7 @@ const AdminCourses = () => {
                   id="schedule"
                   placeholder="e.g., Tuesdays & Thursdays 6-8 PM"
                   value={formData.schedule}
-                  onChange={(e) => setFormData({...formData, schedule: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
                 />
               </div>
 
@@ -371,7 +366,7 @@ const AdminCourses = () => {
                   id="materials"
                   placeholder="e.g., Mushaf, notebook, recording app"
                   value={formData.materials}
-                  onChange={(e) => setFormData({...formData, materials: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, materials: e.target.value })}
                   rows={3}
                 />
               </div>
@@ -380,8 +375,8 @@ const AdminCourses = () => {
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="bg-gradient-primary hover:opacity-90"
                   disabled={createCourse.isPending || updateCourse.isPending}
                 >
@@ -463,7 +458,11 @@ const AdminCourses = () => {
       {/* Courses List */}
       <div className="grid grid-cols-1 gap-4">
         {filteredCourses.map((course) => (
-          <Card key={course.id} className="shadow-card hover:shadow-lg transition-shadow">
+          <Card
+            key={course.id}
+            className="shadow-card hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => handleCourseClick(course)}
+          >
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -496,7 +495,10 @@ const AdminCourses = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => toggleActive(course.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleActive(course.id);
+                    }}
                     title={course.status === 'active' ? 'Deactivate course' : 'Activate course'}
                     disabled={updateCourse.isPending}
                   >
@@ -509,14 +511,20 @@ const AdminCourses = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleEdit(course)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(course);
+                    }}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleDelete(course.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(course.id);
+                    }}
                     disabled={deleteCourse.isPending}
                   >
                     <Trash2 className="h-4 w-4" />
