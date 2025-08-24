@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom'; // Add useLocation
+import { useLocation } from 'react-router-dom';
 import { Eye, Download, Search, Filter, CheckCircle, Circle, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,39 +13,36 @@ import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const AdminRegistrations = () => {
   const location = useLocation();
+
+  const initialTypeFilter = location.state?.itemType && ['event', 'course', 'competition'].includes(location.state.itemType)
+    ? location.state.itemType
+    : 'all';
+  const initialTitleFilter = location.state?.title || 'all';
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'event' | 'course' | 'competition'>('all');
-  const [titleFilter, setTitleFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'event' | 'course' | 'competition'>(initialTypeFilter);
+  const [titleFilter, setTitleFilter] = useState(initialTitleFilter);
   const [statusFilter, setStatusFilter] = useState<'all' | 'registered' | 'completed' | 'cancelled'>('all');
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
-
-  useEffect(() => {
-    if (location.state) {
-      const { itemType, title } = location.state;
-      if (itemType && ['event', 'course', 'competition'].includes(itemType)) {
-        setTypeFilter(itemType);
-      }
-      if (title) {
-        setTitleFilter(title);
-      }
-    }
-  }, [location.state]);
 
   // Backend filters
   const filters: { itemType?: string; title?: string; status?: string } = {};
   if (typeFilter !== 'all') filters.itemType = typeFilter;
   if (titleFilter !== 'all') filters.title = titleFilter;
 
-  const { data, isLoading, error, refetch } = useRegistrations(filters);
+  const { data, isLoading, error } = useRegistrations(filters);
   const registrations = data?.registrations || [];
   const availableTitles = data?.availableTitles || [];
 
   const updateRegistration = useUpdateRegistration();
 
-  // Refetch whenever backend filters change
-  useEffect(() => {
-    refetch();
-  }, [typeFilter, titleFilter, statusFilter, refetch]);
+  // Synchronously reset titleFilter when typeFilter changes
+  const handleTypeFilterChange = (newType: 'all' | 'event' | 'course' | 'competition') => {
+    setTypeFilter(newType);
+    if (newType !== initialTypeFilter) {
+      setTitleFilter('all');
+    }
+  };
 
   // Filter registrations on frontend using searchTerm and status
   const filteredRegistrations = useMemo(() => {
@@ -61,7 +58,6 @@ const AdminRegistrations = () => {
         statusFilter === 'all' ? true : reg.status === statusFilter
       );
   }, [registrations, searchTerm, statusFilter]);
-
 
   const getTypeColor = (itemType: string) => {
     switch (itemType) {
@@ -171,7 +167,7 @@ const AdminRegistrations = () => {
               </div>
             </div>
 
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
               <SelectTrigger><SelectValue placeholder="Filter by type" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
