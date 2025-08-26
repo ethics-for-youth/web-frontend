@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BookOpen, Clock, Users, Monitor, GraduationCap } from 'lucide-react';
 import PaymentButton from '@/components/PaymentButton';
 import { RazorpayResponse, Course } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 interface CourseRegistrationPaymentProps {
   course: Course & {
-    registrationFee: number; // Make required for payment component
+    registrationFee: number;
   };
   onRegistrationSuccess?: (paymentResponse: RazorpayResponse) => void;
 }
@@ -31,20 +29,16 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   const { toast } = useToast();
 
   const handlePaymentSuccess = (response: RazorpayResponse) => {
-    console.log('Payment successful for course enrollment:', response);
     setIsEnrolled(true);
-    
     toast({
       title: 'Enrollment Successful!',
       description: `You have successfully enrolled in ${course.title}. Check your email for course access details.`,
     });
-
     onRegistrationSuccess?.(response);
   };
 
   const handlePaymentFailure = (error: Error) => {
-    console.error('Payment failed for course enrollment:', error);
-    
+    console.error('Payment failed:', error);
     toast({
       title: 'Enrollment Failed',
       description: 'There was an issue with your payment. Please try again or contact support.',
@@ -53,21 +47,10 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   };
 
   const handlePaymentCancel = () => {
-    console.log('Payment cancelled for course enrollment');
-    
     toast({
       title: 'Payment Cancelled',
       description: 'Your enrollment was cancelled. You can try again anytime.',
       variant: 'destructive',
-    });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
     });
   };
 
@@ -77,69 +60,16 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     setUserDetails(prev => ({ ...prev, [field]: value }));
   };
 
-  const isFormValid = userDetails.name && userDetails.email && userDetails.phone && userDetails.age && userDetails.gender;
+  const isFormValid =
+    userDetails.name &&
+    userDetails.email &&
+    userDetails.phone &&
+    userDetails.age &&
+    userDetails.gender;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold text-primary">
-              {course.title}
-            </CardTitle>
-            <CardDescription className="text-base">
-              {course.description}
-            </CardDescription>
-          </div>
-          <Badge variant="secondary" className="ml-4">
-            ₹{course.registrationFee}
-          </Badge>
-        </div>
-      </CardHeader>
-      
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span>{course.duration}</span>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Monitor className="h-4 w-4" />
-            <span>{course.mode}</span>
-          </div>
-          
-          {course.instructor && (
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <GraduationCap className="h-4 w-4" />
-              <span>{course.instructor}</span>
-            </div>
-          )}
-          
-          {spotsLeft && (
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span>{spotsLeft} spots left</span>
-            </div>
-          )}
-        </div>
-
-        {course.startDate && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <BookOpen className="h-4 w-4" />
-              <span>Starts: {formatDate(course.startDate)}</span>
-            </div>
-            
-            {course.endDate && (
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <BookOpen className="h-4 w-4" />
-                <span>Ends: {formatDate(course.endDate)}</span>
-              </div>
-            )}
-          </div>
-        )}
-
         <div className="border-t pt-4">
           <h4 className="font-semibold mb-4">Enrollment Details:</h4>
           <div className="space-y-4">
@@ -154,7 +84,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address *</Label>
                 <Input
@@ -168,7 +98,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
@@ -196,7 +126,10 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender *</Label>
-                <Select value={userDetails.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+                <Select
+                  value={userDetails.gender}
+                  onValueChange={(value) => handleInputChange('gender', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -234,7 +167,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
           </div>
         )}
       </CardContent>
-      
+
       <CardFooter className="pt-6">
         <div className="w-full space-y-4">
           <div className="flex items-center justify-between">
@@ -243,7 +176,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
               ₹{course.registrationFee.toFixed(2)}
             </span>
           </div>
-          
+
           {!isEnrolled && course.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
             <PaymentButton
               amount={course.registrationFee}
@@ -252,11 +185,11 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 id: `user_${Date.now()}`,
                 name: userDetails.name,
                 email: userDetails.email,
-                phone: userDetails.phone
+                phone: userDetails.phone,
               }}
               eventDetails={{
                 id: course.id,
-                name: course.title
+                name: course.title,
               }}
               onSuccess={handlePaymentSuccess}
               onFailure={handlePaymentFailure}
@@ -269,9 +202,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
           ) : isEnrolled ? (
             <div className="text-center py-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800 font-semibold">
-                  ✅ Successfully Enrolled!
-                </p>
+                <p className="text-green-800 font-semibold">✅ Successfully Enrolled!</p>
                 <p className="text-green-700 text-sm mt-1">
                   Check your email for course access details and materials.
                 </p>
@@ -281,7 +212,9 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
             <div className="text-center py-4">
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <p className="text-gray-600 font-medium">
-                  {course.status !== 'active' ? 'Enrollment Currently Unavailable' : 'Course Full'}
+                  {course.status !== 'active'
+                    ? 'Enrollment Currently Unavailable'
+                    : 'Course Full'}
                 </p>
                 {course.status !== 'active' && (
                   <p className="text-gray-500 text-sm mt-1">
