@@ -64,7 +64,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-sm text-primary-foreground/70">
-          <p>&copy; 2024 Ethics For Youth. All rights reserved.</p>
+          <p>&copy; 2025 Ethics For Youth. All rights reserved.</p>
         </div>
       </div>
     </footer>
