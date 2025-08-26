@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarDays, MapPin, Users, Clock } from 'lucide-react';
 import PaymentButton from '@/components/PaymentButton';
 import { RazorpayResponse } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +16,8 @@ interface EventRegistrationPaymentProps {
     location: string;
     registrationFee: number;
     maxParticipants: number;
+    materials?: string;
+    status?: 'active' | 'inactive';
   };
   onRegistrationSuccess?: (paymentResponse: RazorpayResponse) => void;
 }
@@ -37,20 +37,16 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
   const { toast } = useToast();
 
   const handlePaymentSuccess = (response: RazorpayResponse) => {
-    console.log('Payment successful for event registration:', response);
     setIsRegistered(true);
-    
     toast({
       title: 'Registration Successful!',
       description: `You have successfully registered for ${event.title}. Check your email for confirmation details.`,
     });
-
     onRegistrationSuccess?.(response);
   };
 
   const handlePaymentFailure = (error: Error) => {
-    console.error('Payment failed for event registration:', error);
-    
+    console.error('Payment failed:', error);
     toast({
       title: 'Registration Failed',
       description: 'There was an issue with your payment. Please try again or contact support.',
@@ -59,8 +55,6 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
   };
 
   const handlePaymentCancel = () => {
-    console.log('Payment cancelled for event registration');
-    
     toast({
       title: 'Payment Cancelled',
       description: 'Your registration was cancelled. You can try again anytime.',
@@ -68,66 +62,33 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
     });
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const spotsLeft = event.maxParticipants;
+  const spotsLeft = event.maxParticipants || null;
 
   const handleInputChange = (field: string, value: string) => {
     setUserDetails(prev => ({ ...prev, [field]: value }));
   };
 
-  const isFormValid = userDetails.name && userDetails.email && userDetails.phone && userDetails.age && userDetails.gender;
+  const isFormValid =
+    userDetails.name &&
+    userDetails.email &&
+    userDetails.phone &&
+    userDetails.age &&
+    userDetails.gender;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold text-primary">
-              {event.title}
-            </CardTitle>
-            <CardDescription className="text-base">
-              {event.description}
-            </CardDescription>
-          </div>
-          <Badge variant="secondary" className="ml-4">
-            ₹{event.registrationFee}
-          </Badge>
-        </div>
-      </CardHeader>
-      
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <CalendarDays className="h-4 w-4" />
-            <span>{formatDate(event.date)}</span>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            <span>{event.location}</span>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Users className="h-4 w-4" />
-            <span>{spotsLeft} spots left</span>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span>Registration closes soon</span>
+        {/* Event Info */}
+        <div className="border-b pb-4">
+          <h3 className="text-xl font-bold text-primary">{event.title}</h3>
+          <p className="text-muted-foreground text-sm mb-2">{event.description}</p>
+          <div className="text-sm space-y-1">
+            <p><span className="font-medium">Date:</span> {new Date(event.date).toLocaleString()}</p>
+            <p><span className="font-medium">Location:</span> {event.location}</p>
           </div>
         </div>
 
+        {/* Registration Form */}
         <div className="border-t pt-4">
           <h4 className="font-semibold mb-4">Registration Details:</h4>
           <div className="space-y-4">
@@ -142,7 +103,7 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address *</Label>
                 <Input
@@ -184,7 +145,10 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender *</Label>
-                <Select value={userDetails.gender} onValueChange={(value) => handleInputChange('gender', value)}>
+                <Select
+                  value={userDetails.gender}
+                  onValueChange={(value) => handleInputChange('gender', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -198,7 +162,8 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
           </div>
         </div>
 
-        {spotsLeft <= 5 && spotsLeft > 0 && (
+        {/* Spots Left / Full / Materials */}
+        {spotsLeft && spotsLeft <= 5 && spotsLeft > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
             <p className="text-amber-800 text-sm font-medium">
               ⚡ Only {spotsLeft} spots remaining! Register now to secure your place.
@@ -213,8 +178,16 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
             </p>
           </div>
         )}
+
+        {event.materials && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-blue-800 text-sm">
+              <span className="font-medium">Required Materials:</span> {event.materials}
+            </p>
+          </div>
+        )}
       </CardContent>
-      
+
       <CardFooter className="pt-6">
         <div className="w-full space-y-4">
           <div className="flex items-center justify-between">
@@ -223,8 +196,8 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
               ₹{event.registrationFee.toFixed(2)}
             </span>
           </div>
-          
-          {!isRegistered && spotsLeft > 0 ? (
+
+          {!isRegistered && event.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
             <PaymentButton
               amount={event.registrationFee}
               currency="INR"
@@ -232,11 +205,11 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                 id: `user_${Date.now()}`,
                 name: userDetails.name,
                 email: userDetails.email,
-                phone: userDetails.phone
+                phone: userDetails.phone,
               }}
               eventDetails={{
                 id: event.id,
-                name: event.title
+                name: event.title,
               }}
               onSuccess={handlePaymentSuccess}
               onFailure={handlePaymentFailure}
@@ -244,14 +217,12 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
               className="w-full"
               disabled={!isFormValid}
             >
-              Register Now - ₹{event.registrationFee}
+              Proceed to Checkout - ₹{event.registrationFee}
             </PaymentButton>
           ) : isRegistered ? (
             <div className="text-center py-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800 font-semibold">
-                  ✅ Successfully Registered!
-                </p>
+                <p className="text-green-800 font-semibold">✅ Successfully Registered!</p>
                 <p className="text-green-700 text-sm mt-1">
                   Check your email for event details and updates.
                 </p>
@@ -261,8 +232,15 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
             <div className="text-center py-4">
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <p className="text-gray-600 font-medium">
-                  Registration Currently Unavailable
+                  {event.status !== 'active'
+                    ? 'Registration Currently Unavailable'
+                    : 'Event Full'}
                 </p>
+                {event.status !== 'active' && (
+                  <p className="text-gray-500 text-sm mt-1">
+                    This event is not currently accepting new registrations.
+                  </p>
+                )}
               </div>
             </div>
           )}
