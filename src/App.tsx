@@ -20,6 +20,7 @@ import AdminEvents from "./pages/admin/AdminEvents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
 import AdminMessages from "./pages/admin/AdminMessages";
+import PaymentDemo from "./pages/PaymentDemo";
 
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/courses/:id" element={<Layout><CourseDetail /></Layout>} />
             <Route path="/volunteer" element={<Layout><Volunteer /></Layout>} />
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
+            <Route path="/payment-demo" element={<Layout><PaymentDemo /></Layout>} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

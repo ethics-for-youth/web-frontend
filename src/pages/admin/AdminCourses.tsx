@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Search, Filter, ToggleLeft, ToggleRight, Loader2, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import { Course, CreateCourseRequest, UpdateCourseRequest } from '@/services';
 import { formatDateForInput } from '@/utils/dateUtils';
 
 const AdminCourses = () => {
+  const navigate = useNavigate();
   const { data: courses = [], isLoading, error } = useCourses();
   const createCourse = useCreateCourse();
   const updateCourse = useUpdateCourse();
@@ -32,6 +34,7 @@ const AdminCourses = () => {
     category: '',
     level: 'beginner' as 'beginner' | 'intermediate' | 'advanced',
     maxParticipants: '',
+    registrationFee: '',
     startDate: '',
     endDate: '',
     schedule: '',
@@ -44,31 +47,25 @@ const AdminCourses = () => {
       return;
     }
 
-    let filtered = [...courses]; // Create a new array to avoid mutations
-
+    let filtered = [...courses];
     if (searchTerm) {
       filtered = filtered.filter(course =>
         course.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (levelFilter && levelFilter !== 'all') {
       filtered = filtered.filter(course => course.level === levelFilter);
     }
-
     if (statusFilter && statusFilter !== 'all') {
       filtered = filtered.filter(course => course.status === statusFilter);
     }
-
     setFilteredCourses(filtered);
   }, [courses, searchTerm, levelFilter, statusFilter]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       if (editingCourse) {
-        // Update existing course
         const updateData: UpdateCourseRequest = {
           title: formData.title,
           description: formData.description,
@@ -77,15 +74,14 @@ const AdminCourses = () => {
           category: formData.category || undefined,
           level: formData.level,
           maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
+          registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
           materials: formData.materials || undefined,
         };
-
         await updateCourse.mutateAsync({ id: editingCourse.id, courseData: updateData });
       } else {
-        // Create new course
         const courseData: CreateCourseRequest = {
           title: formData.title,
           description: formData.description,
@@ -94,18 +90,16 @@ const AdminCourses = () => {
           category: formData.category || undefined,
           level: formData.level,
           maxParticipants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
+          registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
           materials: formData.materials || undefined,
         };
-
         await createCourse.mutateAsync(courseData);
       }
-
       resetForm();
     } catch (error) {
-      // Error handling is done in the hooks
       console.error('Failed to save course:', error);
     }
   };
@@ -119,6 +113,7 @@ const AdminCourses = () => {
       category: '',
       level: 'beginner',
       maxParticipants: '',
+      registrationFee: '',
       startDate: '',
       endDate: '',
       schedule: '',
@@ -138,6 +133,7 @@ const AdminCourses = () => {
       category: course.category || '',
       level: course.level || 'beginner',
       maxParticipants: course.maxParticipants?.toString() || '',
+      registrationFee: course.registrationFee?.toString() || '',
       startDate: formatDateForInput(course.startDate) || '',
       endDate: formatDateForInput(course.endDate) || '',
       schedule: course.schedule || '',
@@ -151,7 +147,6 @@ const AdminCourses = () => {
       try {
         await deleteCourse.mutateAsync(courseId);
       } catch (error) {
-        // Error handling is done in the hook
         console.error('Failed to delete course:', error);
       }
     }
@@ -168,9 +163,17 @@ const AdminCourses = () => {
         courseData: { status: newStatus }
       });
     } catch (error) {
-      // Error handling is done in the hook
       console.error('Failed to toggle course status:', error);
     }
+  };
+
+  const handleCourseClick = (course: Course) => {
+    navigate('/admin/registrations', {
+      state: {
+        itemType: 'course',
+        title: course.title,
+      },
+    });
   };
 
   if (isLoading) {
@@ -210,7 +213,6 @@ const AdminCourses = () => {
           <h1 className="text-3xl font-bold text-foreground">Course Management</h1>
           <p className="text-muted-foreground">Manage all educational courses</p>
         </div>
-
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary hover:opacity-90">
@@ -313,7 +315,22 @@ const AdminCourses = () => {
                       type="number"
                       placeholder="e.g., 30"
                       value={formData.maxParticipants}
-                      onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="registrationFee">Registration Fee (₹)</Label>
+                  <Input
+                    id="registrationFee"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 500 (leave blank for free)"
+                    value={formData.registrationFee}
+                    onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value })}
                     />
                   </div>
                 </div>
@@ -370,18 +387,14 @@ const AdminCourses = () => {
                     onChange={(e) => setFormData({ ...formData, materials: e.target.value })}
                     rows={3}
                   />
-                </div>
-              </form>
             </div>
 
-            {/* Fixed Footer */}
-            <div className="bg-background px-6 py-4 flex-shrink-0">
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   className="bg-gradient-primary hover:opacity-90"
                   disabled={createCourse.isPending || updateCourse.isPending}
                 >
@@ -395,6 +408,7 @@ const AdminCourses = () => {
                   )}
                 </Button>
               </div>
+            </form>
             </div>
           </DialogContent>
         </Dialog>
@@ -463,7 +477,11 @@ const AdminCourses = () => {
       {/* Courses List */}
       <div className="grid grid-cols-1 gap-4">
         {filteredCourses.map((course) => (
-          <Card key={course.id} className="shadow-card hover:shadow-lg transition-shadow">
+          <Card
+            key={course.id}
+            className="shadow-card hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => handleCourseClick(course)}
+          >
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -488,6 +506,7 @@ const AdminCourses = () => {
                       {course.category && (
                         <span><strong>Category:</strong> {course.category}</span>
                       )}
+                      <span><strong>Registration Fee:</strong> {course.registrationFee && course.registrationFee > 0 ? `₹${course.registrationFee.toLocaleString('en-IN')}` : 'Free'}</span>
                     </div>
                   </CardDescription>
                 </div>
@@ -495,7 +514,10 @@ const AdminCourses = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => toggleActive(course.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleActive(course.id);
+                    }}
                     title={course.status === 'active' ? 'Deactivate course' : 'Activate course'}
                     disabled={updateCourse.isPending}
                   >
@@ -508,14 +530,20 @@ const AdminCourses = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleEdit(course)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(course);
+                    }}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleDelete(course.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(course.id);
+                    }}
                     disabled={deleteCourse.isPending}
                   >
                     <Trash2 className="h-4 w-4" />

@@ -4,13 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import RegistrationForm from '@/components/RegistrationForm';
+import CourseRegistrationPayment from '@/components/CourseRegistrationPayment';
 import { useCourse } from '@/hooks/useCourses';
 import { courseBenefits } from '@/data/mockData';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { RazorpayResponse } from '@/types';
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: course, isLoading, error } = useCourse(id || '');
+
+  const handleCourseRegistrationSuccess = (response: RazorpayResponse) => {
+    console.log('Course enrollment successful:', response);
+    // You can add additional success handling here like redirecting to course dashboard
+  };
 
   if (isLoading) {
     return (
@@ -115,6 +122,30 @@ const CourseDetail = () => {
                   </div>
                 </div>
 
+                {/* Course Fee Information */}
+                <div className="mb-8 p-6 bg-primary/5 border border-primary/10 rounded-lg">
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Course Fee</h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold text-primary">
+                        {course.registrationFee && course.registrationFee > 0 
+                          ? `₹${course.registrationFee.toLocaleString('en-IN')}` 
+                          : 'Free'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {course.registrationFee && course.registrationFee > 0 
+                          ? 'One-time enrollment fee' 
+                          : 'No enrollment fee required'}
+                      </p>
+                    </div>
+                    {course.registrationFee && course.registrationFee > 0 && (
+                      <Badge variant="secondary" className="bg-primary/10 text-primary">
+                        Payment Required
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
                 {/* Course Description */}
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Course Overview</h2>
@@ -187,12 +218,26 @@ const CourseDetail = () => {
           {/* Enrollment Form */}
           <div className="lg:col-span-1">
             {course.status === 'active' ? (
-              <RegistrationForm
-                type="Course"
-                relatedId={course.id}
-                title={course.title}
-                showPaymentConfirmation={true}
-              />
+              <>
+                {/* Show payment component if course has enrollment fee */}
+                {course.registrationFee && course.registrationFee > 0 ? (
+                  <CourseRegistrationPayment
+                    course={{
+                      ...course,
+                      registrationFee: course.registrationFee
+                    }}
+                    onRegistrationSuccess={handleCourseRegistrationSuccess}
+                  />
+                ) : (
+                  /* Fallback to registration form for free courses */
+                  <RegistrationForm
+                    type="Course"
+                    relatedId={course.id}
+                    title={course.title}
+                    showPaymentConfirmation={false}
+                  />
+                )}
+              </>
             ) : (
               <Card className="shadow-card">
                 <CardContent className="p-6 text-center">

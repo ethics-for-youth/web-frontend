@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from '@/hooks/useEvents';
 import { Event } from '@/types';
 import { formatDateForInput } from '@/utils/dateUtils';
+import { useNavigate } from 'react-router-dom';
 
 const AdminEvents = () => {
+  const navigate = useNavigate();
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -25,6 +27,7 @@ const AdminEvents = () => {
     location: '',
     category: '',
     maxParticipants: '',
+    registrationFee: '',
     registrationDeadline: '',
     status: 'active'
   });
@@ -41,30 +44,23 @@ const AdminEvents = () => {
       return;
     }
 
-    let filtered = [...events]; // Create a new array to avoid mutations
-
+    let filtered = [...events];
     if (searchTerm) {
       filtered = filtered.filter(event =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (dateFilter) {
       filtered = filtered.filter(event => event.date >= dateFilter);
     }
-
     setFilteredEvents(filtered);
   }, [events, searchTerm, dateFilter]);
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       if (editingEvent) {
-        // Update existing event
         await updateEvent.mutateAsync({
           id: editingEvent.id,
           eventData: {
@@ -74,12 +70,12 @@ const AdminEvents = () => {
             location: formData.location,
             category: formData.category,
             maxParticipants: parseInt(formData.maxParticipants) || 0,
+            registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
             registrationDeadline: formData.registrationDeadline,
             status: formData.status,
           }
         });
       } else {
-        // Create new event
         await createEvent.mutateAsync({
           title: formData.title,
           description: formData.description,
@@ -87,14 +83,13 @@ const AdminEvents = () => {
           location: formData.location,
           category: formData.category,
           maxParticipants: parseInt(formData.maxParticipants) || 0,
+          registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
           registrationDeadline: formData.registrationDeadline,
           status: formData.status,
         });
       }
-
       resetForm();
     } catch (error) {
-      // Error handling is done in the mutation hooks
       console.error('Event submission error:', error);
     }
   };
@@ -107,6 +102,7 @@ const AdminEvents = () => {
       location: '',
       category: '',
       maxParticipants: '',
+      registrationFee: '',
       registrationDeadline: '',
       status: 'active'
     });
@@ -123,6 +119,7 @@ const AdminEvents = () => {
       location: event.location || '',
       category: event.category || '',
       maxParticipants: event.maxParticipants?.toString() || '',
+      registrationFee: event.registrationFee?.toString() || '',
       registrationDeadline: formatDateForInput(event.registrationDeadline),
       status: event.status || 'active'
     };
@@ -138,6 +135,15 @@ const AdminEvents = () => {
         console.error('Delete error:', error);
       }
     }
+  };
+
+  const handleEventClick = (event: Event) => {
+    navigate('/admin/registrations', {
+      state: {
+        itemType: 'event',
+        title: event.title,
+      },
+    });
   };
 
   const exportToCSV = () => {
@@ -212,13 +218,11 @@ const AdminEvents = () => {
           <h1 className="text-3xl font-bold text-foreground">Event Management</h1>
           <p className="text-muted-foreground">Manage all community events</p>
         </div>
-
         <div className="flex space-x-2">
           <Button onClick={exportToCSV} variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
-
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-primary hover:opacity-90">
@@ -423,7 +427,11 @@ const AdminEvents = () => {
       {/* Events List */}
       <div className="grid grid-cols-1 gap-4">
         {filteredEvents.map((event) => (
-          <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow">
+          <Card
+            key={event.id}
+            className="shadow-card hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => handleEventClick(event)}
+          >
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -449,14 +457,20 @@ const AdminEvents = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleEdit(event)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(event);
+                    }}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handleDelete(event.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(event.id);
+                    }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
