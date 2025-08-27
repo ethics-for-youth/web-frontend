@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import PaymentButton from '@/components/PaymentButton';
 import { RazorpayResponse, Course } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +25,10 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     email: '',
     phone: '',
     age: '',
-    gender: ''
+    gender: '',
+    education: '',
+    address: '',
+    joinCommunity: false
   });
   const { toast } = useToast();
 
@@ -56,7 +60,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
 
   const spotsLeft = course.maxParticipants || null;
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setUserDetails(prev => ({ ...prev, [field]: value }));
   };
 
@@ -65,7 +69,9 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     userDetails.email &&
     userDetails.phone &&
     userDetails.age &&
-    userDetails.gender;
+    userDetails.gender &&
+    userDetails.education &&
+    userDetails.address;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -139,6 +145,35 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="education">Education Level</Label>
+                <Input
+                  id="education"
+                  value={userDetails.education}
+                  onChange={(e) => handleInputChange('education', e.target.value)}
+                  placeholder="e.g., High School, Bachelor's, etc."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={userDetails.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="Enter your address"
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="joinCommunity"
+                checked={userDetails.joinCommunity}
+                onCheckedChange={(checked) => handleInputChange('joinCommunity', checked)}
+              />
+              <Label htmlFor="joinCommunity" className='text-sm'>
+                I would like to join the Ethics For Youth community and receive updates.
+              </Label>
             </div>
           </div>
         </div>
@@ -186,10 +221,14 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 name: userDetails.name,
                 email: userDetails.email,
                 phone: userDetails.phone,
+                notes: {
+                  details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}, Address: ${userDetails.address || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                }
               }}
-              eventDetails={{
+              itemDetails={{
                 id: course.id,
                 name: course.title,
+                itemType: 'course'
               }}
               onSuccess={handlePaymentSuccess}
               onFailure={handlePaymentFailure}
