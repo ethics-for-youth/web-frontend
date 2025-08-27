@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCourses } from '@/hooks/useCourses';
-import coursesImage from '@/assets/courses-illustration.jpg';
+import coursesImage from '@/assets/Course-3.jpg';
 
 const Courses = () => {
   const { data: courses = [], isLoading, error } = useCourses();
