@@ -181,7 +181,7 @@ const Volunteer = () => {
             <div className="text-sm text-primary-foreground/80">
               Questions? Contact us at{' '}
               <a href="mailto:volunteer@ethicsforyouth.org" className="underline hover:text-primary-foreground">
-                volunteer@ethicsforyouth.org
+             ethicsforyouth@gmail.com
               </a>
             </div>
           </div>

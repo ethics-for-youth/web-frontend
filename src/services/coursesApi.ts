@@ -13,6 +13,7 @@ export interface Course {
   category?: string;
   level?: 'beginner' | 'intermediate' | 'advanced';
   maxParticipants?: number;
+  registrationFee?: number;
   startDate?: string;
   endDate?: string;
   schedule?: string;
@@ -30,6 +31,7 @@ export interface CreateCourseRequest {
   category?: string;
   level?: 'beginner' | 'intermediate' | 'advanced';
   maxParticipants?: number;
+  registrationFee?: number;
   startDate?: string;
   endDate?: string;
   schedule?: string;
@@ -44,6 +46,7 @@ export interface UpdateCourseRequest {
   category?: string;
   level?: 'beginner' | 'intermediate' | 'advanced';
   maxParticipants?: number;
+  registrationFee?: number;
   startDate?: string;
   endDate?: string;
   schedule?: string;
