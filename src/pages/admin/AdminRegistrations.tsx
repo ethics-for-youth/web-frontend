@@ -42,7 +42,6 @@ const AdminRegistrations = () => {
   const availableTitles = useMemo(() => data?.availableTitles || [], [data?.availableTitles]);
 
   const updateRegistration = useUpdateRegistration();
-
   // Refetch whenever backend filters change
   useEffect(() => {
     refetch();
@@ -131,7 +130,12 @@ const AdminRegistrations = () => {
         reg.status,
         formatDateForDisplay(reg.registeredAt),
         formatDateForDisplay(reg.updatedAt),
-        reg.notes ? reg.notes.replace(/,/g, ';') : ''
+        reg.notes
+          ? typeof reg.notes === "object"
+            ? `${reg.notes.purpose || ""} - ${reg.notes.extra_info || ""}`
+            : reg.notes.replace(/,/g, ';')
+          : ''
+
       ])
     ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
 
@@ -241,9 +245,15 @@ const AdminRegistrations = () => {
                     </div>
                     {registration.notes && (
                       <div className="mt-2 text-sm">
-                        <strong>Notes:</strong> <span className="text-muted-foreground">{registration.notes}</span>
+                        <strong>Notes:</strong>{" "}
+                        <span className="text-muted-foreground">
+                          {typeof registration.notes === "object"
+                            ? `${registration.notes.purpose || ""} ${registration.notes.extra_info ? `- ${registration.notes.extra_info}` : ""}`
+                            : registration.notes}
+                        </span>
                       </div>
                     )}
+
                   </CardDescription>
                 </div>
 
@@ -293,9 +303,14 @@ const AdminRegistrations = () => {
                           {selectedRegistration.notes && (
                             <div>
                               <h4 className="font-semibold text-foreground">Notes</h4>
-                              <p className="text-sm text-muted-foreground">{selectedRegistration.notes}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {typeof selectedRegistration.notes === "object"
+                                  ? `${selectedRegistration.notes.purpose || ""} ${selectedRegistration.notes.extra_info ? `- ${selectedRegistration.notes.extra_info}` : ""}`
+                                  : selectedRegistration.notes}
+                              </p>
                             </div>
                           )}
+
                         </div>
                       )}
                     </DialogContent>
