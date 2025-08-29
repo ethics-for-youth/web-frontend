@@ -3,6 +3,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import PaymentButton from '@/components/PaymentButton';
 import { RazorpayResponse } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -32,7 +33,10 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
     email: '',
     phone: '',
     age: '',
-    gender: ''
+    gender: '',
+    education: '',
+    address: '',
+    joinCommunity: false
   });
   const { toast } = useToast();
 
@@ -64,7 +68,7 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
 
   const spotsLeft = event.maxParticipants || null;
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setUserDetails(prev => ({ ...prev, [field]: value }));
   };
 
@@ -73,20 +77,13 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
     userDetails.email &&
     userDetails.phone &&
     userDetails.age &&
-    userDetails.gender;
+    userDetails.gender &&
+    userDetails.education &&
+    userDetails.address;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardContent className="space-y-4">
-        {/* Event Info */}
-        <div className="border-b pb-4">
-          <h3 className="text-xl font-bold text-primary">{event.title}</h3>
-          <p className="text-muted-foreground text-sm mb-2">{event.description}</p>
-          <div className="text-sm space-y-1">
-            <p><span className="font-medium">Date:</span> {new Date(event.date).toLocaleString()}</p>
-            <p><span className="font-medium">Location:</span> {event.location}</p>
-          </div>
-        </div>
 
         {/* Registration Form */}
         <div className="border-t pt-4">
@@ -117,7 +114,7 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
@@ -158,6 +155,35 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="education">Education Level</Label>
+                <Input
+                  id="education"
+                  value={userDetails.education}
+                  onChange={(e) => handleInputChange('education', e.target.value)}
+                  placeholder="e.g., High School, Bachelor's, etc."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={userDetails.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="Enter your address"
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="joinCommunity"
+                checked={userDetails.joinCommunity}
+                onCheckedChange={(checked) => handleInputChange('joinCommunity', checked)}
+              />
+              <Label htmlFor="joinCommunity" className='text-sm'>
+                I would like to join the Ethics For Youth community and receive updates.
+              </Label>
             </div>
           </div>
         </div>
@@ -206,10 +232,14 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                 name: userDetails.name,
                 email: userDetails.email,
                 phone: userDetails.phone,
+                notes: {
+                  details: `Registration via event form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}, Address: ${userDetails.address || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                }
               }}
-              eventDetails={{
+              itemDetails={{
                 id: event.id,
                 name: event.title,
+                itemType: 'event'
               }}
               onSuccess={handlePaymentSuccess}
               onFailure={handlePaymentFailure}

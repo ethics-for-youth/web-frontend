@@ -304,8 +304,8 @@ const AdminRegistrations = () => {
                             <div>
                               <h4 className="font-semibold text-foreground">Notes</h4>
                               <p className="text-sm text-muted-foreground">
-                                {typeof selectedRegistration.notes === "object"
-                                  ? `${selectedRegistration.notes.purpose || ""} ${selectedRegistration.notes.extra_info ? `- ${selectedRegistration.notes.extra_info}` : ""}`
+                                {selectedRegistration.notes && typeof selectedRegistration.notes === "object"
+                                  ? `${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).purpose || ""} ${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).extra_info ? `- ${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).extra_info}` : ""}`
                                   : selectedRegistration.notes}
                               </p>
                             </div>
