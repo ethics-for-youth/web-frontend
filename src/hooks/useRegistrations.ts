@@ -1,8 +1,7 @@
 // React Query hooks for Registrations and Volunteers API
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { registrationsApi, volunteersApi } from '@/services';
-import { 
-  Registration,
+import {
   NewCreateRegistrationRequest,
   UpdateRegistrationRequest,
   RegistrationFilters
@@ -34,7 +33,7 @@ export const useCreateRegistration = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (registrationData: NewCreateRegistrationRequest) => 
+    mutationFn: (registrationData: NewCreateRegistrationRequest) =>
       registrationsApi.createRegistration(registrationData),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: registrationsQueryKeys.lists() });
@@ -58,7 +57,7 @@ export const useUpdateRegistration = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updateData }: { id: string; updateData: UpdateRegistrationRequest }) => 
+    mutationFn: ({ id, updateData }: { id: string; updateData: UpdateRegistrationRequest }) =>
       registrationsApi.updateRegistration(id, updateData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: registrationsQueryKeys.lists() });
@@ -80,7 +79,7 @@ export const useUpdateRegistration = () => {
 // Hook to submit volunteer application
 export const useVolunteerApplication = () => {
   return useMutation({
-    mutationFn: (volunteerData: VolunteerJoinRequest) => 
+    mutationFn: (volunteerData: VolunteerJoinRequest) =>
       volunteersApi.joinAsVolunteer(volunteerData),
     onSuccess: (result) => {
       toast({
