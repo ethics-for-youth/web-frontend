@@ -153,6 +153,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   value={userDetails.education}
                   onChange={(e) => handleInputChange('education', e.target.value)}
                   placeholder="e.g., High School, Bachelor's, etc."
+                   required
                 />
               </div>
 
