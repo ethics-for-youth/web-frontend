@@ -38,8 +38,12 @@ const AdminCourses = () => {
     startDate: '',
     endDate: '',
     schedule: '',
-    materials: ''
+
+    whatYouWillLearn: [] as string[],
+    requirements: [] as string[]
   });
+
+
 
   useEffect(() => {
     if (!courses || !Array.isArray(courses)) {
@@ -78,7 +82,9 @@ const AdminCourses = () => {
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
-          materials: formData.materials || undefined,
+
+          whatYouWillLearn: formData.whatYouWillLearn,
+          requirements: formData.requirements,
         };
         await updateCourse.mutateAsync({ id: editingCourse.id, courseData: updateData });
       } else {
@@ -94,7 +100,9 @@ const AdminCourses = () => {
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
-          materials: formData.materials || undefined,
+
+          whatYouWillLearn: formData.whatYouWillLearn,
+          requirements: formData.requirements,
         };
         await createCourse.mutateAsync(courseData);
       }
@@ -117,12 +125,13 @@ const AdminCourses = () => {
       startDate: '',
       endDate: '',
       schedule: '',
-      materials: ''
+
+      whatYouWillLearn: [],
+      requirements: []
     });
     setEditingCourse(null);
     setIsDialogOpen(false);
   };
-
   const handleEdit = (course: Course) => {
     setEditingCourse(course);
     setFormData({
@@ -137,7 +146,9 @@ const AdminCourses = () => {
       startDate: formatDateForInput(course.startDate) || '',
       endDate: formatDateForInput(course.endDate) || '',
       schedule: course.schedule || '',
-      materials: course.materials || ''
+
+      whatYouWillLearn: course.whatYouWillLearn || [],
+      requirements: course.requirements || []
     });
     setIsDialogOpen(true);
   };
@@ -236,7 +247,6 @@ const AdminCourses = () => {
                 className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
                 onClick={resetForm}
               >
-
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </Button>
@@ -315,22 +325,22 @@ const AdminCourses = () => {
                       type="number"
                       placeholder="e.g., 30"
                       value={formData.maxParticipants}
-                    onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
-                  />
+                      onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="registrationFee">Registration Fee (₹)</Label>
-                  <Input
-                    id="registrationFee"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="e.g., 500 (leave blank for free)"
-                    value={formData.registrationFee}
-                    onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value })}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="registrationFee">Registration Fee (₹)</Label>
+                    <Input
+                      id="registrationFee"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g., 500 (leave blank for free)"
+                      value={formData.registrationFee}
+                      onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value })}
                     />
                   </div>
                 </div>
@@ -378,37 +388,56 @@ const AdminCourses = () => {
                   />
                 </div>
 
+
+
+                {/* What You'll Learn */}
                 <div className="space-y-2">
-                  <Label htmlFor="materials">Required Materials</Label>
+                  <Label htmlFor="whatYouWillLearn">What You'll Learn</Label>
                   <Textarea
-                    id="materials"
-                    placeholder="e.g., Mushaf, notebook, recording app"
-                    value={formData.materials}
-                    onChange={(e) => setFormData({ ...formData, materials: e.target.value })}
+                    id="whatYouWillLearn"
+                    placeholder=""
+                    value={formData.whatYouWillLearn.join('\n')}
+                    onChange={(e) =>
+                      setFormData({ ...formData, whatYouWillLearn: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })
+                    }
+                    rows={4}
+                  />
+                </div>
+
+                {/* Requirements */}
+                <div className="space-y-2">
+                  <Label htmlFor="requirements">Requirements</Label>
+                  <Textarea
+                    id="requirements"
+                    placeholder=""
+                    value={formData.requirements.join('\n')}
+                    onChange={(e) =>
+                      setFormData({ ...formData, requirements: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })
+                    }
                     rows={3}
                   />
-            </div>
+                </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-gradient-primary hover:opacity-90"
-                  disabled={createCourse.isPending || updateCourse.isPending}
-                >
-                  {(createCourse.isPending || updateCourse.isPending) ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {editingCourse ? 'Updating...' : 'Creating...'}
-                    </>
-                  ) : (
-                    editingCourse ? 'Update Course' : 'Create Course'
-                  )}
-                </Button>
-              </div>
-            </form>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button type="button" variant="outline" onClick={resetForm}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-primary hover:opacity-90"
+                    disabled={createCourse.isPending || updateCourse.isPending}
+                  >
+                    {(createCourse.isPending || updateCourse.isPending) ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        {editingCourse ? 'Updating...' : 'Creating...'}
+                      </>
+                    ) : (
+                      editingCourse ? 'Update Course' : 'Create Course'
+                    )}
+                  </Button>
+                </div>
+              </form>
             </div>
           </DialogContent>
         </Dialog>

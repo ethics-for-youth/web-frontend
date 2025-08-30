@@ -146,7 +146,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="education">Education Level</Label>
+                <Label htmlFor="education">Education Level *</Label>
                 <Input
                   id="education"
                   value={userDetails.education}
@@ -190,14 +190,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
           <div className="bg-red-50 border border-red-200 rounded-lg p-3">
             <p className="text-red-800 text-sm font-medium">
               🚫 This course is fully booked. Join our waitlist to be notified if spots open up.
-            </p>
-          </div>
-        )}
-
-        {course.materials && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-blue-800 text-sm">
-              <span className="font-medium">Required Materials:</span> {course.materials}
             </p>
           </div>
         )}

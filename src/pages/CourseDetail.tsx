@@ -159,26 +159,32 @@ const CourseDetail = () => {
                 {/* What You'll Learn */}
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-foreground mb-4">What You'll Learn</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {courseBenefits.map((benefit, index) => (
-                      <div key={index} className="flex items-start space-x-3">
-                        <CheckCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                        <span className="text-muted-foreground">{benefit}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {course.whatYouWillLearn && course.whatYouWillLearn.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {course.whatYouWillLearn.map((item, index) => (
+                        <div key={index} className="flex items-start space-x-3">
+                          <CheckCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                          <span className="text-muted-foreground">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No learning outcomes provided.</p>
+                  )}
                 </div>
 
                 {/* Course Requirements */}
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Requirements</h2>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li>• Basic knowledge of Arabic letters (helpful but not required)</li>
-                    <li>• Commitment to attend weekly sessions</li>
-                    <li>• Open mind and willingness to learn</li>
-                    <li>• Note-taking materials</li>
-                    {course.materials && <li>• Required Materials: {course.materials}</li>}
-                  </ul>
+                  {course.requirements && course.requirements.length > 0 ? (
+                    <ul className="space-y-2 text-muted-foreground">
+                      {course.requirements.map((req, index) => (
+                        <li key={index}>• {req}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground">No special requirements listed.</p>
+                  )}
                 </div>
 
                 {/* Course Schedule */}
