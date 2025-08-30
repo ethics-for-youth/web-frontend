@@ -35,7 +35,6 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
     age: '',
     gender: '',
     education: '',
-    address: '',
     joinCommunity: false
   });
   const { toast } = useToast();
@@ -78,8 +77,7 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
     userDetails.phone &&
     userDetails.age &&
     userDetails.gender &&
-    userDetails.education &&
-    userDetails.address;
+    userDetails.education;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -165,15 +163,6 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={userDetails.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your address"
-                />
-              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -233,7 +222,7 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                 email: userDetails.email,
                 phone: userDetails.phone,
                 notes: {
-                  details: `Registration via event form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}, Address: ${userDetails.address || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                  details: `Registration via event form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
                 }
               }}
               itemDetails={{
