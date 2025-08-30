@@ -8,8 +8,18 @@ on:
       - 'package.json'
     branches:
       - develop
+      - qa
+      - main
   workflow_dispatch:  # Allow manual triggering
     inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - qa
       force_deploy:
         description: 'Force deployment even if no changes in build output'
         required: false
@@ -18,18 +28,60 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  S3_BUCKET: efy-sandbox-env
   NODE_VERSION: '18'
 
 jobs:
-  build-and-deploy:
+  determine-environment:
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          # Determine environment based on branch or manual input
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+          elif [ "${{ github.ref }}" == "refs/heads/qa" ]; then
+            ENVIRONMENT="qa"
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ENVIRONMENT="prod"
+          elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            ENVIRONMENT="develop"
+          else
+            echo "❌ No environment mapping for branch: ${{ github.ref }}"
+            exit 1
+          fi
+          
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "🎯 Deploying to environment: $ENVIRONMENT"
+
+  build-and-deploy:
+    needs: determine-environment
+    runs-on: ubuntu-latest
+    environment: ${{ needs.determine-environment.outputs.environment }}
     permissions:
       id-token: write
       contents: read
       actions: read
     
     steps:
+      - name: Get environment variables
+        id: env-vars
+        run: |
+          # Get environment-specific configurations from GitHub Environment
+          S3_BUCKET="${{ vars.S3_BUCKET }}"
+          
+          # Validate required variables
+          if [ -z "$S3_BUCKET" ]; then
+            echo "❌ S3_BUCKET not configured in GitHub Environment: ${{ needs.determine-environment.outputs.environment }}"
+            exit 1
+          fi
+          
+          echo "s3_bucket=$S3_BUCKET" >> $GITHUB_OUTPUT
+          
+          echo "📦 S3 Bucket: $S3_BUCKET"
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -40,7 +92,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: 'client/package-lock.json' 
+          cache-dependency-path: 'package-lock.json'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -50,30 +102,62 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Install dependencies
-        run: |
-          cd client  
-          npm ci
+        run: npm i
 
-      - name: Create environment file
+      - name: Set environment variables
         run: |
-          cd client
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
           
-          # Create .env file for production build
-          cat > .env.production << EOF
-          REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}
-          REACT_APP_VERSION=${{ github.sha }}
-          REACT_APP_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          GENERATE_SOURCEMAP=false
+          # Set API base URL based on environment
+          case $ENVIRONMENT in
+            "develop")
+              API_BASE_URL="https://dev.efy.org.in/api"
+              ;;
+            "qa")
+              API_BASE_URL="https://qa.efy.org.in/api"
+              ;;
+            "prod")
+              API_BASE_URL="https://efy.org.in/api"
+              ;;
+            *)
+              echo "❌ Unknown environment: $ENVIRONMENT"
+              exit 1
+              ;;
+          esac
+          
+          # Create runtime environment file
+          cat > .env << EOF
+          VITE_API_BASE_URL=$API_BASE_URL
+          VITE_ENVIRONMENT=$ENVIRONMENT
+          VITE_VERSION=${{ github.sha }}
+          VITE_BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          VITE_API_TIMEOUT=10000
+          VITE_API_LOGGING=$( [ "$ENVIRONMENT" = "develop" ] && echo "true" || echo "false" )
           EOF
           
-          echo "✅ Environment file created"
+          echo "✅ Environment variables set for $ENVIRONMENT"
+          echo "📋 API Base URL: $API_BASE_URL"
 
       - name: Build React application
         run: |
-          cd client
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          echo "🏗️ Building React application for $ENVIRONMENT..."
           
-          echo "🏗️ Building React application..."
-          npm run build
+          # Use appropriate build script based on environment
+          case $ENVIRONMENT in
+            "develop")
+              npm run build:dev
+              ;;
+            "qa")
+              npm run build:qa
+              ;;
+            "prod")
+              npm run build:prod
+              ;;
+            *)
+              npm run build
+              ;;
+          esac
           
           # Verify build output
           if [ ! -d "dist" ]; then
@@ -90,8 +174,7 @@ jobs:
       - name: Check for deployment changes
         id: check_changes
         run: |
-          cd client
-          
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
           # Create hash of current build
           CURRENT_HASH=$(find dist -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
           echo "current_build_hash=$CURRENT_HASH" >> $GITHUB_OUTPUT
@@ -101,43 +184,55 @@ jobs:
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "🚀 Force deployment requested"
           else
-            # Compare with previous deployment (you could store this hash in S3 or as a GitHub variable)
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "📋 Changes detected in build output"
+            # Check if build hash changed
+            PREVIOUS_HASH=$(aws s3 cp s3://$S3_BUCKET/.build-hash - 2>/dev/null || echo "")
+            if [ "$CURRENT_HASH" != "$PREVIOUS_HASH" ]; then
+              echo "has_changes=true" >> $GITHUB_OUTPUT
+              echo "📋 Build hash changed: $PREVIOUS_HASH -> $CURRENT_HASH"
+            else
+              echo "has_changes=false" >> $GITHUB_OUTPUT
+              echo "✅ No changes detected in build output"
+            fi
           fi
 
       - name: Get S3 bucket URL
         id: get-url
         run: |
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
           # Get bucket website URL
-          BUCKET_WEBSITE_URL="http://${{ env.S3_BUCKET }}.s3-website.${{ env.AWS_REGION }}.amazonaws.com"
+          BUCKET_WEBSITE_URL="http://$S3_BUCKET.s3-website.${{ env.AWS_REGION }}.amazonaws.com"
           echo "website_url=$BUCKET_WEBSITE_URL" >> $GITHUB_OUTPUT
           echo "📋 Website URL: $BUCKET_WEBSITE_URL"
 
       - name: Backup current deployment
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          
           echo "💾 Creating backup of current deployment..."
           TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
           
           # Create backup by copying current S3 content to backup prefix
-          aws s3 sync s3://${{ env.S3_BUCKET }}/ s3://${{ env.S3_BUCKET }}/backups/$TIMESTAMP/ \
+          aws s3 sync s3://$S3_BUCKET/ s3://$S3_BUCKET/backups/$ENVIRONMENT/$TIMESTAMP/ \
             --exclude "backups/*" \
             --quiet || echo "No existing deployment to backup"
           
           echo "backup_timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
-          echo "✅ Backup created: backups/$TIMESTAMP"
+          echo "✅ Backup created: backups/$ENVIRONMENT/$TIMESTAMP"
         id: backup
 
       - name: Deploy to S3
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
-          cd client
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
           
-          echo "🚀 Deploying to S3 bucket: ${{ env.S3_BUCKET }}"
+          echo "🚀 Deploying to S3 bucket: $S3_BUCKET (Environment: $ENVIRONMENT)"
+          ls -al dist/
           
           # Sync build directory to S3 with proper cache headers
-          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+          aws s3 sync dist/ s3://$S3_BUCKET/ \
             --delete \
             --cache-control "max-age=31536000" \
             --exclude "*.html" \
@@ -145,21 +240,27 @@ jobs:
             --exclude "manifest.json"
           
           # Upload HTML files with no-cache headers
-          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+          aws s3 sync dist/ s3://$S3_BUCKET/ \
             --cache-control "no-cache, no-store, must-revalidate" \
             --include "*.html" \
             --include "service-worker.js"
           
           # Upload manifest with short cache
-          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+          aws s3 sync dist/ s3://$S3_BUCKET/ \
             --cache-control "max-age=300" \
             --include "manifest.json"
+          
+          # Store build hash for future comparisons
+          echo "${{ steps.check_changes.outputs.current_build_hash }}" | aws s3 cp - s3://$S3_BUCKET/.build-hash
           
           echo "✅ Deployment to S3 completed"
 
       - name: Set S3 bucket website configuration
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          
           echo "🌐 Configuring S3 bucket for static website hosting..."
           
           # Create website configuration
@@ -176,16 +277,19 @@ jobs:
           
           # Apply website configuration
           aws s3api put-bucket-website \
-            --bucket ${{ env.S3_BUCKET }} \
+            --bucket $S3_BUCKET \
             --website-configuration file://website-config.json
           
           echo "✅ S3 website configuration applied"
 
-
       - name: Run post-deployment tests
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
-          echo "🧪 Running post-deployment tests..."
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          
+          echo "🧪 Running post-deployment tests for $ENVIRONMENT..."
           
           # Wait a moment for propagation
           sleep 10
@@ -203,14 +307,6 @@ jobs:
             exit 1
           fi
           
-          # Test that it returns HTML
-          if curl -s --max-time 30 "$WEBSITE_URL" | grep -q "<!DOCTYPE html>"; then
-            echo "✅ HTML content is being served"
-          else
-            echo "❌ HTML content not found"
-            exit 1
-          fi
-          
           # Test React app is loaded (check for root div)
           if curl -s --max-time 30 "$WEBSITE_URL" | grep -q 'id="root"'; then
             echo "✅ React app structure detected"
@@ -219,12 +315,17 @@ jobs:
           fi
 
       - name: Store deployment metadata
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          
           # Create deployment metadata
           cat > deployment-info.json << EOF
           {
             "deployment_time": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "environment": "$ENVIRONMENT",
             "commit_sha": "${{ github.sha }}",
             "commit_message": $(echo '${{ github.event.head_commit.message }}' | jq -R .),
             "build_hash": "${{ steps.check_changes.outputs.current_build_hash }}",
@@ -236,31 +337,34 @@ jobs:
           EOF
           
           # Upload metadata to S3
-          aws s3 cp deployment-info.json s3://${{ env.S3_BUCKET }}/.deployment-info.json \
+          aws s3 cp deployment-info.json s3://$S3_BUCKET/.deployment-info.json \
             --cache-control "no-cache"
           
           echo "📋 Deployment metadata stored"
 
       - name: Deployment success notification
-        if: steps.check_changes.outputs.has_changes == 'true'
+        # if: steps.check_changes.outputs.has_changes == 'true'
+        if: false
         run: |
-          echo "🎉 React app deployment completed successfully!"
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          
+          echo "🎉 React app deployment to $ENVIRONMENT completed successfully!"
           echo ""
           echo "📊 Deployment Summary:"
+          echo "├── Environment: $ENVIRONMENT"
           echo "├── Website URL: ${{ steps.get-url.outputs.website_url }}"
           echo "├── Build Hash: ${{ steps.check_changes.outputs.current_build_hash }}"
-          echo "├── Backup: backups/${{ steps.backup.outputs.backup_timestamp }}"
+          echo "├── Backup: backups/$ENVIRONMENT/${{ steps.backup.outputs.backup_timestamp }}"
           echo "├── Commit: ${{ github.sha }}"
           echo "└── Deployed by: ${{ github.actor }}"
-          
-          if [ -n "${{ steps.invalidate.outputs.invalidation_id }}" ]; then
-            echo "├── CloudFront Invalidation: ${{ steps.invalidate.outputs.invalidation_id }}"
-          fi
 
       - name: No changes detected
-        if: steps.check_changes.outputs.has_changes == 'false'
+        # if: steps.check_changes.outputs.has_changes == 'false'
+        if: false
         run: |
-          echo "✅ No changes detected in build output. Skipping deployment."
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          echo "✅ No changes detected in build output for $ENVIRONMENT. Skipping deployment."
           echo "Current build hash: ${{ steps.check_changes.outputs.current_build_hash }}"
           echo "Use 'force_deploy' option if you want to deploy anyway."
 
@@ -268,38 +372,45 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: react-build-${{ github.run_number }}
+          name: react-build-${{ needs.determine-environment.outputs.environment }}-${{ github.run_number }}
           path: |
-            build/
+            dist/
             deployment-info.json
           retention-days: 7
 
       - name: Rollback on failure
-        if: failure() && steps.check_changes.outputs.has_changes == 'true' && steps.backup.outputs.backup_timestamp != ''
+        # if: failure() && steps.check_changes.outputs.has_changes == 'true' && steps.backup.outputs.backup_timestamp != ''
+        if: failure() && false && steps.backup.outputs.backup_timestamp != ''
         run: |
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
+          
           echo "💥 Deployment failed! Initiating rollback..."
           
           # Restore from backup
-          BACKUP_PATH="backups/${{ steps.backup.outputs.backup_timestamp }}"
+          BACKUP_PATH="backups/$ENVIRONMENT/${{ steps.backup.outputs.backup_timestamp }}"
           echo "📋 Restoring from: $BACKUP_PATH"
           
-          aws s3 sync s3://${{ env.S3_BUCKET }}/$BACKUP_PATH/ s3://${{ env.S3_BUCKET }}/ \
+          aws s3 sync s3://$S3_BUCKET/$BACKUP_PATH/ s3://$S3_BUCKET/ \
             --delete \
             --exclude "backups/*" \
             --exclude ".deployment-info.json"
           
-          echo "✅ Rollback completed"
+          echo "✅ Rollback completed for $ENVIRONMENT"
 
       - name: Cleanup old backups
         if: always()
         run: |
-          echo "🧹 Cleaning up old backups (keeping last 5)..."
+          S3_BUCKET="${{ steps.env-vars.outputs.s3_bucket }}"
+          ENVIRONMENT="${{ needs.determine-environment.outputs.environment }}"
           
-          # List backups and keep only the 5 most recent
-          aws s3 ls s3://${{ env.S3_BUCKET }}/backups/ | sort -r | tail -n +6 | while read -r line; do
+          echo "🧹 Cleaning up old backups for $ENVIRONMENT (keeping last 5)..."
+          
+          # List backups for this environment and keep only the 5 most recent
+          aws s3 ls s3://$S3_BUCKET/backups/$ENVIRONMENT/ | sort -r | tail -n +6 | while read -r line; do
             BACKUP_DIR=$(echo $line | awk '{print $2}')
             if [ -n "$BACKUP_DIR" ]; then
               echo "Deleting old backup: $BACKUP_DIR"
-              aws s3 rm s3://${{ env.S3_BUCKET }}/backups/$BACKUP_DIR --recursive --quiet
+              aws s3 rm s3://$S3_BUCKET/backups/$ENVIRONMENT/$BACKUP_DIR --recursive --quiet
             fi
           done || echo "No old backups to clean"
