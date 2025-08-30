@@ -303,11 +303,7 @@ const AdminRegistrations = () => {
                           {selectedRegistration.notes && (
                             <div>
                               <h4 className="font-semibold text-foreground">Notes</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {typeof selectedRegistration.notes === "object"
-                                  ? `${selectedRegistration.notes.purpose || ""} ${selectedRegistration.notes.extra_info ? `- ${selectedRegistration.notes.extra_info}` : ""}`
-                                  : selectedRegistration.notes}
-                              </p>
+                              <p className="text-sm text-muted-foreground">{selectedRegistration.notes}</p>
                             </div>
                           )}
 
