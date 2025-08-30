@@ -27,7 +27,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     age: '',
     gender: '',
     education: '',
-    address: '',
     joinCommunity: false
   });
   const { toast } = useToast();
@@ -70,8 +69,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     userDetails.phone &&
     userDetails.age &&
     userDetails.gender &&
-    userDetails.education &&
-    userDetails.address;
+    userDetails.education;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -155,15 +153,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={userDetails.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your address"
-                />
-              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -193,14 +182,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
             </p>
           </div>
         )}
-
-        {course.materials && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-blue-800 text-sm">
-              <span className="font-medium">Required Materials:</span> {course.materials}
-            </p>
-          </div>
-        )}
       </CardContent>
 
       <CardFooter className="pt-6">
@@ -222,7 +203,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 email: userDetails.email,
                 phone: userDetails.phone,
                 notes: {
-                  details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}, Address: ${userDetails.address || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                  details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
                 }
               }}
               itemDetails={{
