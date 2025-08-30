@@ -25,7 +25,6 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
     gender: '',
     age: '',
     education: '',
-    address: '',
     joinCommunity: false,
   });
 
@@ -53,7 +52,7 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
           email: formData.email,
           phone: formData.whatsappNumber,
           skills: ['General Volunteer'], // Default skill - you might want to add a skills field to the form
-          availability: formData.address || 'Flexible', // Using address field as availability for now
+          availability: 'Flexible', // Default availability for volunteer applications
           status: 'pending', // Default status for new applications
           // Note: These fields are optional according to the API spec
           experience: 'Filled via registration form',
@@ -71,7 +70,7 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
           userEmail: formData.email,
           userName: formData.name,
           userPhone: formData.whatsappNumber,
-          notes: `Registration via ${type} form. Age: ${formData.age}, Gender: ${formData.gender}, Education: ${formData.education}, Address: ${formData.address}${formData.joinCommunity ? ', Wants to join community' : ''}`,
+          notes: `Registration via ${type} form. Age: ${formData.age}, Gender: ${formData.gender}, Education: ${formData.education}${formData.joinCommunity ? ', Wants to join community' : ''}`,
         };
 
         await createRegistration.mutateAsync(registrationData);
@@ -85,7 +84,6 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
         gender: '',
         age: '',
         education: '',
-        address: '',
         joinCommunity: false,
       });
     } catch (error) {
@@ -188,17 +186,6 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Address *</Label>
-            <Textarea
-              id="address"
-              value={formData.address}
-              onChange={(e) => handleInputChange('address', e.target.value)}
-              required
-              placeholder="Enter your full address"
-              rows={3}
-            />
-          </div>
 
 
           <div className="flex items-center space-x-2">
