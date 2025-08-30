@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Mail, MessageCircle, Instagram } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -55,11 +55,39 @@ const Footer = () => {
           {/* Contact Info */}
           <div>
             <h3 className="font-semibold mb-4">Connect With Us</h3>
-            <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li>Email: ethicsforyouth@gmail.com</li>
-              <li>WhatsApp: +919214808891</li>
-              <li>Telegram: @EthicsForYouth</li>
-            </ul>
+            <div className="space-y-3">
+              <a 
+                href="mailto:ethicsforyouth@gmail.com" 
+                className="flex items-center space-x-3 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+              >
+                <div className="p-2 bg-primary-foreground/10 rounded-lg">
+                  <Mail className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <span className="text-sm">Email</span>
+              </a>
+              <a 
+                href="https://wa.me/919214808891" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+              >
+                <div className="p-2 bg-primary-foreground/10 rounded-lg">
+                  <MessageCircle className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <span className="text-sm">WhatsApp</span>
+              </a>
+              <a 
+                href="https://instagram.com/ethicsforyouth" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+              >
+                <div className="p-2 bg-primary-foreground/10 rounded-lg">
+                  <Instagram className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <span className="text-sm">Instagram</span>
+              </a>
+            </div>
           </div>
         </div>
 
