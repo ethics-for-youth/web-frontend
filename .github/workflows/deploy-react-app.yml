@@ -9,6 +9,7 @@ on:
     branches:
       - develop
       - qa
+      - main
   workflow_dispatch:  # Allow manual triggering
     inputs:
       environment:
@@ -43,6 +44,8 @@ jobs:
             ENVIRONMENT="${{ github.event.inputs.environment }}"
           elif [ "${{ github.ref }}" == "refs/heads/qa" ]; then
             ENVIRONMENT="qa"
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ENVIRONMENT="prod"
           elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
             ENVIRONMENT="develop"
           else
@@ -113,7 +116,7 @@ jobs:
             "qa")
               API_BASE_URL="https://qa.efy.org.in/api"
               ;;
-            "production")
+            "prod")
               API_BASE_URL="https://efy.org.in/api"
               ;;
             *)
@@ -148,7 +151,7 @@ jobs:
             "qa")
               npm run build:qa
               ;;
-            "production")
+            "prod")
               npm run build:prod
               ;;
             *)
