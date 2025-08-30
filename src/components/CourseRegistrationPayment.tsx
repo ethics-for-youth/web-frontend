@@ -145,6 +145,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="education">Education Level *</Label>
                 <Input
@@ -155,7 +156,8 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 />
               </div>
 
-              <div className="space-y-2">
+
+              <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address">Address</Label>
                 <Input
                   id="address"
@@ -165,6 +167,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 />
               </div>
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="joinCommunity"
