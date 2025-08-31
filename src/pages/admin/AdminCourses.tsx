@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCourses, useCreateCourse, useUpdateCourse, useDeleteCourse } from '@/hooks/useCourses';
 import { Course, CreateCourseRequest, UpdateCourseRequest } from '@/services';
 import { formatDateForInput } from '@/utils/dateUtils';
+import ListInput from '@/components/ui/ListInput';
 
 const AdminCourses = () => {
   const navigate = useNavigate();
@@ -38,12 +39,9 @@ const AdminCourses = () => {
     startDate: '',
     endDate: '',
     schedule: '',
-
     whatYouWillLearn: [] as string[],
     requirements: [] as string[]
   });
-
-
 
   useEffect(() => {
     if (!courses || !Array.isArray(courses)) {
@@ -82,7 +80,6 @@ const AdminCourses = () => {
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
-
           whatYouWillLearn: formData.whatYouWillLearn,
           requirements: formData.requirements,
         };
@@ -100,7 +97,6 @@ const AdminCourses = () => {
           startDate: formData.startDate || undefined,
           endDate: formData.endDate || undefined,
           schedule: formData.schedule || undefined,
-
           whatYouWillLearn: formData.whatYouWillLearn,
           requirements: formData.requirements,
         };
@@ -125,13 +121,13 @@ const AdminCourses = () => {
       startDate: '',
       endDate: '',
       schedule: '',
-
       whatYouWillLearn: [],
       requirements: []
     });
     setEditingCourse(null);
     setIsDialogOpen(false);
   };
+
   const handleEdit = (course: Course) => {
     setEditingCourse(course);
     setFormData({
@@ -146,7 +142,6 @@ const AdminCourses = () => {
       startDate: formatDateForInput(course.startDate) || '',
       endDate: formatDateForInput(course.endDate) || '',
       schedule: course.schedule || '',
-
       whatYouWillLearn: course.whatYouWillLearn || [],
       requirements: course.requirements || []
     });
@@ -388,35 +383,19 @@ const AdminCourses = () => {
                   />
                 </div>
 
-
-
                 {/* What You'll Learn */}
-                <div className="space-y-2">
-                  <Label htmlFor="whatYouWillLearn">What You'll Learn</Label>
-                  <Textarea
-                    id="whatYouWillLearn"
-                    placeholder=""
-                    value={formData.whatYouWillLearn.join('\n')}
-                    onChange={(e) =>
-                      setFormData({ ...formData, whatYouWillLearn: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })
-                    }
-                    rows={4}
-                  />
-                </div>
+                <ListInput
+                  label="What You'll Learn"
+                  items={formData.whatYouWillLearn}
+                  onChange={(items) => setFormData({ ...formData, whatYouWillLearn: items })}
+                />
 
                 {/* Requirements */}
-                <div className="space-y-2">
-                  <Label htmlFor="requirements">Requirements</Label>
-                  <Textarea
-                    id="requirements"
-                    placeholder=""
-                    value={formData.requirements.join('\n')}
-                    onChange={(e) =>
-                      setFormData({ ...formData, requirements: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })
-                    }
-                    rows={3}
-                  />
-                </div>
+                <ListInput
+                  label="Requirements"
+                  items={formData.requirements}
+                  onChange={(items) => setFormData({ ...formData, requirements: items })}
+                />
 
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button type="button" variant="outline" onClick={resetForm}>
