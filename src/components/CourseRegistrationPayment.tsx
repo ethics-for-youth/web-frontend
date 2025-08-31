@@ -27,7 +27,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     age: '',
     gender: '',
     education: '',
-    address: '',
     joinCommunity: false
   });
   const { toast } = useToast();
@@ -71,8 +70,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     Number(userDetails.age) >= 10 &&
     Number(userDetails.age) <= 50 &&
     userDetails.gender &&
-    userDetails.education &&
-    userDetails.address;
+    userDetails.education;
 
 
   return (
@@ -161,6 +159,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
               </div>
 
 
+
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address">Address</Label>
                 <Input
@@ -170,6 +169,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   placeholder="Enter your address"
                 />
               </div>
+
             </div>
 
             <div className="flex items-center space-x-2">
@@ -221,7 +221,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 email: userDetails.email,
                 phone: userDetails.phone,
                 notes: {
-                  details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}, Address: ${userDetails.address || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                  details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
                 }
               }}
               itemDetails={{
