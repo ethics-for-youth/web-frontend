@@ -202,9 +202,8 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 name: userDetails.name,
                 email: userDetails.email,
                 phone: userDetails.phone,
-                notes: {
-                  details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
-                }
+                notes: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}, Address: ${userDetails.address || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+
               }}
               itemDetails={{
                 id: course.id,

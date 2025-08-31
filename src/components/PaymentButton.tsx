@@ -70,16 +70,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         userName: userDetails.name,
         userEmail: userDetails.email,
         userPhone: userDetails.phone,
-        notes: {
-          customer_id: userDetails.id,
-          item_id: itemDetails.id,
-          item_name: itemDetails.name,
-          item_type: itemDetails.itemType,
-          customer_name: userDetails.name,
-          customer_email: userDetails.email,
-          customer_phone: userDetails.phone,
-          ...userDetails.notes
-        }
+        notes: userDetails.notes
       };
 
       return await createPaymentOrder(orderData);
@@ -117,13 +108,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         email: userDetails.email,
         contact: userDetails.phone
       },
-      notes: {
-        customer_id: userDetails.id,
-        item_id: itemDetails.id,
-        item_type: itemDetails.itemType,
-        order_id: orderData.orderId,
-        ...userDetails.notes
-      },
+      notes: userDetails.notes,
       theme: {
         color: '#3399cc'
       },
