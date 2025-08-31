@@ -176,6 +176,7 @@ const CourseDetail = () => {
                 {/* Course Requirements */}
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Requirements</h2>
+
                   {course.requirements && course.requirements.length > 0 ? (
                     <ul className="space-y-2 text-muted-foreground">
                       {course.requirements.map((req, index) => (
@@ -185,6 +186,7 @@ const CourseDetail = () => {
                   ) : (
                     <p className="text-muted-foreground">No special requirements listed.</p>
                   )}
+
                 </div>
 
                 {/* Course Schedule */}

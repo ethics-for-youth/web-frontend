@@ -93,7 +93,7 @@ export interface Registration {
   gender: 'Male' | 'Female';
   age: number;
   education: string;
-  address: string;
+  address?: string; // Made optional since API doesn't require it
   paymentConfirmation?: File | null; // Optional for events
   joinCommunity: boolean;
   type: 'Event' | 'Course' | 'Volunteer';
