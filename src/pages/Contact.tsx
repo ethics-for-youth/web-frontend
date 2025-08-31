@@ -81,11 +81,11 @@ const Contact = () => {
     },
     {
       icon: MessageSquare,
-      title: 'Telegram',
-      description: 'Join our Telegram channel',
-      value: '@EthicsForYouth',
-      action: 'https://t.me/EthicsForYouth',
-      actionText: 'Join Telegram'
+      title: 'Instagram',
+      description: 'Follow us on Instagram',
+      value: '@ethicsforyouth',
+      action: 'https://instagram.com/ethicsforyouth',
+      actionText: 'Follow on Instagram'
     },
     {
       icon: Mail,

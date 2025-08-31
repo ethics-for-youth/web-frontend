@@ -174,7 +174,7 @@ const CourseDetail = () => {
                   <h2 className="text-xl font-semibold text-foreground mb-4">Requirements</h2>
                   <ul className="space-y-2 text-muted-foreground">
                     <li>• Basic knowledge of Arabic letters (helpful but not required)</li>
-                    <li>• Commitment to attend weekly sessions</li>
+                    <li>• Commitment to attend sessions as per the schedule</li>
                     <li>• Open mind and willingness to learn</li>
                     <li>• Note-taking materials</li>
                     {course.materials && <li>• Required Materials: {course.materials}</li>}
