@@ -24,7 +24,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <img src="/icon.png" alt="EFY Logo" className="w-8 h-8 object-contain" />
+              <img src="/icon.png" alt="EFY Logo" className="w-9 h-9 object-contain" />
               <span className="font-bold text-xl text-foreground">Ethics For Youth</span>
             </Link>
             {/* Environment Indicator - Desktop Only */}
