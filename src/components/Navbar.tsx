@@ -26,15 +26,18 @@ const Navbar = () => {
             <Link to="/" className="flex items-center space-x-2">
               <img src="/icon.png" alt="EFY Logo" className="w-9 h-9 object-contain" />
 
-              <span
-                className="text-2xl font-bold -tracking-wide font-family: 'Nunito', sans-serif;
+              <div className="w-full text-center pb-1">
+                <span
+                  className="text-lg sm:text-md md:text-xl lg:text-2xl font-bold -tracking-wide font-family: 'Nunito', sans-serif;
+                bg-gradient-to-r from-[#4B703D] to-[#2E4A27]
+                dark:from-[#F8FAFC] dark:to-[#94A3B8]
+                bg-clip-text text-transparent"
+                >
+                  Ethics For Youth
+                </span>
+              </div>
 
-                  bg-gradient-to-r from-[#4B703D] to-[#2E4A27] 
-                 dark:from-[#F8FAFC] dark:to-[#94A3B8] 
-                  bg-clip-text text-transparent"
-              >
-                Ethics For Youth
-              </span>
+
 
             </Link>
             {/* Environment Indicator - Desktop Only */}
