@@ -6,7 +6,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useCourses } from '@/hooks/useCourses';
 import heroImage from '@/assets/hero-bg.jpg';
 import { formatDateForDisplay } from '@/utils/dateUtils';
-import WeeklyDuaCard from '@/components/ui/default WeeklyDuaCard';
+import WeeklyDuaCard from '@/components/ui/WeeklyDuaCard';
 
 const Home = () => {
   const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();
