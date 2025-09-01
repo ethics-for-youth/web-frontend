@@ -229,7 +229,6 @@ export const courseBenefits = [
   'Structured learning path with clear objectives',
   'Interactive sessions and Q&A opportunities', 
   'Course materials and resources included',
-  'Certificate of completion',
   'Access to course community',
   'Lifetime access to course materials'
 ];
