@@ -25,7 +25,17 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <img src="/icon.png" alt="EFY Logo" className="w-9 h-9 object-contain" />
-              <span className="font-bold text-xl text-foreground">Ethics For Youth</span>
+
+              <span
+                className="text-2xl font-bold -tracking-wide font-family: 'Nunito', sans-serif;
+
+                  bg-gradient-to-r from-[#4B703D] to-[#2E4A27] 
+                 dark:from-[#F8FAFC] dark:to-[#94A3B8] 
+                  bg-clip-text text-transparent"
+              >
+                Ethics For Youth
+              </span>
+
             </Link>
             {/* Environment Indicator - Desktop Only */}
             {isTestingEnvironment() && (
@@ -41,11 +51,10 @@ const Navbar = () => {
               <Link
                 key={link.name}
                 to={link.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(link.path)
-                    ? 'text-primary bg-primary/10'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive(link.path)
+                  ? 'text-primary bg-primary/10'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
               >
                 {link.name}
               </Link>
@@ -79,11 +88,10 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                    isActive(link.path)
-                      ? 'text-primary bg-primary/10'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive(link.path)
+                    ? 'text-primary bg-primary/10'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
