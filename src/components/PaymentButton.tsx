@@ -2,18 +2,18 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { createPaymentOrder, generateReceiptId, PaymentError } from '@/services/paymentsApi';
-import { 
-  PaymentUserDetails, 
-  PaymentEventDetails, 
+import {
+  PaymentUserDetails,
+  PaymentItemDetails,
   RazorpayResponse,
-  RazorpayOptions 
+  RazorpayOptions
 } from '@/types';
 
 interface PaymentButtonProps {
   amount: number;
   currency?: string;
   userDetails: PaymentUserDetails;
-  eventDetails: PaymentEventDetails;
+  itemDetails: PaymentItemDetails;
   onSuccess?: (response: RazorpayResponse) => void;
   onFailure?: (error: Error) => void;
   onCancel?: () => void;
@@ -26,7 +26,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   amount,
   currency = 'INR',
   userDetails,
-  eventDetails,
+  itemDetails,
   onSuccess,
   onFailure,
   onCancel,
@@ -54,19 +54,31 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   const createOrder = async () => {
     try {
-      const receipt = generateReceiptId('event_reg');
-      
+      const receipt_prefix = itemDetails?.itemType
+        ? `${itemDetails.itemType}_reg`
+        : 'event_reg';
+
+      const receipt = generateReceiptId(receipt_prefix);
+
       const orderData = {
         amount,
         currency,
         receipt,
+        userId: userDetails.id,
+        itemId: itemDetails.id,
+        itemType: itemDetails.itemType,
+        userName: userDetails.name,
+        userEmail: userDetails.email,
+        userPhone: userDetails.phone,
         notes: {
           customer_id: userDetails.id,
-          event_id: eventDetails.id,
-          event_name: eventDetails.name,
+          item_id: itemDetails.id,
+          item_name: itemDetails.name,
+          item_type: itemDetails.itemType,
           customer_name: userDetails.name,
           customer_email: userDetails.email,
-          customer_phone: userDetails.phone
+          customer_phone: userDetails.phone,
+          ...userDetails.notes
         }
       };
 
@@ -79,7 +91,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   const openRazorpayCheckout = (orderData: { orderId: string; amount: number; currency: string }) => {
     const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
-    
     if (!razorpayKey) {
       throw new PaymentError('Razorpay configuration is missing', 'CONFIG_ERROR');
     }
@@ -90,9 +101,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       currency: orderData.currency,
       order_id: orderData.orderId,
       name: 'Ethics For Youth',
-      description: `Payment for ${eventDetails.name}`,
+      description: `Payment for ${itemDetails.name}`,
       image: '/logo.png',
-      handler: function(response: RazorpayResponse) {
+      handler: function (response: RazorpayResponse) {
         console.log('Payment successful:', response);
         toast({
           title: 'Payment Successful',
@@ -107,14 +118,16 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       },
       notes: {
         customer_id: userDetails.id,
-        event_id: eventDetails.id,
-        order_id: orderData.orderId
+        item_id: itemDetails.id,
+        item_type: itemDetails.itemType,
+        order_id: orderData.orderId,
+        ...userDetails.notes
       },
       theme: {
         color: '#3399cc'
       },
       modal: {
-        ondismiss: function() {
+        ondismiss: function () {
           console.log('Payment cancelled by user');
           toast({
             title: 'Payment Cancelled',
@@ -142,22 +155,20 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
       // Create order
       const orderData = await createOrder();
-      
       // Open Razorpay checkout
       openRazorpayCheckout(orderData);
     } catch (error) {
       console.error('Payment error:', error);
-      
-      const errorMessage = error instanceof PaymentError 
-        ? error.message 
+
+      const errorMessage = error instanceof PaymentError
+        ? error.message
         : 'An unexpected error occurred. Please try again.';
-      
+
       toast({
         title: 'Payment Error',
         description: errorMessage,
         variant: 'destructive',
       });
-      
       onFailure?.(error as Error);
     } finally {
       setIsLoading(false);

@@ -93,7 +93,7 @@ export interface Registration {
   gender: 'Male' | 'Female';
   age: number;
   education: string;
-  address: string;
+  address?: string; // Made optional since API doesn't require it
   paymentConfirmation?: File | null; // Optional for events
   joinCommunity: boolean;
   type: 'Event' | 'Course' | 'Volunteer';
@@ -115,24 +115,35 @@ export interface PaymentUserDetails {
   name: string;
   email: string;
   phone: string;
+  notes?: Record<string, string>;
 }
 
-export interface PaymentEventDetails {
+export interface PaymentItemDetails {
   id: string;
   name: string;
+  itemType: 'event' | 'competition' | 'course';
 }
 
 export interface PaymentOrderRequest {
   amount: number;
   currency: string;
   receipt: string;
+  userId: string;
+  itemId: string;
+  itemType: 'event' | 'competition' | 'course';
+  userName: string;
+  userEmail: string;
+  userPhone?: string;
   notes: {
     customer_id: string;
-    event_id: string;
-    event_name: string;
+    item_id: string;
+    item_name: string;
+    item_type: 'event' | 'competition' | 'course';
     customer_name: string;
     customer_email: string;
     customer_phone?: string;
+    details?: string;
+    [key: string]: string | undefined;
   };
 }
 
@@ -163,6 +174,16 @@ export interface RazorpayResponse {
   razorpay_payment_id: string;
   razorpay_order_id: string;
   razorpay_signature: string;
+  orderId: string;
+  registrationId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  receipt: string;
+  notes: Record<string, string>;
+  createdAt: number;
+  requestId: string;
+  timestamp: string;
 }
 
 export interface RazorpayOptions {
