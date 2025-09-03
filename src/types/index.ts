@@ -93,7 +93,7 @@ export interface Registration {
   gender: 'Male' | 'Female';
   age: number;
   education: string;
-  address: string;
+  address?: string;
   paymentConfirmation?: File | null; // Optional for events
   joinCommunity: boolean;
   type: 'Event' | 'Course' | 'Volunteer';
