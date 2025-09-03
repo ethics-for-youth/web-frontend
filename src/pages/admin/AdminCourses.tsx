@@ -351,7 +351,7 @@ const AdminCourses = () => {
                     <Label htmlFor="startDate">Start Date</Label>
                     <Input
                       id="startDate"
-                      type="date"
+                     type="datetime-local" 
                       value={formData.startDate}
                       onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                     />
@@ -361,7 +361,7 @@ const AdminCourses = () => {
                     <Label htmlFor="endDate">End Date</Label>
                     <Input
                       id="endDate"
-                      type="date"
+                    type="datetime-local" 
                       value={formData.endDate}
                       onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                     />

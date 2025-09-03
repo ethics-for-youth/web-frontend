@@ -61,7 +61,6 @@ export const formatTimeForDisplay = (dateValue: unknown): string => {
     return 'Time not available';
   }
 };
-
 // Helper function to format date for datetime-local input
 export const formatDateForInput = (dateValue: unknown): string => {
   const date = parseDate(dateValue);
@@ -76,12 +75,14 @@ export const formatDateForInput = (dateValue: unknown): string => {
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-   return `${year}-${month}-${day}`;
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   } catch (error) {
     console.error('Error formatting date for input:', error);
     return '';
   }
 };
+
 
 // Helper function to check if a date is in the future
 export const isDateInFuture = (dateValue: unknown): boolean => {
