@@ -76,7 +76,7 @@ export const formatDateForInput = (dateValue: unknown): string => {
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+   return `${year}-${month}-${day}`;
   } catch (error) {
     console.error('Error formatting date for input:', error);
     return '';
