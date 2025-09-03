@@ -91,7 +91,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   const openRazorpayCheckout = (orderData: { orderId: string; amount: number; currency: string }) => {
     const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
-
     if (!razorpayKey) {
       throw new PaymentError('Razorpay configuration is missing', 'CONFIG_ERROR');
     }
@@ -156,7 +155,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
       // Create order
       const orderData = await createOrder();
-
       // Open Razorpay checkout
       openRazorpayCheckout(orderData);
     } catch (error) {
@@ -171,7 +169,6 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         description: errorMessage,
         variant: 'destructive',
       });
-
       onFailure?.(error as Error);
     } finally {
       setIsLoading(false);

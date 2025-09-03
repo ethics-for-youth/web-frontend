@@ -3,7 +3,7 @@ import { Calendar, MapPin, User, ArrowRight, Loader2, AlertCircle } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEvents } from '@/hooks/useEvents';
-import eventsImage from '@/assets/events-illustration.jpg';
+import eventsImage from '@/assets/events.png';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const Events = () => {
