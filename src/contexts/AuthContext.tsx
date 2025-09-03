@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { isTestingEnvironment } from '@/utils/environment';
 
 interface Admin {
   id: string;
@@ -16,12 +17,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Mock admin credentials - in production, this would be handled by a secure backend
-const MOCK_ADMIN = {
-  id: '1',
-  email: 'admin@ethicsforyouth.org',
-  password: 'admin123',
-  name: 'Admin User'
+const getMockAdmin = () => {
+  if (isTestingEnvironment()) {
+    return {
+      id: '1',
+      email: 'admin@ethicsforyouth.org',
+      password: 'admin123',
+      name: 'Admin User'
+    };
+  } else {
+    return {
+      id: '1',
+      email: 'prod.admin@efy.org.in',
+      password: 'prodAdmin@2025',
+      name: 'Production Admin'
+    };
+  }
 };
+
+const MOCK_ADMIN = getMockAdmin();
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [admin, setAdmin] = useState<Admin | null>(null);

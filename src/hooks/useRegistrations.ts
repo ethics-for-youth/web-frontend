@@ -2,7 +2,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { registrationsApi, volunteersApi } from '@/services';
 import {
-  Registration,
   NewCreateRegistrationRequest,
   UpdateRegistrationRequest,
   RegistrationFilters

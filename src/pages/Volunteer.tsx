@@ -2,7 +2,7 @@ import { Heart, Users, BookOpen, Hand, Globe, Star } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import RegistrationForm from '@/components/RegistrationForm';
 import { volunteerOpportunities, volunteerBenefits } from '@/data/mockData';
-import volunteerImage from '@/assets/volunteer-illustration.jpg';
+import volunteerImage from '@/assets/volunteer-3.jpg';
 
 const Volunteer = () => {
   // Icon mapping for volunteer opportunities
@@ -181,7 +181,7 @@ const Volunteer = () => {
             <div className="text-sm text-primary-foreground/80">
               Questions? Contact us at{' '}
               <a href="mailto:volunteer@ethicsforyouth.org" className="underline hover:text-primary-foreground">
-                volunteer@ethicsforyouth.org
+             ethicsforyouth@gmail.com
               </a>
             </div>
           </div>

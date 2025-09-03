@@ -17,7 +17,7 @@ const Home = () => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
           style={{ backgroundImage: `url(${heroImage})` }}
         />
@@ -31,7 +31,7 @@ const Home = () => {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Empowering young Muslims with knowledge, ethics, and community engagement 
+              Empowering young Muslims with knowledge, ethics, and community engagement
               rooted in Islamic values. Building character for a better tomorrow.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -60,7 +60,7 @@ const Home = () => {
               Upcoming Events
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Join our community events designed to strengthen faith, build character, 
+              Join our community events designed to strengthen faith, build character,
               and create lasting connections.
             </p>
           </div>
@@ -92,9 +92,13 @@ const Home = () => {
               </Card>
             </div>
           ) : (
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {upcomingEvents.map((event) => (
-                <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card">
+                <Card
+                  key={event.id}
+                  className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
+                >
                   <CardHeader>
                     <CardTitle className="text-primary">{event.title}</CardTitle>
                     <CardDescription>
@@ -105,17 +109,21 @@ const Home = () => {
                       <span className="block mt-1 text-muted-foreground">{event.location}</span>
                     </CardDescription>
                   </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {event.description}
-                  </p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={`/events/${event.id}`}>
-                      Learn More
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
-                  </Button>
-                </CardContent>
+
+                  {/* Make CardContent take all space and push button down */}
+                  <CardContent className="flex flex-col flex-1">
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
+                      {event.description}
+                    </p>
+                    <div className="mt-auto">
+                      <Button asChild variant="outline" className="w-full">
+                        <Link to={`/events/${event.id}`}>
+                          Learn More
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
                 </Card>
               ))}
             </div>
@@ -140,35 +148,45 @@ const Home = () => {
               Featured Courses
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Deepen your understanding of Islam through our comprehensive courses 
+              Deepen your understanding of Islam through our comprehensive courses
               designed for modern Muslim youth.
             </p>
           </div>
 
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {featuredCourses.map((course) => (
-              <Card key={course.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card">
+              <Card
+                key={course.id}
+                className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
+              >
                 <CardHeader>
                   <CardTitle className="text-primary">{course.title}</CardTitle>
                   <CardDescription>
-                    <span className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">{course.duration}</span>
-                      <span className="text-sm font-medium text-accent-foreground bg-accent px-2 py-1 rounded">
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-sm text-muted-foreground font-medium">
+                        {course.duration}
+                      </span>
+                      <span className="text-sm font-medium text-accent-foreground bg-accent px-3 py-1 rounded-full">
                         {course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : 'All Levels'}
                       </span>
-                    </span>
+                    </div>
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+
+                {/* Stretch content and push button down */}
+                <CardContent className="flex flex-col flex-1">
                   <p className="text-muted-foreground mb-4 line-clamp-3">
                     {course.description}
                   </p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={`/courses/${course.id}`}>
-                      Learn More
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
-                  </Button>
+                  <div className="mt-auto">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to={`/courses/${course.id}`}>
+                        Learn More
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -192,22 +210,23 @@ const Home = () => {
             Ready to Make a Difference?
           </h2>
           <p className="text-xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
-            Join our community of young Muslims committed to personal growth, 
+            Join our community of young Muslims committed to personal growth,
             community service, and living by Islamic principles.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild variant="secondary" size="lg">
+            <Button asChild variant="secondary" size="lg" className="px-4 py-2">
               <Link to="/volunteer">
                 <Users className="w-5 h-5 mr-2" />
                 Become a Volunteer
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button asChild variant="secondary" size="lg" className="px-4 py-2">
               <Link to="/contact">
                 Get in Touch
               </Link>
             </Button>
           </div>
+
         </div>
       </section>
     </div>

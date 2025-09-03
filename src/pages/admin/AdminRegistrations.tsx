@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom'; // Add useLocation
 import { Eye, Download, Search, Filter, CheckCircle, Circle, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,36 +13,39 @@ import { formatDateForDisplay } from '@/utils/dateUtils';
 
 const AdminRegistrations = () => {
   const location = useLocation();
-
-  const initialTypeFilter = location.state?.itemType && ['event', 'course', 'competition'].includes(location.state.itemType)
-    ? location.state.itemType
-    : 'all';
-  const initialTitleFilter = location.state?.title || 'all';
-
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'event' | 'course' | 'competition'>(initialTypeFilter);
-  const [titleFilter, setTitleFilter] = useState(initialTitleFilter);
+  const [typeFilter, setTypeFilter] = useState<'all' | 'event' | 'course' | 'competition'>('all');
+  const [titleFilter, setTitleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'registered' | 'completed' | 'cancelled'>('all');
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
 
-  // Backend filters
-  const filters: { itemType?: string; title?: string; status?: string } = {};
-  if (typeFilter !== 'all') filters.itemType = typeFilter;
-  if (titleFilter !== 'all') filters.title = titleFilter;
+  useEffect(() => {
+    if (location.state) {
+      const { itemType, title } = location.state;
+      if (itemType && ['event', 'course', 'competition'].includes(itemType)) {
+        setTypeFilter(itemType);
+      }
+      if (title) {
+        setTitleFilter(title);
+      }
+    }
+  }, [location.state]);
 
-  const { data, isLoading, error } = useRegistrations(filters);
-  const registrations = data?.registrations || [];
-  const availableTitles = data?.availableTitles || [];
+  // Backend filters
+  const filters: { itemType?: 'event' | 'course' | 'competition'; title?: string; status?: 'registered' | 'completed' | 'cancelled' } = {};
+  if (typeFilter !== 'all') filters.itemType = typeFilter as 'event' | 'course' | 'competition';
+  if (titleFilter !== 'all') filters.title = titleFilter;
+  if (statusFilter !== 'all') filters.status = statusFilter as 'registered' | 'completed' | 'cancelled';
+
+  const { data, isLoading, error, refetch } = useRegistrations(filters);
+  const registrations = useMemo(() => data?.registrations || [], [data?.registrations]);
+  const availableTitles = useMemo(() => data?.availableTitles || [], [data?.availableTitles]);
 
   const updateRegistration = useUpdateRegistration();
-
-  // Synchronously reset titleFilter when typeFilter changes
-  const handleTypeFilterChange = (newType: 'all' | 'event' | 'course' | 'competition') => {
-    setTypeFilter(newType);
-    if (newType !== initialTypeFilter) {
-      setTitleFilter('all');
-    }
-  };
+  // Refetch whenever backend filters change
+  useEffect(() => {
+    refetch();
+  }, [typeFilter, titleFilter, statusFilter, refetch]);
 
   // Filter registrations on frontend using searchTerm and status
   const filteredRegistrations = useMemo(() => {
@@ -58,6 +61,7 @@ const AdminRegistrations = () => {
         statusFilter === 'all' ? true : reg.status === statusFilter
       );
   }, [registrations, searchTerm, statusFilter]);
+
 
   const getTypeColor = (itemType: string) => {
     switch (itemType) {
@@ -126,7 +130,12 @@ const AdminRegistrations = () => {
         reg.status,
         formatDateForDisplay(reg.registeredAt),
         formatDateForDisplay(reg.updatedAt),
-        reg.notes ? reg.notes.replace(/,/g, ';') : ''
+        reg.notes
+          ? typeof reg.notes === "object"
+            ? `${reg.notes.purpose || ""} - ${reg.notes.extra_info || ""}`
+            : reg.notes.replace(/,/g, ';')
+          : ''
+
       ])
     ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
 
@@ -167,7 +176,7 @@ const AdminRegistrations = () => {
               </div>
             </div>
 
-            <Select value={typeFilter} onValueChange={handleTypeFilterChange}>
+            <Select value={typeFilter} onValueChange={(value: string) => setTypeFilter(value as 'all' | 'event' | 'course' | 'competition')}>
               <SelectTrigger><SelectValue placeholder="Filter by type" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
@@ -187,7 +196,7 @@ const AdminRegistrations = () => {
               </SelectContent>
             </Select>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value as 'all' | 'registered' | 'completed' | 'cancelled')}>
               <SelectTrigger>
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -236,9 +245,15 @@ const AdminRegistrations = () => {
                     </div>
                     {registration.notes && (
                       <div className="mt-2 text-sm">
-                        <strong>Notes:</strong> <span className="text-muted-foreground">{registration.notes}</span>
+                        <strong>Notes:</strong>{" "}
+                        <span className="text-muted-foreground">
+                          {typeof registration.notes === "object"
+                            ? `${registration.notes.purpose || ""} ${registration.notes.extra_info ? `- ${registration.notes.extra_info}` : ""}`
+                            : registration.notes}
+                        </span>
                       </div>
                     )}
+
                   </CardDescription>
                 </div>
 
@@ -288,9 +303,14 @@ const AdminRegistrations = () => {
                           {selectedRegistration.notes && (
                             <div>
                               <h4 className="font-semibold text-foreground">Notes</h4>
-                              <p className="text-sm text-muted-foreground">{selectedRegistration.notes}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {selectedRegistration.notes && typeof selectedRegistration.notes === "object"
+                                  ? `${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).purpose || ""} ${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).extra_info ? `- ${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).extra_info}` : ""}`
+                                  : selectedRegistration.notes}
+                              </p>
                             </div>
                           )}
+
                         </div>
                       )}
                     </DialogContent>

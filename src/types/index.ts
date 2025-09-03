@@ -12,6 +12,7 @@ export interface Event {
   status: string;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
+  registrationFee?: number; // Event fee for payment integration
 }
 
 export interface Competition {
@@ -73,6 +74,15 @@ export interface Course {
   mode: string; // e.g., "Online", "In-person", "Hybrid"
   enrollmentLink: string;
   isActive: boolean;
+  registrationFee?: number; // Course fee for payment integration
+  maxParticipants?: number;
+  instructor?: string;
+  level?: string;
+  materials?: string;
+  startDate?: string;
+  endDate?: string;
+  schedule?: string;
+  status?: string;
 }
 
 export interface Registration {
@@ -83,7 +93,7 @@ export interface Registration {
   gender: 'Male' | 'Female';
   age: number;
   education: string;
-  address: string;
+  address?: string; // Made optional since API doesn't require it
   paymentConfirmation?: File | null; // Optional for events
   joinCommunity: boolean;
   type: 'Event' | 'Course' | 'Volunteer';
@@ -97,4 +107,113 @@ export interface ContactForm {
   name: string;
   email: string;
   message: string;
+}
+
+// Payment related types
+export interface PaymentUserDetails {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  notes?: Record<string, string>;
+}
+
+export interface PaymentItemDetails {
+  id: string;
+  name: string;
+  itemType: 'event' | 'competition' | 'course';
+}
+
+export interface PaymentOrderRequest {
+  amount: number;
+  currency: string;
+  receipt: string;
+  userId: string;
+  itemId: string;
+  itemType: 'event' | 'competition' | 'course';
+  userName: string;
+  userEmail: string;
+  userPhone?: string;
+  notes: {
+    customer_id: string;
+    item_id: string;
+    item_name: string;
+    item_type: 'event' | 'competition' | 'course';
+    customer_name: string;
+    customer_email: string;
+    customer_phone?: string;
+    details?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+export interface PaymentOrderResponse {
+  success: boolean;
+  message: string;
+  data: {
+    orderId: string;
+    amount: number;
+    currency: string;
+    status: string;
+    receipt: string;
+    notes: Record<string, string>;
+    createdAt: number;
+    timestamp: string;
+  };
+}
+
+export interface PaymentErrorResponse {
+  success: false;
+  error: {
+    message: string;
+    code: string;
+  };
+}
+
+export interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+  orderId: string;
+  registrationId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  receipt: string;
+  notes: Record<string, string>;
+  createdAt: number;
+  requestId: string;
+  timestamp: string;
+}
+
+export interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  order_id: string;
+  name: string;
+  description: string;
+  image?: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: {
+    name: string;
+    email: string;
+    contact: string;
+  };
+  notes: Record<string, string>;
+  theme: {
+    color: string;
+  };
+  modal: {
+    ondismiss: () => void;
+  };
+}
+
+// Global Razorpay interface
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => {
+      open: () => void;
+    };
+  }
 }

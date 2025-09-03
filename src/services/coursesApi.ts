@@ -13,13 +13,15 @@ export interface Course {
   category?: string;
   level?: 'beginner' | 'intermediate' | 'advanced';
   maxParticipants?: number;
+  registrationFee?: number;
   startDate?: string;
   endDate?: string;
   schedule?: string;
-  materials?: string;
   status: 'active' | 'inactive' | 'completed';
   createdAt: string;
   updatedAt: string;
+   whatYouWillLearn?: string[]; 
+  requirements?: string[];
 }
 
 export interface CreateCourseRequest {
@@ -30,10 +32,12 @@ export interface CreateCourseRequest {
   category?: string;
   level?: 'beginner' | 'intermediate' | 'advanced';
   maxParticipants?: number;
+  registrationFee?: number;
   startDate?: string;
   endDate?: string;
   schedule?: string;
-  materials?: string;
+  whatYouWillLearn?: string[];
+  requirements?: string[];
 }
 
 export interface UpdateCourseRequest {
@@ -44,11 +48,13 @@ export interface UpdateCourseRequest {
   category?: string;
   level?: 'beginner' | 'intermediate' | 'advanced';
   maxParticipants?: number;
+  registrationFee?: number;
   startDate?: string;
   endDate?: string;
   schedule?: string;
-  materials?: string;
   status?: 'active' | 'inactive' | 'completed';
+  whatYouWillLearn?: string[];
+  requirements?: string[];
 }
 
 export const coursesApi = {

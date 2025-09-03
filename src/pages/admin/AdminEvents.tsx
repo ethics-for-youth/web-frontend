@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Download, Search, Filter, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Download, Search, Filter, Loader2, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from '@/hooks/useEvents';
 import { Event } from '@/types';
 import { formatDateForInput } from '@/utils/dateUtils';
+import { useNavigate } from 'react-router-dom';
 
 const AdminEvents = () => {
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ const AdminEvents = () => {
     location: '',
     category: '',
     maxParticipants: '',
+    registrationFee: '',
     registrationDeadline: '',
     status: 'active'
   });
@@ -69,6 +70,7 @@ const AdminEvents = () => {
             location: formData.location,
             category: formData.category,
             maxParticipants: parseInt(formData.maxParticipants) || 0,
+            registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
             registrationDeadline: formData.registrationDeadline,
             status: formData.status,
           }
@@ -81,6 +83,7 @@ const AdminEvents = () => {
           location: formData.location,
           category: formData.category,
           maxParticipants: parseInt(formData.maxParticipants) || 0,
+          registrationFee: formData.registrationFee ? parseFloat(formData.registrationFee) : undefined,
           registrationDeadline: formData.registrationDeadline,
           status: formData.status,
         });
@@ -99,6 +102,7 @@ const AdminEvents = () => {
       location: '',
       category: '',
       maxParticipants: '',
+      registrationFee: '',
       registrationDeadline: '',
       status: 'active'
     });
@@ -115,6 +119,7 @@ const AdminEvents = () => {
       location: event.location || '',
       category: event.category || '',
       maxParticipants: event.maxParticipants?.toString() || '',
+      registrationFee: event.registrationFee?.toString() || '',
       registrationDeadline: formatDateForInput(event.registrationDeadline),
       status: event.status || 'active'
     };
@@ -225,115 +230,147 @@ const AdminEvents = () => {
                 Add Event
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
-                <DialogDescription>
-                  {editingEvent ? 'Update the event details below.' : 'Fill in the details for the new event.'}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0 [&>button]:hidden">
+
+              <div className="relative bg-background p-6 pb-4 flex-shrink-0">
+                <DialogHeader className="pb-2">
+                  <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
+                  <DialogDescription>
+                    {editingEvent ? 'Update the event details below.' : 'Fill in the details for the new event.'}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
+                  onClick={resetForm}
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto px-6 pb-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Event Title *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category *</Label>
+                      <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="educational">Educational</SelectItem>
+                          <SelectItem value="religious">Religious</SelectItem>
+                          <SelectItem value="social">Social</SelectItem>
+                          <SelectItem value="cultural">Cultural</SelectItem>
+                          <SelectItem value="sports">Sports</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="date">Date & Time *</Label>
+                      <Input
+                        id="date"
+                        type="datetime-local"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="registrationDeadline">Registration Deadline *</Label>
+                      <Input
+                        id="registrationDeadline"
+                        type="datetime-local"
+                        value={formData.registrationDeadline}
+                        onChange={(e) => setFormData({ ...formData, registrationDeadline: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location *</Label>
+                      <Input
+                        id="location"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="maxParticipants">Max Participants *</Label>
+                      <Input
+                        id="maxParticipants"
+                        type="number"
+                        min="1"
+                        value={formData.maxParticipants}
+                        onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Status *</Label>
+                      <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="draft">Draft</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="title">Event Title *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    <Label htmlFor="description">Description *</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={4}
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category *</Label>
-                    <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="educational">Educational</SelectItem>
-                        <SelectItem value="religious">Religious</SelectItem>
-                        <SelectItem value="social">Social</SelectItem>
-                        <SelectItem value="cultural">Cultural</SelectItem>
-                        <SelectItem value="sports">Sports</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Date & Time *</Label>
-                    <Input
-                      id="date"
-                      type="datetime-local"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="registrationDeadline">Registration Deadline *</Label>
-                    <Input
-                      id="registrationDeadline"
-                      type="datetime-local"
-                      value={formData.registrationDeadline}
-                      onChange={(e) => setFormData({ ...formData, registrationDeadline: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location *</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="maxParticipants">Max Participants *</Label>
-                    <Input
-                      id="maxParticipants"
-                      type="number"
-                      min="1"
-                      value={formData.maxParticipants}
-                      onChange={(e) => setFormData({ ...formData, maxParticipants: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status *</Label>
-                    <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="draft">Draft</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={4}
-                    required
-                  />
-                </div>
-                <div className="flex justify-end space-x-2 pt-4">
+                </form>
+              </div>
+
+
+              <div className="bg-background px-6 py-4 flex-shrink-0">
+                <div className="flex justify-end space-x-2">
                   <Button type="button" variant="outline" onClick={resetForm} disabled={isSubmitting}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-gradient-primary hover:opacity-90" disabled={isSubmitting}>
+                  <Button
+                    onClick={handleSubmit}
+                    className="bg-gradient-primary hover:opacity-90"
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -344,7 +381,7 @@ const AdminEvents = () => {
                     )}
                   </Button>
                 </div>
-              </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>

@@ -35,6 +35,9 @@ export const API_ENDPOINTS = {
   
   // Admin Stats
   ADMIN_STATS: '/admin/stats',
+  
+  // Payments
+  PAYMENTS_CREATE_ORDER: '/payments/create-order',
 } as const;
 
 // API Configuration
