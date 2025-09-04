@@ -7,10 +7,14 @@ import EventRegistrationPayment from '@/components/EventRegistrationPayment';
 import { useEvent } from '@/hooks/useEvents';
 import { formatDateForDisplay, formatTimeForDisplay, isDateInFuture } from '@/utils/dateUtils';
 import { RazorpayResponse } from '@/types';
+import { useEffect } from 'react';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: event, isLoading, error } = useEvent(id || '');
+  useEffect(() => {
+  window.scrollTo(0, 0);  
+}, [id]);
 
   const handleEventRegistrationSuccess = (response: RazorpayResponse) => {
     console.log('Event registration successful:', response);
@@ -145,9 +149,9 @@ const EventDetail = () => {
                 <div>
                   <h2 className="text-xl font-semibold text-foreground mb-4">About This Event</h2>
                   <div className="prose prose-slate max-w-none">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {event.description || 'No description available for this event.'}
-                    </p>
+                     <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                       {event.description || 'No description available for this event.'}
+                     </p>
                   </div>
                 </div>
 
