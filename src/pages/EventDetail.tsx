@@ -7,10 +7,14 @@ import EventRegistrationPayment from '@/components/EventRegistrationPayment';
 import { useEvent } from '@/hooks/useEvents';
 import { formatDateForDisplay, formatTimeForDisplay, isDateInFuture } from '@/utils/dateUtils';
 import { RazorpayResponse } from '@/types';
+import { useEffect } from 'react';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: event, isLoading, error } = useEvent(id || '');
+  useEffect(() => {
+  window.scrollTo(0, 0);  
+}, [id]);
 
   const handleEventRegistrationSuccess = (response: RazorpayResponse) => {
     console.log('Event registration successful:', response);

@@ -9,10 +9,13 @@ import { useCourse } from '@/hooks/useCourses';
 import { courseBenefits } from '@/data/mockData';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { RazorpayResponse } from '@/types';
-
+import { useEffect } from 'react';
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: course, isLoading, error } = useCourse(id || '');
+  useEffect(() => {
+  window.scrollTo(0, 0);   
+}, [id]);
 
   const handleCourseRegistrationSuccess = (response: RazorpayResponse) => {
     console.log('Course enrollment successful:', response);
