@@ -150,8 +150,8 @@ const CourseDetail = () => {
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Course Overview</h2>
                   <div className="prose prose-slate max-w-none">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {course.description}
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                       {course.description}
                     </p>
                   </div>
                 </div>

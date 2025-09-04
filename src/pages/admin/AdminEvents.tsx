@@ -477,9 +477,9 @@ const AdminEvents = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground line-clamp-2">{event.description}</p>
-            </CardContent>
+           <CardContent>
+             <p className="text-muted-foreground whitespace-pre-line line-clamp-2">{event.description}</p>
+          </CardContent>
           </Card>
         ))}
       </div>

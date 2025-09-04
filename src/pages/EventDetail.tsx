@@ -145,9 +145,9 @@ const EventDetail = () => {
                 <div>
                   <h2 className="text-xl font-semibold text-foreground mb-4">About This Event</h2>
                   <div className="prose prose-slate max-w-none">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {event.description || 'No description available for this event.'}
-                    </p>
+                     <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                       {event.description || 'No description available for this event.'}
+                     </p>
                   </div>
                 </div>
 
