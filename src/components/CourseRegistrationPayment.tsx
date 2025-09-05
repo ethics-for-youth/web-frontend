@@ -72,7 +72,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     userDetails.gender &&
     userDetails.education;
 
-
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardContent className="space-y-4">
@@ -155,18 +154,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   onChange={(e) => handleInputChange('education', e.target.value)}
                   placeholder="e.g., High School, Bachelor's, etc."
                   required
-                />
-              </div>
-
-
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={userDetails.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your address"
                 />
               </div>
 
