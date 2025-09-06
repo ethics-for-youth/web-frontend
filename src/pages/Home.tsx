@@ -6,7 +6,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useCourses } from '@/hooks/useCourses';
 import heroImage from '@/assets/hero-bg.jpg';
 import { formatDateForDisplay } from '@/utils/dateUtils';
-import DuaCard from '@/components/features/duaCard';
+import DuaCard from '@/components/features/DuaCard';
 
 const Home = () => {
   const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();

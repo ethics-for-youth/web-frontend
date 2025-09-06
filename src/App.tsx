@@ -21,7 +21,7 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
 import AdminMessages from "./pages/admin/AdminMessages";
 import PaymentDemo from "./pages/PaymentDemo";
-import DuaCard from "./components/features/duaCard";
+import DuaCard from "./components/features/DuaCard";
 
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
