@@ -6,6 +6,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useCourses } from '@/hooks/useCourses';
 import heroImage from '@/assets/hero-bg.jpg';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import DuaCard from '@/components/features/duaCard';
 
 const Home = () => {
   const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();
@@ -51,6 +52,22 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <section className="py-5 bg-muted/50">
+        <div className="max-w-auto mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-1">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Weekly Inspirational Dua
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Start your day with a meaningful dua to inspire and uplift your spirit.
+            </p>
+          </div>
+            <DuaCard />
+        </div>
+      </section>
+
+
 
       {/* Upcoming Events Section */}
       <section className="py-16 bg-muted/50">
