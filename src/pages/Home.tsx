@@ -54,7 +54,7 @@ const Home = () => {
       </section>
 
       <section className="py-5 bg-muted/50">
-        <div className="max-w-auto mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-auto mx-auto px-4 sm:px-6 lg:px-8 mt-8">
           <div className="text-center mb-1">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Weekly Inspirational Dua
@@ -63,7 +63,10 @@ const Home = () => {
               Start your day with a meaningful dua to inspire and uplift your spirit.
             </p>
           </div>
-            <DuaCard />
+          <div className='flex justify-center mt-8'>
+             <DuaCard />
+          </div>
+           
         </div>
       </section>
 
