@@ -62,14 +62,16 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   const handleInputChange = (field: string, value: string | boolean) => {
     setUserDetails(prev => ({ ...prev, [field]: value }));
   };
-
   const isFormValid =
     userDetails.name &&
     userDetails.email &&
     userDetails.phone &&
     userDetails.age &&
+    Number(userDetails.age) >= 10 &&
+    Number(userDetails.age) <= 50 &&
     userDetails.gender &&
     userDetails.education;
+
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -121,10 +123,11 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   value={userDetails.age}
                   onChange={(e) => handleInputChange('age', e.target.value)}
                   placeholder="25"
-                  min="13"
-                  max="100"
+                  min="10"
+                  max="50"
                   required
                 />
+
               </div>
 
               <div className="space-y-2">
@@ -142,17 +145,32 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="education">Education Level</Label>
+                <Label htmlFor="education">Education Level *</Label>
                 <Input
                   id="education"
                   value={userDetails.education}
                   onChange={(e) => handleInputChange('education', e.target.value)}
                   placeholder="e.g., High School, Bachelor's, etc."
+                  required
+                />
+              </div>
+
+
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={userDetails.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="Enter your address"
                 />
               </div>
 
             </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="joinCommunity"
