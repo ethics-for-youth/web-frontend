@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import html2canvas from "html2canvas";
 import duaAudio from "@/assets/dua.mp3";
+import icon from "/icon.png";
 // import bgImage from "@/assets/dua-card-2.jpg";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
@@ -97,6 +98,8 @@ export default function DuaCard() {
             alert("Failed to share card. Please try again.");
         }
     };
+
+
 
     return (
         <div className="flex flex-col p-4 sm:p-6">
@@ -272,12 +275,14 @@ export default function DuaCard() {
                                     color: "#2E4A27",
                                     fontFamily: "'Amiri', serif",
                                     boxSizing: "border-box",
+                                    
+                                    
                                 }}
                             >
 
                                 <div className="flex flex-col items-center mb-6">
                                     <h2
-                                        className="text-5xl sm:text-4xl font-bold text-center mb-22"
+                                        className="text-6xl sm:text-5xl font-bold text-center mb-22"
                                         style={{
                                             fontFamily: '"Playfair Display", "Merriweather", serif',
                                             color: "#1f2937", // Use dark color for strong heading
@@ -342,6 +347,49 @@ export default function DuaCard() {
                                 >
                                     {duaData.translation[tranLang]}
                                 </p>
+
+                                {/* Footer: Logo (left) + Website (right) */}
+                                <div
+                                    style={{
+                                        position: "absolute",
+    bottom: "30px",
+    left: "40px",
+    right: "40px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    background: "transparent",   // ✅ no white patch
+    pointerEvents: "none", 
+                                    }}
+                                >
+                                    {/* Logo */}
+                                    <div className="flex items-center space-x-3">
+                                        <img
+                                            src={icon}
+                                            alt="Logo"
+                                            style={{
+                                                width: "80px",
+                                                height: "auto",
+                                                objectFit: "contain",
+                                            }}
+                                        />
+                                        <span className="text-2xl font-semibold text-gradient-to-r from-[#4B703D] to-[#2E4A27] 
+                                        dark:from-[#F8FAFC] dark:to-[#94A3B8] mb-6">
+                                            Ethics For Youth
+                                        </span>
+                                    </div>
+
+                                    {/* Website */}
+                                    <span
+                                        style={{
+                                            fontSize: "28px",
+                                            color: "#374151",
+                                            fontFamily: '"Nunito", sans-serif',
+                                        }}
+                                    >
+                                        www.efy.org.in
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
