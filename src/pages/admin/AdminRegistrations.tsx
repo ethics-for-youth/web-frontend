@@ -18,7 +18,7 @@ const AdminRegistrations = () => {
   const [titleFilter, setTitleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'registered' | 'completed' | 'cancelled'>('all');
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
-
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'none'>('none');
   useEffect(() => {
     if (location.state) {
       const { itemType, title } = location.state;
@@ -48,19 +48,49 @@ const AdminRegistrations = () => {
   }, [typeFilter, titleFilter, statusFilter, refetch]);
 
   // Filter registrations on frontend using searchTerm and status
-  const filteredRegistrations = useMemo(() => {
-    return registrations
-      .filter(reg =>
-        searchTerm
-          ? reg.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase())
-          : true
+  // Step 1: filter based on searchTerm and status
+  const filtered = useMemo(() => {
+    return registrations.filter(reg =>
+      (searchTerm
+        ? reg.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase())
+        : true
       )
-      .filter(reg =>
-        statusFilter === 'all' ? true : reg.status === statusFilter
-      );
+      && (statusFilter === 'all' ? true : reg.status === statusFilter)
+    );
   }, [registrations, searchTerm, statusFilter]);
 
+  // Step 2: sort separately
+  const filteredRegistrations = useMemo(() => {
+    const result = [...filtered];
+
+    if (sortBy === 'name') {
+      result.sort((a, b) => a.userName.localeCompare(b.userName));
+    } else if (sortBy === 'date') {
+      result.sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime());
+    }
+
+    return result;
+  }, [filtered, sortBy]);
+
+  // Compute stats based on filteredRegistrations
+  const stats = useMemo(() => {
+    const byType: Record<string, number> = {};
+    const byItem: Record<string, number> = {};
+    const byStatus: Record<string, number> = {};
+
+    filtered.forEach(reg => {
+      byType[reg.itemType] = (byType[reg.itemType] || 0) + 1;
+      byItem[reg.itemTitle] = (byItem[reg.itemTitle] || 0) + 1;
+      byStatus[reg.status] = (byStatus[reg.status] || 0) + 1;
+    });
+
+    return { byType, byItem, byStatus };
+  }, [filtered]);
+
+
+
+  console.log("ff", filteredRegistrations)
 
   const getTypeColor = (itemType: string) => {
     switch (itemType) {
@@ -76,6 +106,12 @@ const AdminRegistrations = () => {
       case 'registered': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
       case 'completed': return 'bg-blue-100 text-blue-800';
+      case 'pending': return 'bg-gray-100 text-gray-800';          // Order/payment created
+      case 'authorized': return 'bg-purple-100 text-purple-800';  // Payment authorized
+      case 'captured': return 'bg-green-100 text-green-800';      // Payment success
+      case 'failed': return 'bg-red-100 text-red-800';            // Payment failed
+      case 'refunded': return 'bg-blue-100 text-blue-800';        // Full refund
+      case 'paid': return 'bg-green-200 text-green-900';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -215,9 +251,11 @@ const AdminRegistrations = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="authorized">Sent but not received</SelectItem>
+                <SelectItem value="Paid">Paid</SelectItem>
                 <SelectItem value="registered">Registered</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="Failed">Failed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -227,8 +265,73 @@ const AdminRegistrations = () => {
               <Filter className="h-4 w-4 mr-2" /> Clear Filters
             </Button>
           </div>
+          <div className="mt-4 flex space-x-2">
+            <Button
+              variant={sortBy === 'name' ? 'default' : 'outline'}
+              onClick={() => setSortBy('name')}
+            >
+              Sort by Name
+            </Button>
+            <Button
+              variant={sortBy === 'date' ? 'default' : 'outline'}
+              onClick={() => setSortBy('date')}
+            >
+              Sort by Date
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setSortBy('none')}
+            >
+              Reset Sort
+            </Button>
+          </div>
+
         </CardContent>
       </Card>
+
+      <Card className="mb-6 p-4">
+        <CardHeader>
+          <CardTitle>Registrations Stats</CardTitle>
+          <CardDescription>Total Registrations: {filteredRegistrations.length}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* By Type always visible */}
+          <div>
+            <h4 className="font-semibold">By Type</h4>
+            <ul className="text-sm mt-1 space-y-1">
+              {Object.entries(stats.byType).map(([type, count]) => (
+                <li key={type}>{type.charAt(0).toUpperCase() + type.slice(1)}: {count}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* By Item only if a title is selected */}
+          {titleFilter !== 'all' && Object.keys(stats.byItem).length > 0 && (
+            <div>
+              <h4 className="font-semibold">By Item</h4>
+              <ul className="text-sm mt-1 space-y-1 max-h-40 overflow-y-auto">
+                {Object.entries(stats.byItem).map(([title, count]) => (
+                  <li key={title}>{title}: {count}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* By Status only if a status filter is applied */}
+          {statusFilter !== 'all' && Object.keys(stats.byStatus).length > 0 && (
+            <div>
+              <h4 className="font-semibold">By Status</h4>
+              <ul className="text-sm mt-1 space-y-1">
+                {Object.entries(stats.byStatus).map(([status, count]) => (
+                  <li key={status}>{status.charAt(0).toUpperCase() + status.slice(1)}: {count}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
 
       {/* Registrations List */}
       <div className="grid grid-cols-1 gap-4">

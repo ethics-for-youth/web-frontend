@@ -5,19 +5,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useEvents } from '@/hooks/useEvents';
 import eventsImage from '@/assets/events.png';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { Badge } from '@/components/ui/badge';
 
 const Events = () => {
   const { data: events = [], isLoading, error } = useEvents();
-
+  const isLatest = (date: string | number | Date) => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return new Date(date) >= sevenDaysAgo;
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
-              <img 
-                src={eventsImage} 
-                alt="Community Events" 
+              <img
+                src={eventsImage}
+                alt="Community Events"
                 className="w-64 h-48 object-cover rounded-lg shadow-soft"
               />
             </div>
@@ -25,11 +30,11 @@ const Events = () => {
               Community Events
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Join our inspiring events designed to strengthen your faith, build meaningful 
+              Join our inspiring events designed to strengthen your faith, build meaningful
               connections, and contribute to our community's growth.
             </p>
           </div>
-          
+
           <div className="flex justify-center">
             <Card className="p-8">
               <div className="flex items-center space-x-2">
@@ -49,9 +54,9 @@ const Events = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
-              <img 
-                src={eventsImage} 
-                alt="Community Events" 
+              <img
+                src={eventsImage}
+                alt="Community Events"
                 className="w-64 h-48 object-cover rounded-lg shadow-soft"
               />
             </div>
@@ -59,7 +64,7 @@ const Events = () => {
               Community Events
             </h1>
           </div>
-          
+
           <div className="flex justify-center">
             <Card className="p-8 border-destructive">
               <div className="flex items-center space-x-2 text-destructive">
@@ -79,9 +84,9 @@ const Events = () => {
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
-            <img 
-              src={eventsImage} 
-              alt="Community Events" 
+            <img
+              src={eventsImage}
+              alt="Community Events"
               className="w-64 h-48 object-cover rounded-lg shadow-soft"
             />
           </div>
@@ -89,7 +94,7 @@ const Events = () => {
             Community Events
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Join our inspiring events designed to strengthen your faith, build meaningful 
+            Join our inspiring events designed to strengthen your faith, build meaningful
             connections, and contribute to our community's growth.
           </p>
         </div>
@@ -97,7 +102,10 @@ const Events = () => {
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
-            <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full">
+            <Card key={event.id} className="relative shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full">
+              {isLatest(event.createdAt || event.updatedAt) && (
+                <Badge variant="default" className="absolute top-4 right-2 z-20  text-xs font-bold px-3 py-1 rounded-full shadow-lg">New</Badge>
+              )}
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -141,7 +149,7 @@ const Events = () => {
         </div>
 
         {/* No Events Fallback */}
-                  {events.length === 0 && (
+        {events.length === 0 && (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">No Events Available</h3>
@@ -163,7 +171,7 @@ const Events = () => {
               Stay Updated with Our Events
             </h2>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Don't miss out on our inspiring events. Join our community to receive 
+              Don't miss out on our inspiring events. Join our community to receive
               notifications about upcoming programs and activities.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -9,7 +9,11 @@ import coursesImage from '@/assets/Course-2.jpg';
 const Courses = () => {
   const { data: courses = [], isLoading, error } = useCourses();
   const activeCourses = courses.filter(course => course.status === 'active');
-
+  const isLatest = (date: string | number | Date) => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return new Date(date) >= sevenDaysAgo;
+  };
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,9 +77,13 @@ const Courses = () => {
                     <CardTitle className="text-primary group-hover:text-primary-light transition-colors line-clamp-2">
                       {course.title}
                     </CardTitle>
-                    <Badge variant="secondary" className="ml-2 shrink-0">
-                      Active
-                    </Badge>
+                    {/* Badge group */}
+                    <div className="flex items-center space-x-2 ml-2 shrink-0">
+                      <Badge variant="secondary">Active</Badge>
+                      {isLatest(course.createdAt || course.updatedAt) && (
+                        <Badge variant="default">New</Badge>
+                      )}
+                    </div>
                   </div>
                   <CardDescription>
                     <div className="space-y-2">

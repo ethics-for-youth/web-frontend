@@ -77,26 +77,25 @@ export const registrationsApi = {
       if (API_CONFIG.enableLogging) {
         console.log('Registrations API Response:', response.data);
       }
-      let registrations: Registration[] = [];
-      // According to API spec: { success: boolean, message: string, data: { registrations: [], count: number } }
-      if (response.data.success && response.data.data && Array.isArray(response.data.data.registrations)) {
-        registrations = response.data.data;
-      } else if (Array.isArray(response.data)) {
-        registrations = response.data;
-      } else {
-        console.error('Unexpected registrations API response:', response.data);
-        return [];
-      }
 
-      // Transform DynamoDB data if needed
-      if (registrations.length > 0 && isDynamoDBFormatted(registrations[0])) {
-        if (API_CONFIG.enableLogging) {
-          console.log('Transforming DynamoDB formatted registrations data');
+      if (response.data.success && response.data.data) {
+        const { registrations, availableTitles, count, stats } = response.data.data;
+
+        let transformedRegistrations = registrations;
+        if (registrations.length > 0 && isDynamoDBFormatted(registrations[0])) {
+          transformedRegistrations = transformDynamoDBArray(registrations);
         }
-        return transformDynamoDBArray(registrations);
+
+        return {
+          registrations: transformedRegistrations,
+          availableTitles,
+          count,
+          stats
+        };
       }
 
-      return registrations;
+      console.error('Unexpected registrations API response:', response.data);
+      return { registrations: [], availableTitles: [], count: 0, stats: { byType: {}, byItem: {} } };
     } catch (error) {
       throw new Error(handleApiError(error));
     }

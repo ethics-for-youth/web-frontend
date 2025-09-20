@@ -156,7 +156,7 @@ const AdminEvents = () => {
         event.category,
         event.maxParticipants.toString(),
         event.status,
-        event.description.replace(/,/g, ';') // Replace commas to avoid CSV issues
+        event.description.replace(/,/g, ';')
       ])
     ].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
 
