@@ -6,12 +6,18 @@ import { useEvents } from '@/hooks/useEvents';
 import { useCourses } from '@/hooks/useCourses';
 import heroImage from '@/assets/hero-bg.jpg';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { Badge } from '@/components/ui/badge';
 
 const Home = () => {
   const { data: allEvents = [], isLoading: eventsLoading, error: eventsError } = useEvents();
   const { data: allCourses = [], isLoading: coursesLoading } = useCourses();
   const upcomingEvents = Array.isArray(allEvents) ? allEvents.slice(0, 3) : [];
   const featuredCourses = Array.isArray(allCourses) ? allCourses.filter(course => course.status === 'active').slice(0, 3) : [];
+  const isLatest = (date: string | number | Date) => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return new Date(date) >= sevenDaysAgo;
+  };
 
   return (
     <div className="min-h-screen">
@@ -97,8 +103,13 @@ const Home = () => {
               {upcomingEvents.map((event) => (
                 <Card
                   key={event.id}
-                  className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
+                  className="relative shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
                 >
+                  {/* Badge */}
+                  {isLatest(event.createdAt || event.updatedAt) && (
+                    <Badge variant="default" className="absolute top-4 right-2 z-20  text-xs font-bold px-3 py-1 rounded-full shadow-lg">New</Badge>
+                  )}
+
                   <CardHeader>
                     <CardTitle className="text-primary">{event.title}</CardTitle>
                     <CardDescription>
@@ -158,8 +169,11 @@ const Home = () => {
             {featuredCourses.map((course) => (
               <Card
                 key={course.id}
-                className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
+                className=" relative shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
               >
+                {isLatest(course.createdAt || course.updatedAt) && (
+                  <Badge variant="default" className="absolute top-4 right-2 z-20  text-xs font-bold px-3 py-1 rounded-full shadow-lg">New</Badge>
+                )}
                 <CardHeader>
                   <CardTitle className="text-primary">{course.title}</CardTitle>
                   <CardDescription>
