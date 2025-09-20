@@ -48,28 +48,46 @@ const AdminRegistrations = () => {
   }, [typeFilter, titleFilter, statusFilter, refetch]);
 
   // Filter registrations on frontend using searchTerm and status
-  const filteredRegistrations = useMemo(() => {
-    let result = registrations
-      .filter((reg: { userName: string; userEmail: string; }) =>
-        searchTerm
-          ? reg.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase())
-          : true
+  // Step 1: filter based on searchTerm and status
+  const filtered = useMemo(() => {
+    return registrations.filter(reg =>
+      (searchTerm
+        ? reg.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase())
+        : true
       )
-      .filter(reg =>
-        statusFilter === 'all' ? true : reg.status === statusFilter
-      );
+      && (statusFilter === 'all' ? true : reg.status === statusFilter)
+    );
+  }, [registrations, searchTerm, statusFilter]);
+
+  // Step 2: sort separately
+  const filteredRegistrations = useMemo(() => {
+    const result = [...filtered];
 
     if (sortBy === 'name') {
-      result = [...result].sort((a, b) => a.userName.localeCompare(b.userName));
+      result.sort((a, b) => a.userName.localeCompare(b.userName));
     } else if (sortBy === 'date') {
-      result = [...result].sort(
-        (a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime()
-      );
+      result.sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime());
     }
 
     return result;
-  }, [registrations, searchTerm, statusFilter, sortBy]);
+  }, [filtered, sortBy]);
+
+  // Compute stats based on filteredRegistrations
+  const stats = useMemo(() => {
+    const byType: Record<string, number> = {};
+    const byItem: Record<string, number> = {};
+    const byStatus: Record<string, number> = {};
+
+    filtered.forEach(reg => {
+      byType[reg.itemType] = (byType[reg.itemType] || 0) + 1;
+      byItem[reg.itemTitle] = (byItem[reg.itemTitle] || 0) + 1;
+      byStatus[reg.status] = (byStatus[reg.status] || 0) + 1;
+    });
+
+    return { byType, byItem, byStatus };
+  }, [filtered]);
+
 
 
   console.log("ff", filteredRegistrations)
@@ -270,6 +288,51 @@ const AdminRegistrations = () => {
 
         </CardContent>
       </Card>
+
+      <Card className="mb-6 p-4">
+        <CardHeader>
+          <CardTitle>Registrations Stats</CardTitle>
+          <CardDescription>Total Registrations: {filteredRegistrations.length}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* By Type always visible */}
+          <div>
+            <h4 className="font-semibold">By Type</h4>
+            <ul className="text-sm mt-1 space-y-1">
+              {Object.entries(stats.byType).map(([type, count]) => (
+                <li key={type}>{type.charAt(0).toUpperCase() + type.slice(1)}: {count}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* By Item only if a title is selected */}
+          {titleFilter !== 'all' && Object.keys(stats.byItem).length > 0 && (
+            <div>
+              <h4 className="font-semibold">By Item</h4>
+              <ul className="text-sm mt-1 space-y-1 max-h-40 overflow-y-auto">
+                {Object.entries(stats.byItem).map(([title, count]) => (
+                  <li key={title}>{title}: {count}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* By Status only if a status filter is applied */}
+          {statusFilter !== 'all' && Object.keys(stats.byStatus).length > 0 && (
+            <div>
+              <h4 className="font-semibold">By Status</h4>
+              <ul className="text-sm mt-1 space-y-1">
+                {Object.entries(stats.byStatus).map(([status, count]) => (
+                  <li key={status}>{status.charAt(0).toUpperCase() + status.slice(1)}: {count}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+
+
       {/* Registrations List */}
       <div className="grid grid-cols-1 gap-4">
         {filteredRegistrations.map(registration => (
