@@ -75,7 +75,7 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setUserDetails(prev => ({ ...prev, [field]: value }));
-    
+
     if (field === 'phone') {
       const phoneValue = value as string;
       if (phoneValue && !validatePhone(phoneValue)) {
@@ -133,8 +133,12 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
+                  type="tel"
                   value={userDetails.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onChange={(e) => {
+                    const numericValue = e.target.value.replace(/\D/g, ''); // allow only digits
+                    handleInputChange('phone', numericValue);
+                  }}
                   placeholder="9876543210"
                   minLength={10}
                   maxLength={10}
@@ -144,6 +148,7 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                   <p className="text-red-500 text-xs mt-1">{phoneError}</p>
                 )}
               </div>
+
 
               <div className="space-y-2">
                 <Label htmlFor="age">Age *</Label>

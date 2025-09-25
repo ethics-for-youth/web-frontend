@@ -61,13 +61,13 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   const spotsLeft = course.maxParticipants || null;
 
   const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^[6-9]\d{9}$/; 
-    return phoneRegex.test(phone.replace(/\D/g, '')); 
+    const phoneRegex = /^[6-9]\d{9}$/;
+    return phoneRegex.test(phone.replace(/\D/g, ''));
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setUserDetails(prev => ({ ...prev, [field]: value }));
-    
+
     if (field === 'phone') {
       const phoneValue = value as string;
       if (phoneValue && !validatePhone(phoneValue)) {
@@ -81,7 +81,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     userDetails.name &&
     userDetails.email &&
     userDetails.phone &&
-    validatePhone(userDetails.phone) && 
+    validatePhone(userDetails.phone) &&
     userDetails.age &&
     Number(userDetails.age) >= 10 &&
     Number(userDetails.age) <= 50 &&
@@ -124,13 +124,18 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
+                  type="tel"
                   value={userDetails.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onChange={(e) => {
+                    const numericValue = e.target.value.replace(/\D/g, ''); // allow only digits
+                    handleInputChange('phone', numericValue);
+                  }}
                   placeholder="9876543210"
                   minLength={10}
                   maxLength={10}
                   required
                 />
+
                 {phoneError && (
                   <p className="text-red-500 text-xs mt-1">{phoneError}</p>
                 )}
