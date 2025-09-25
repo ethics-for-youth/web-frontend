@@ -67,43 +67,43 @@ const Courses = () => {
         {!isLoading && !error && activeCourses.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {activeCourses.map((course) => (
-              <Card key={course.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full">
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
-                    <CardTitle className="text-primary group-hover:text-primary-light transition-colors line-clamp-2">
-                      {course.title}
-                    </CardTitle>
-                    <Badge variant="secondary" className="ml-2 shrink-0">
-                      Active
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Clock className="w-4 h-4 text-primary" />
-                        <span>{course.duration}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Monitor className="w-4 h-4 text-primary" />
-                        <span>{course.mode}</span>
-                      </div>
+              <Link to={`/courses/${course.id}`} key={course.id} className="block">
+                <Card className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-2">
+                      <CardTitle className="text-primary group-hover:text-primary-light transition-colors line-clamp-2">
+                        {course.title}
+                      </CardTitle>
+                      <Badge variant="secondary" className="ml-2 shrink-0">
+                        Active
+                      </Badge>
                     </div>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col flex-1">
-                  <p className="text-muted-foreground mb-6 line-clamp-4">
-                    {course.description}
-                  </p>
-                  <div className="mt-auto">
-                    <Button asChild className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
-                      <Link to={`/courses/${course.id}`}>
+                    <CardDescription>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-sm">
+                          <Clock className="w-4 h-4 text-primary" />
+                          <span>{course.duration}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-sm">
+                          <Monitor className="w-4 h-4 text-primary" />
+                          <span>{course.mode}</span>
+                        </div>
+                      </div>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col flex-1">
+                    <p className="text-muted-foreground mb-6 line-clamp-4">
+                      {course.description}
+                    </p>
+                    <div className="mt-auto">
+                      <Button className="w-full bg-gradient-primary hover:opacity-90 transition-opacity group-hover:bg-primary-dark">
                         View Details & Enroll
                         <ArrowRight className="w-4 h-4 ml-2" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
