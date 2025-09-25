@@ -29,6 +29,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     education: '',
     joinCommunity: false
   });
+  const [phoneError, setPhoneError] = useState('');
   const { toast } = useToast();
 
   const handlePaymentSuccess = (response: RazorpayResponse) => {
@@ -59,19 +60,33 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
 
   const spotsLeft = course.maxParticipants || null;
 
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^[6-9]\d{9}$/; 
+    return phoneRegex.test(phone.replace(/\D/g, '')); 
+  };
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setUserDetails(prev => ({ ...prev, [field]: value }));
+    
+    if (field === 'phone') {
+      const phoneValue = value as string;
+      if (phoneValue && !validatePhone(phoneValue)) {
+        setPhoneError('Please enter a valid 10-digit phone number');
+      } else {
+        setPhoneError('');
+      }
+    }
   };
   const isFormValid =
     userDetails.name &&
     userDetails.email &&
     userDetails.phone &&
+    validatePhone(userDetails.phone) && 
     userDetails.age &&
     Number(userDetails.age) >= 10 &&
     Number(userDetails.age) <= 50 &&
     userDetails.gender &&
     userDetails.education;
-
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -111,9 +126,14 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   id="phone"
                   value={userDetails.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder="+91 9876543210"
+                  placeholder="9876543210"
+                  minLength={10}
+                  maxLength={10}
                   required
                 />
+                {phoneError && (
+                  <p className="text-red-500 text-xs mt-1">{phoneError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -128,7 +148,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   max="50"
                   required
                 />
-
               </div>
 
               <div className="space-y-2">
@@ -157,19 +176,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   required
                 />
               </div>
-
-
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={userDetails.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your address"
-                />
-              </div>
-
             </div>
 
             <div className="flex items-center space-x-2">
