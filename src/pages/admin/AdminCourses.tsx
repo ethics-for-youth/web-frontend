@@ -559,9 +559,9 @@ const AdminCourses = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground line-clamp-2">{course.description}</p>
-            </CardContent>
+           <CardContent>
+            <p className="text-muted-foreground whitespace-pre-line line-clamp-2">{course.description}</p>
+          </CardContent>
           </Card>
         ))}
       </div>

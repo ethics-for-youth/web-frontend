@@ -95,36 +95,34 @@ const Home = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {upcomingEvents.map((event) => (
-                <Card
-                  key={event.id}
-                  className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
-                >
-                  <CardHeader>
-                    <CardTitle className="text-primary">{event.title}</CardTitle>
-                    <CardDescription>
-                      <span className="flex items-center space-x-2 text-sm">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDateForDisplay(event.date)}</span>
-                      </span>
-                      <span className="block mt-1 text-muted-foreground">{event.location}</span>
-                    </CardDescription>
-                  </CardHeader>
+                <Link to={`/events/${event.id}`} key={event.id} className="block">
+                  <Card 
+                     className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col cursor-pointer group">
+                    <CardHeader>
+                      <CardTitle className="text-primary group-hover:text-primary/80 transition-colors">{event.title}</CardTitle>
+                      <CardDescription>
+                        <span className="flex items-center space-x-2 text-sm">
+                          <Calendar className="w-4 h-4" />
+                          <span>{formatDateForDisplay(event.date)}</span>
+                        </span>
+                        <span className="block mt-1 text-muted-foreground">{event.location}</span>
+                      </CardDescription>
+                    </CardHeader>
 
-                  {/* Make CardContent take all space and push button down */}
-                  <CardContent className="flex flex-col flex-1">
-                    <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {event.description}
-                    </p>
-                    <div className="mt-auto">
-                      <Button asChild variant="outline" className="w-full">
-                        <Link to={`/events/${event.id}`}>
+                    {/* Make CardContent take all space and push button down */}
+                    <CardContent className="flex flex-col flex-1">
+                      <p className="text-muted-foreground mb-4 line-clamp-3">
+                        {event.description}
+                      </p>
+                      <div className="mt-auto">
+                        <Button variant="outline" className="w-full group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
                           Learn More
                           <ArrowRight className="w-4 h-4 ml-2" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           )}
@@ -156,39 +154,38 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {featuredCourses.map((course) => (
-              <Card
-                key={course.id}
-                className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col"
-              >
-                <CardHeader>
-                  <CardTitle className="text-primary">{course.title}</CardTitle>
-                  <CardDescription>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-sm text-muted-foreground font-medium">
-                        {course.duration}
-                      </span>
-                      <span className="text-sm font-medium text-accent-foreground bg-accent px-3 py-1 rounded-full">
-                        {course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : 'All Levels'}
-                      </span>
-                    </div>
-                  </CardDescription>
-                </CardHeader>
+              <Link to={`/courses/${course.id}`} key={course.id} className="block">
+                <Card className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card flex flex-col cursor-pointer group">
+                  <CardHeader>
+                    <CardTitle className="text-primary group-hover:text-primary/80 transition-colors">
+                      {course.title}
+                    </CardTitle>
+                    <CardDescription>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-sm text-muted-foreground font-medium">
+                          {course.duration}
+                        </span>
+                        <span className="text-sm font-medium text-accent-foreground bg-accent px-3 py-1 rounded-full">
+                          {course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : 'All Levels'}
+                        </span>
+                      </div>
+                    </CardDescription>
+                  </CardHeader>
 
-                {/* Stretch content and push button down */}
-                <CardContent className="flex flex-col flex-1">
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {course.description}
-                  </p>
-                  <div className="mt-auto">
-                    <Button asChild variant="outline" className="w-full">
-                      <Link to={`/courses/${course.id}`}>
+                  {/* Stretch content and push button down */}
+                  <CardContent className="flex flex-col flex-1">
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
+                      {course.description}
+                    </p>
+                    <div className="mt-auto">
+                      <Button variant="outline" className="w-full group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
                         Learn More
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                        <ArrowRight className="w-4 h-5 ml-2" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
