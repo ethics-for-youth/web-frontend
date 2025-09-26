@@ -20,6 +20,7 @@ import AdminEvents from "./pages/admin/AdminEvents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
 import AdminMessages from "./pages/admin/AdminMessages";
+import AdminWeeklyDua from "./pages/admin/AdminWeeklyDua";
 import PaymentDemo from "./pages/PaymentDemo";
 import DuaCard from "./components/features/DuaCard";
 
@@ -92,6 +93,15 @@ const App = () => (
                 <AdminLayout>
                   <ErrorBoundary>
                     <AdminMessages />
+                  </ErrorBoundary>
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/weeklyDua" element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminWeeklyDua />
                   </ErrorBoundary>
                 </AdminLayout>
               </ProtectedRoute>

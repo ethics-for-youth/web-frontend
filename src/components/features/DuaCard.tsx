@@ -20,12 +20,12 @@ const duaData = {
         None: "",
         English: "Hasbiyallaahu laa ilaaha illaa Huwa alayhi tawakkaltu wa Huwa Rabbul-Arshil-Adheem",
         Hindi: "हसबियल्लाहु ला इलाहा इल्ला हुवा, अलैहि तवक्कलतु व हुवा रब्बुल अर्शिल अज़ीम",
-        Urdu: "حسبی الله لا إله إلا هو...",
+        // Urdu: "حَسبِیَ اللّٰہُ لَا اِلٰہَ اِلَّا ھُوَ عَلَیہِ تَوَکَّلْتُ وَھُوَ رَبُّ الْعَرشِ الْعَظِیمِ",
     },
     translation: {
         English: "Sufficient for me is Allah there is nothing worthy of worship except for Him, I place my trust in Him, He is the Lord of the mighty throne.",
         Hindi: "अल्लाह मेरे लिए काफी है, उसके सिवा कोई इबादत के लायक नहीं, उसी पर मैंने भरोसा किया, और वही अर्श-ए-अज़ीम का रब है।",
-        Urdu: "مجھ کو اللہ کافی ہے، اس کے سوا کوئی عبادت کے لائق نہیں، اسی پر میں نے بھروسہ किया, اور وہی عرشِ عظیم का رب है۔",
+        Urdu: "اللہ میرے لیے کافی ہے؛ اس کے سوا کوئی عبادت کے لائق نہیں۔ میں نے اسی پر بھروسہ کیا اور وہی عرشِ عظیم کا رب ہے۔",
         RomanUrdu: "Allah mere liye kaafi hai, uske siwa koi ibadat ke layaq nahin, usi par maine bharosa kiya, aur wahi Arsh-e-Azeem ka Rab hai.",
     },
 };
@@ -36,8 +36,9 @@ export default function DuaCard() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [audio] = useState(new Audio(duaAudio));
 
-    const optionsTrans = ["None", "English", "Hindi", "Urdu"];
+    const optionsTrans = ["None", "English", "Hindi" /*, "Urdu"*/];
     const optionsTran = ["English", "Hindi", "Urdu", "RomanUrdu"];
+
 
     const togglePlay = () => {
         if (isPlaying) {
@@ -151,28 +152,22 @@ export default function DuaCard() {
                 </Menu>
             </div>
 
-            <div className="flex flex-col items-center pt-4 pb-4 sm:pt-6 sm:pb-6">
+            <div className="flex flex-col pt-4 pb-4 sm:pt-6 sm:pb-6">
+  <div className="relative w-full max-w-7xl mx-auto"> 
+    <div
+      id="dua-card"
+      className="
+        relative 
+        w-full        /* fixed full width */
+        h-auto        /* only height grows */
+        rounded-2xl
+        shadow-xl
+        p-4 sm:p-10
+        bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]
+        flex flex-col justify-between
+      "
+    >
 
-                <div className="relative w-full max-w-auto mx-auto">
-                    <div
-                        id="dua-card"
-                        // bg-image 
-                        // style={{      
-                        //     backgroundImage: `url(${bgImage})`,
-                        //     backgroundRepeat: "no-repeat",
-                        //     backgroundSize: "cover",
-                        // }}
-                        className="
-                        relative 
-                        w-full 
-                        h-fit
-                        rounded-2xl
-                        shadow-xl
-                        p-4 sm:p-10
-                        bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]
-                        flex flex-col justify-between
-                    "
-                    >
 
                         <p
                             className="text-ms sm:text-base italic text-center mb-6"
@@ -275,8 +270,8 @@ export default function DuaCard() {
                                     color: "#2E4A27",
                                     fontFamily: "'Amiri', serif",
                                     boxSizing: "border-box",
-                                    
-                                    
+
+
                                 }}
                             >
 
@@ -352,14 +347,14 @@ export default function DuaCard() {
                                 <div
                                     style={{
                                         position: "absolute",
-    bottom: "30px",
-    left: "40px",
-    right: "40px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    background: "transparent",   // ✅ no white patch
-    pointerEvents: "none", 
+                                        bottom: "30px",
+                                        left: "40px",
+                                        right: "40px",
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        background: "transparent",   // ✅ no white patch
+                                        pointerEvents: "none",
                                     }}
                                 >
                                     {/* Logo */}
