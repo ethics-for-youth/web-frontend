@@ -107,10 +107,10 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
       </div>
 
       {/* Week info */}
-     <div className="md:col-span-2 flex justify-end items-center space-x-2 text-sm text-gray-500 mt-0">
-  <Badge className="bg-[#5E7839] text-white">Week {weekNum}</Badge>
-  <span>{formattedDate}</span>
-</div>
+      <div className="md:col-span-2 flex justify-end items-center space-x-2 text-sm text-gray-500 mt-0">
+        <Badge className="bg-[#5E7839] text-white">Week {weekNum}</Badge>
+        <span>{formattedDate}</span>
+      </div>
 
 
       {/* Title Field */}
@@ -287,7 +287,10 @@ export default function AdminDuaManagement() {
     <div className="max-w-6xl mx-auto p-8 space-y-8">
       {/* Header and Add Dua button */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Dua Management</h1>
+        <div> <h1 className="text-3xl font-bold text-foreground">Dua Management</h1>
+          <p className="text-muted-foreground">Manage all duas</p>
+        </div>
+
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-primary hover:opacity-90">
