@@ -310,7 +310,7 @@ export default function AdminDuaManagement() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-auto rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 h-8 w-8 active:bg-transparent hover:bg-transparent"
+                className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
                 onClick={() => setOpenDialog(false)}
                 tabIndex={0}
               >
@@ -364,7 +364,7 @@ export default function AdminDuaManagement() {
             <Button
               variant="ghost"
               size="icon"
-              className="ml-auto rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 h-8 w-8 active:bg-transparent hover:bg-transparent"
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
               onClick={() => setEditDialog({ dua: null, open: false })}
               tabIndex={0}
             >
