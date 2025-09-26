@@ -63,7 +63,7 @@ const Home = () => {
               Start your day with a meaningful dua to inspire and uplift your spirit.
             </p>
           </div>
-          <div className='flex justify-center mt-4'>
+          <div className='justify-center mt-4 px-6'>
              <DuaCard />
           </div>
            
