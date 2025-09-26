@@ -108,7 +108,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
 
       {/* Week info */}
      <div className="md:col-span-2 flex justify-end items-center space-x-2 text-sm text-gray-500 mt-0">
-  <Badge className="bg-green-600 text-white">Week {weekNum}</Badge>
+  <Badge className="bg-[#5E7839] text-white">Week {weekNum}</Badge>
   <span>{formattedDate}</span>
 </div>
 
