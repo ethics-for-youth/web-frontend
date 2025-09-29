@@ -63,10 +63,10 @@ const Home = () => {
               Start your day with a meaningful dua to inspire and uplift your spirit.
             </p>
           </div>
-          <div className='justify-center mt-4 px-6'>
-             <DuaCard />
+          <div className='mt-4'>
+            <DuaCard />
           </div>
-           
+
         </div>
       </section>
 

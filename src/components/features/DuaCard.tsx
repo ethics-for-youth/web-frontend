@@ -103,83 +103,66 @@ export default function DuaCard() {
 
 
     return (
-        <div className="flex flex-col p-4 sm:p-6">
-            <div className="top-3 left-4 flex sm:flex-row gap-4">
-                {/* Transcription */}
-                <Menu as="div" className="relative text-left">
-                    <MenuButton className="inline-flex justify-between items-center rounded-lg px-3 py-1.5 bg-gradient-primary hover:opacity-90 transition-opacity text-white text-xs font-medium shadow-sm focus:outline-none">
-                        <span>Transcription: {transLang}</span>
-                        <FaChevronDown className="ml-2 h-3 w-3 text-gray-300 ui-open:rotate-180 transition-transform" />
-                    </MenuButton>
-                    <MenuItems className="absolute left-0 mt-1 w-36 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-10 focus:outline-none">
-                        {optionsTrans.map((opt) => (
-                            <MenuItem key={opt}>
-                                {({ active }) => (
-                                    <div
-                                        onClick={() => setTransLang(opt)}
-                                        className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
-                                            } px-3 py-1 text-xs cursor-pointer rounded-md`}
-                                    >
-                                        {opt}
-                                    </div>
-                                )}
-                            </MenuItem>
-                        ))}
-                    </MenuItems>
-                </Menu>
+        <div className="relative flex flex-col p-4 sm:p-6">
+            <div className="flex flex-col  py-8 sm:py-4 lg:py-4">
+                <div className="absolute top-0 left-4 sm:top-0 sm:left-4 md:top-0 md:left-8  flex flex-row gap-4 z-30">
+                    {/* Transcription */}
+                    <Menu as="div" className="relative text-left">
+                        <MenuButton className="inline-flex justify-between items-center rounded-lg px-3 py-1.5 bg-gradient-primary hover:opacity-90 transition-opacity text-white text-xs font-medium shadow-sm focus:outline-none">
+                            <span>Transcription: {transLang}</span>
+                            <FaChevronDown className="ml-2 h-3 w-3 text-gray-300 ui-open:rotate-180 transition-transform" />
+                        </MenuButton>
+                        <MenuItems className="absolute left-0 mt-1 w-36 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-10 focus:outline-none">
+                            {optionsTrans.map((opt) => (
+                                <MenuItem key={opt}>
+                                    {({ active }) => (
+                                        <div
+                                            onClick={() => setTransLang(opt)}
+                                            className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
+                                                } px-3 py-1 text-xs cursor-pointer rounded-md`}
+                                        >
+                                            {opt}
+                                        </div>
+                                    )}
+                                </MenuItem>
+                            ))}
+                        </MenuItems>
+                    </Menu>
 
-                {/* Translation */}
-                <Menu as="div" className="relative text-left">
-                    <MenuButton className="inline-flex justify-between items-center rounded-lg px-3 py-1.5 bg-gradient-primary hover:opacity-90 text-white text-xs font-medium shadow-sm hover:bg-gray-700 focus:outline-none">
-                        <span>Translation: {tranLang}</span>
-                        <FaChevronDown className="ml-2 h-3 w-3 text-gray-300 ui-open:rotate-180 transition-transform" />
-                    </MenuButton>
-                    <MenuItems className="absolute left-0 mt-1 w-36 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-10 focus:outline-none">
-                        {optionsTran.map((opt) => (
-                            <MenuItem key={opt}>
-                                {({ active }) => (
-                                    <div
-                                        onClick={() => setTranLang(opt)}
-                                        className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
-                                            } px-3 py-1 text-xs cursor-pointer rounded-md`}
-                                    >
-                                        {opt}
-                                    </div>
-                                )}
-                            </MenuItem>
-                        ))}
-                    </MenuItems>
-                </Menu>
-            </div>
+                    {/* Translation */}
+                    <Menu as="div" className="relative text-left">
+                        <MenuButton className="inline-flex justify-between items-center rounded-lg px-3 py-1.5 bg-gradient-primary hover:opacity-90 text-white text-xs font-medium shadow-sm hover:bg-gray-700 focus:outline-none">
+                            <span>Translation: {tranLang}</span>
+                            <FaChevronDown className="ml-2 h-3 w-3 text-gray-300 ui-open:rotate-180 transition-transform" />
+                        </MenuButton>
+                        <MenuItems className="absolute left-0 mt-1 w-36 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-10 focus:outline-none">
+                            {optionsTran.map((opt) => (
+                                <MenuItem key={opt}>
+                                    {({ active }) => (
+                                        <div
+                                            onClick={() => setTranLang(opt)}
+                                            className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
+                                                } px-3 py-1 text-xs cursor-pointer rounded-md`}
+                                        >
+                                            {opt}
+                                        </div>
+                                    )}
+                                </MenuItem>
+                            ))}
+                        </MenuItems>
+                    </Menu>
+                </div>
+                <div className="relative w-full max-w-7xl mx-auto">
+                    <div className="absolute -inset-x-4 -inset-y-6 rounded-3xl opacity-30 blur-3xl bg-green-300"></div>
 
-            <div className="flex flex-col pt-4 pb-4 sm:pt-6 sm:pb-6">
-  <div className="relative w-full max-w-7xl mx-auto"> 
-    <div
-      id="dua-card"
-      className="
-        relative 
-        w-full        /* fixed full width */
-        h-auto        /* only height grows */
-        rounded-2xl
-        shadow-xl
-        p-4 sm:p-10
-        bg-gradient-to-br from-[#fdfcfb] to-[#e2d1c3]
-        flex flex-col justify-between
-      "
-    >
+                    <div
+                        id="dua-card"
+                        className="relative flex flex-col justify-between p-6 bg-white rounded-2xl shadow-xl"
+                    >
 
-
-                        <p
-                            className="text-ms sm:text-base italic text-center mb-6"
-                            style={{
-                                fontFamily: '"Georgia", "Times New Roman", serif',
-                                color: "#4B5563",
-                                fontWeight: 500
-                            }}
-                        >
+                        <p className="text-ms sm:text-base italic text-center mb-6 font-pj text-gray-600">
                             {duaData.title}
                         </p>
-
 
                         {/* Arabic Dua */}
                         <p className="text-2xl sm:text-4xl font-bold text-center text-[#2E4A27] mb-6 font-[Amiri] leading-relaxed">
@@ -259,19 +242,17 @@ export default function DuaCard() {
                                     width: "1080px",
                                     height: "1080px",
                                     padding: "40px 30px",
-                                    backgroundImage: "linear-gradient(to bottom right, #fdfcfb, #e2d1c3)",
+                                    background: "linear-gradient(to top, #a7f3d0 0%, transparent 40%) white",
                                     borderRadius: "1rem",
                                     boxShadow: "0 10px 15px rgba(0,0,0,0.1)",
                                     display: "flex",
                                     flexDirection: "column",
-                                    justifyContent: "center",         // <-- Center text vertically!
-                                    alignItems: "center",             // <-- Center horizontally
+                                    justifyContent: "center",
+                                    alignItems: "center",
                                     overflowY: "auto",
                                     color: "#2E4A27",
                                     fontFamily: "'Amiri', serif",
                                     boxSizing: "border-box",
-
-
                                 }}
                             >
 
