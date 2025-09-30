@@ -13,6 +13,10 @@ export interface Registration {
   userEmail: string;
   userName: string;
   userPhone?: string;
+  userGender?: string;
+  userAge?: number;
+  userEducation?: string;
+  userJoinCommunity?: boolean;
   status: 'registered' | 'cancelled' | 'completed';
   paymentStatus: string,
   notes?: string;
