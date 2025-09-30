@@ -70,6 +70,10 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         userName: userDetails.name,
         userEmail: userDetails.email,
         userPhone: userDetails.phone,
+        userAge:userDetails.age,
+        userGender:userDetails.gender,
+        userEducation:userDetails.education,
+        userJoinCommunity:userDetails.joinCommunity,
         notes: {
           customer_id: userDetails.id,
           item_id: itemDetails.id,

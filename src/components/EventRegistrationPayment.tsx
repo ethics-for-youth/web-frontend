@@ -77,7 +77,8 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
     userDetails.phone &&
     userDetails.age &&
     userDetails.gender &&
-    userDetails.education;
+    userDetails.education &&
+    userDetails.joinCommunity;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -221,6 +222,10 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
                 name: userDetails.name,
                 email: userDetails.email,
                 phone: userDetails.phone,
+                age: Number(userDetails.age),
+                gender:userDetails.gender,
+                education: userDetails.education,
+                joinCommunity:userDetails.joinCommunity,
                 notes: {
                   details: `Registration via event form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
                 }

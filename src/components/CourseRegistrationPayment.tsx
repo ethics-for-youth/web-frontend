@@ -207,6 +207,10 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 name: userDetails.name,
                 email: userDetails.email,
                 phone: userDetails.phone,
+                age: Number(userDetails.age),
+                gender:userDetails.gender,
+                education: userDetails.education,
+                joinCommunity:userDetails.joinCommunity,
                 notes: {
                   details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
                 }
