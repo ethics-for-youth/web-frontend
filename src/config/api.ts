@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   // Registrations
   REGISTRATIONS: '/registrations',
   REGISTRATION_DETAIL: (id: string) => `/registrations/${id}`,
+  REGISTRATIONS_PENDING: '/registrations/pending',
   
   // Courses
   COURSES: '/courses',

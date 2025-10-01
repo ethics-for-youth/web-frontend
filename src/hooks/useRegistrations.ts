@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { registrationsApi, volunteersApi } from '@/services';
 import {
   NewCreateRegistrationRequest,
+  CreatePendingRegistrationRequest,
   UpdateRegistrationRequest,
   RegistrationFilters
 } from '@/services';
@@ -45,6 +46,30 @@ export const useCreateRegistration = () => {
     onError: (error: Error) => {
       toast({
         title: "Registration Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+};
+
+// Create Pending Registration (WhatsApp Payment Flow)
+export const useCreatePendingRegistration = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (registrationData: CreatePendingRegistrationRequest) =>
+      registrationsApi.createPendingRegistration(registrationData),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: registrationsQueryKeys.lists() });
+      toast({
+        title: "Registration Pending!",
+        description: result.message || `Your registration is pending. We'll contact you soon. Registration ID: ${result.registrationId}`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Pending Registration Failed",
         description: error.message,
         variant: "destructive",
       });

@@ -31,7 +31,15 @@ export interface CreateRegistrationRequest {
   userEmail: string;
   userName: string;
   userPhone?: string;
-  notes?: string;
+  notes?: Record<string, string>;
+}
+
+export interface CreatePendingRegistrationRequest extends CreateRegistrationRequest {
+  amount?: number;
+  userGender?: string;
+  userAge?: number;
+  userEducation?: string;
+  userJoinCommunity?: boolean;
 }
 
 export interface UpdateRegistrationRequest {
@@ -68,7 +76,29 @@ export const registrationsApi = {
     }
   },
 
-  // Get all registrations with filters
+  // Create pending registration (WhatsApp Payment)
+  createPendingRegistration: async (registrationData: CreatePendingRegistrationRequest): Promise<{ registrationId: string, message: string }> => {
+    try {
+      const response = await apiClient.post(`${API_ENDPOINTS.REGISTRATIONS_PENDING}`, registrationData);
+
+      if (API_CONFIG.enableLogging) {
+        console.log('Pending Registration API Response:', response.data);
+      }
+
+      if (response.data.success && response.data.data && response.data.data.registration) {
+        return {
+          registrationId: response.data.data.registration.id,
+          message: response.data.message || 'You will be contacted soon for the payment.',
+        };
+      } else {
+        throw new Error('Pending registration failed or invalid response format');
+      }
+    } catch (error) {
+      throw new Error(handleApiError(error));
+    }
+  },
+
+  //  Get all registrations with filters
   getRegistrations: async (filters?: RegistrationFilters): Promise<any> => {
     try {
       const params = new URLSearchParams();
