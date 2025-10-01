@@ -20,7 +20,7 @@ export interface Dua {
     urdu?: string;
     romanUrdu?: string;
   };
-  audioKey?: string; // URL to audio file
+  audioUrl?: string; // URL to audio file
 //   image?: string; // URL to image
   status: 'active' | 'inactive';
   createdAt: string;

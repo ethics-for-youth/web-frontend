@@ -64,7 +64,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
   });
   
   const [audio, setAudio] = useState<File | null>(null);
-  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(initialValues?.audioKey || null);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(initialValues?.audioUrl || null);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -579,10 +579,10 @@ export default function AdminDuaManagement() {
                 {dua.translation?.english && (
                   <p className="text-sm text-gray-800">{dua.translation.english}</p>
                 )}
-                {dua.audioKey && (
+                {dua.audioUrl && (
                   <div className="mt-3">
                     <audio controls className="w-full max-w-md">
-                      <source src={dua.audioKey} type="audio/mpeg" />
+                      <source src={dua.audioUrl} type="audio/mpeg" />
                       Your browser does not support the audio element.
                     </audio>
                   </div>
