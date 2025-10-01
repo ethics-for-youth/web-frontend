@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, ToggleRight, ToggleLeft, X } from "lucide-react";
+import { Plus, Edit, Trash2, ToggleRight, ToggleLeft, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,15 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { duasApi, Dua, CreateDuaRequest, UpdateDuaRequest } from '@/services/duaApi';
+import apiClient from '@/lib/apiClient';
+import { API_ENDPOINTS } from '@/config/api';
 
 // Utility functions
-function getWeekNumber(date) {
+function getWeekNumber(date: Date): number {
   const firstDay = new Date(date.getFullYear(), 0, 1);
   const pastDays = Math.floor((date.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000));
   return Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
 }
 
-function formatDateForInput(dateString) {
+function formatDateForInput(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
     weekday: "long",
@@ -25,50 +28,91 @@ function formatDateForInput(dateString) {
   });
 }
 
+interface FormInputs {
+  title: string;
+  arabicText: string;
+  transcriptionEng: string;
+  transcriptionHindi: string;
+  translationEng: string;
+  translationUrdu: string;
+  translationHindi: string;
+  translationRoman: string;
+}
+
+interface AdminDuaFormProps {
+  onSubmit: (data: CreateDuaRequest | UpdateDuaRequest) => Promise<void>;
+  onSuccess: () => void;
+  initialValues?: Dua | null;
+  editingDua: boolean;
+}
+
 // Dua Form Component
-function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, resetForm }) {
+function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }: AdminDuaFormProps) {
   const [timestamp, setTimestamp] = useState(
     initialValues?.createdAt ? new Date(initialValues.createdAt) : new Date()
   );
-  const [inputs, setInputs] = useState(
-    initialValues || {
-      title: "",
-      arabic: "",
-      transcriptionEng: "",
-      transcriptionHindi: "",
-      translationEng: "",
-      translationUrdu: "",
-      translationHindi: "",
-      translationRoman: "",
-    }
-  );
-  const [audio, setAudio] = useState(initialValues?.audio || null);
+  
+  const [inputs, setInputs] = useState<FormInputs>({
+    title: initialValues?.title || "",
+    arabicText: initialValues?.arabicText || "",
+    transcriptionEng: initialValues?.transcription?.english || "",
+    transcriptionHindi: initialValues?.transcription?.hindi || "",
+    translationEng: initialValues?.translation?.english || "",
+    translationUrdu: initialValues?.translation?.urdu || "",
+    translationHindi: initialValues?.translation?.hindi || "",
+    translationRoman: initialValues?.translation?.romanUrdu || "",
+  });
+  
+  const [audio, setAudio] = useState<File | null>(null);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(initialValues?.audio || null);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleChange = (e) => setInputs({ ...inputs, [e.target.name]: e.target.value });
-  const handleAudio = (e) => setAudio(e.target.files[0] || null);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+    setInputs({ ...inputs, [e.target.name]: e.target.value });
+  
+  const handleAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAudio(file);
+      setCurrentAudioUrl(null);
+    }
+  };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg("");
     setErrorMsg("");
 
     try {
-      const formData = {
-        ...inputs,
-        audio,
-        createdAt: timestamp.toISOString(),
+      // Prepare data in API format
+      const duaData: CreateDuaRequest | UpdateDuaRequest = {
+        title: inputs.title,
+        arabicText: inputs.arabicText,
         week: getWeekNumber(timestamp),
+        transcription: {
+          english: inputs.transcriptionEng || undefined,
+          hindi: inputs.transcriptionHindi || undefined,
+        },
+        translation: {
+          english: inputs.translationEng || undefined,
+          urdu: inputs.translationUrdu || undefined,
+          hindi: inputs.translationHindi || undefined,
+          romanUrdu: inputs.translationRoman || undefined,
+        },
+        ...(audio && { audio }),
       };
-      await onSubmit(formData);
+
+      await onSubmit(duaData);
       setSuccessMsg("✅ Dua submitted successfully!");
+      
+      // Reset form if creating new
       if (!initialValues) {
         setInputs({
           title: "",
-          arabic: "",
+          arabicText: "",
           transcriptionEng: "",
           transcriptionHindi: "",
           translationEng: "",
@@ -77,10 +121,12 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
           translationRoman: "",
         });
         setAudio(null);
+        setCurrentAudioUrl(null);
       }
+      
       setTimeout(() => onSuccess(), 1200);
-    } catch {
-      setErrorMsg("❌ Failed to submit dua. Please try again.");
+    } catch (error: any) {
+      setErrorMsg(`❌ Failed to submit dua: ${error.message || 'Please try again.'}`);
     } finally {
       setLoading(false);
     }
@@ -92,10 +138,10 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
   }, []);
 
   const weekNum = getWeekNumber(timestamp);
-  const formattedDate = formatDateForInput(timestamp);
+  const formattedDate = formatDateForInput(timestamp.toISOString());
 
   return (
-    <form id="dua-form" onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       {/* Display Success/Error messages */}
       <div className="col-span-full space-y-2">
         {successMsg && (
@@ -112,11 +158,10 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
         <span>{formattedDate}</span>
       </div>
 
-
       {/* Title Field */}
       <div className="md:col-span-2">
         <Label htmlFor="title" className="font-semibold">
-          Title
+          Title <span className="text-red-500">*</span>
         </Label>
         <Input
           id="title"
@@ -131,13 +176,13 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
 
       {/* Arabic Text */}
       <div className="md:col-span-2">
-        <Label htmlFor="arabic" className="font-semibold">
-          Arabic Text
+        <Label htmlFor="arabicText" className="font-semibold">
+          Arabic Text <span className="text-red-500">*</span>
         </Label>
         <Textarea
-          id="arabic"
-          name="arabic"
-          value={inputs.arabic}
+          id="arabicText"
+          name="arabicText"
+          value={inputs.arabicText}
           onChange={handleChange}
           placeholder="Enter Arabic text here..."
           rows={3}
@@ -193,7 +238,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
             id={name}
             name={name}
             rows={2}
-            value={inputs[name]}
+            value={inputs[name as keyof FormInputs]}
             onChange={handleChange}
             placeholder={`Enter ${label.toLowerCase()}...`}
             className="shadow-none bg-transparent focus:ring-0 focus:outline-none mt-1"
@@ -206,6 +251,11 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
         <Label htmlFor="audio" className="font-semibold">
           Upload Audio
         </Label>
+        {currentAudioUrl && !audio && (
+          <div className="mb-2 text-sm text-gray-600">
+            Current audio: <a href={currentAudioUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View</a>
+          </div>
+        )}
         <Input
           id="audio"
           type="file"
@@ -213,94 +263,173 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua, r
           onChange={handleAudio}
           className="shadow-none bg-transparent file:bg-white file:text-green-700 focus:ring-0 focus:outline-none mt-1"
         />
+        {audio && (
+          <p className="text-sm text-gray-600 mt-1">Selected: {audio.name}</p>
+        )}
       </div>
 
-    </form>
+      {/* Submit Button */}
+      <div className="md:col-span-2 flex justify-end space-x-2 mt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onSuccess()}
+          disabled={loading}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          className="bg-gradient-to-r from-[#5E7839] to-[#4a5f2e] hover:opacity-90"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {editingDua ? "Updating..." : "Submitting..."}
+            </>
+          ) : (
+            editingDua ? "Update Dua" : "Submit Dua"
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }
 
-// Main Admin Dua Management component rendering the dialog and the dua list
+// Main Admin Dua Management component
 export default function AdminDuaManagement() {
-  const [duas, setDuas] = useState([]);
+  const [duas, setDuas] = useState<Dua[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [editDialog, setEditDialog] = useState({ open: false, dua: null });
-  const [loading, setLoading] = useState(false);
+  const [editDialog, setEditDialog] = useState<{ open: boolean; dua: Dua | null }>({ open: false, dua: null });
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Reset form logic for dialogs
-  const resetForm = () => {
-    setEditDialog({ open: false, dua: null });
-    setOpenDialog(false);
-  };
+  // Load duas on mount
+  useEffect(() => {
+    loadDuas();
+  }, []);
 
-  // Handle form submissions (new and edits)
-  const handleFormSubmit = async (formData) => {
-    setLoading(true);
+  const loadDuas = async () => {
     try {
-      const date = new Date();
-      if (editDialog.open && editDialog.dua) {
-        // Edit existing dua
-        setDuas((prev) =>
-          prev.map((dua) =>
-            dua.id === editDialog.dua.id ? { ...dua, ...formData } : dua
-          )
-        );
-        setEditDialog({ open: false, dua: null });
-      } else {
-        // Add new dua
-        const newDua = {
-          id: Date.now(),
-          ...formData,
-          createdAt: date.toISOString(),
-          week: getWeekNumber(date),
-          visible: true,
-        };
-        setDuas((prev) => [newDua, ...prev]);
-        setOpenDialog(false);
-      }
-    } catch {
-      // Handle error as needed
+      setInitialLoading(true);
+      setError(null);
+      const fetchedDuas = await duasApi.getDuas();
+      // Sort by createdAt descending (newest first)
+      const sortedDuas = fetchedDuas.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setDuas(sortedDuas);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load duas');
+      console.error('Error loading duas:', err);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
   };
 
-  // Toggle visibility (soft delete)
-  const handleToggleVisibility = (id) => {
-    setDuas((prev) =>
-      prev.map((dua) => (dua.id === id ? { ...dua, visible: !dua.visible } : dua))
-    );
+  // Handle create new dua
+  const handleCreateDua = async (formData: CreateDuaRequest) => {
+    try {
+      const newDua = await duasApi.createDua(formData);
+      setDuas((prev) => [newDua, ...prev]);
+      setOpenDialog(false);
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to create dua');
+    }
+  };
+
+  // Handle update existing dua
+  const handleUpdateDua = async (formData: UpdateDuaRequest) => {
+    if (!editDialog.dua) return;
+    
+    try {
+      const updatedDua = await duasApi.updateDua(editDialog.dua.id, formData);
+      setDuas((prev) =>
+        prev.map((dua) => (dua.id === editDialog.dua!.id ? updatedDua : dua))
+      );
+      setEditDialog({ open: false, dua: null });
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to update dua');
+    }
+  };
+
+  // Handle form submission (routes to create or update)
+  const handleFormSubmit = async (formData: CreateDuaRequest | UpdateDuaRequest) => {
+    if (editDialog.open && editDialog.dua) {
+      await handleUpdateDua(formData as UpdateDuaRequest);
+    } else {
+      await handleCreateDua(formData as CreateDuaRequest);
+    }
+  };
+
+  // Toggle visibility (status change) using PATCH endpoint
+  const handleToggleVisibility = async (dua: Dua) => {
+    try {
+      const newStatus = dua.status === 'active' ? 'inactive' : 'active';
+      
+      // Use PATCH endpoint for status update
+      await apiClient.patch(API_ENDPOINTS.DUAS, {
+        id: dua.id,
+        status: newStatus
+      });
+      
+      // Update local state
+      setDuas((prev) =>
+        prev.map((d) => (d.id === dua.id ? { ...d, status: newStatus } : d))
+      );
+    } catch (err: any) {
+      alert(`Failed to update dua status: ${err.message}`);
+    }
   };
 
   // Delete dua after confirmation
-  const handleDelete = (id) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this Dua?")) {
-      setDuas((prev) => prev.filter((dua) => dua.id !== id));
+      try {
+        await duasApi.deleteDua(id);
+        setDuas((prev) => prev.filter((dua) => dua.id !== id));
+      } catch (err: any) {
+        alert(`Failed to delete dua: ${err.message}`);
+      }
     }
   };
 
   // Open edit dialog with selected dua
-  const handleEditOpen = (dua) => {
+  const handleEditOpen = (dua: Dua) => {
     setEditDialog({ open: true, dua });
   };
+
+  if (initialLoading) {
+    return (
+      <div className="max-w-6xl mx-auto p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#5E7839]" />
+          <p className="text-gray-600">Loading duas...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-8 space-y-8">
       {/* Header and Add Dua button */}
       <div className="flex justify-between items-center mb-8">
-        <div> <h1 className="text-3xl font-bold text-foreground">Dua Management</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dua Management</h1>
           <p className="text-muted-foreground">Manage all duas</p>
         </div>
 
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-primary hover:opacity-90">
+            <Button className="bg-gradient-to-r from-[#5E7839] to-[#4a5f2e] hover:opacity-90">
               <Plus className="h-4 w-4 mr-2" />
               Add Dua
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0 bg-white shadow-xl rounded-lg">
-            {/* Sticky header */}
-            <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 flex items-center justify-between">
+          <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 bg-white shadow-xl rounded-lg overflow-hidden">
+            <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 flex items-center justify-between border-b">
               <div>
                 <DialogTitle className="text-xl font-semibold">Add New Dua</DialogTitle>
                 <DialogDescription className="text-sm text-muted-foreground">
@@ -318,33 +447,12 @@ export default function AdminDuaManagement() {
                 <span className="sr-only">Close</span>
               </Button>
             </div>
-            {/* Scrollable form container */}
-            <div className="flex-1 overflow-y-auto px-6 pb-4">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
               <AdminDuaForm
                 onSubmit={handleFormSubmit}
                 onSuccess={() => setOpenDialog(false)}
                 editingDua={false}
-                resetForm={() => setOpenDialog(false)}
               />
-            </div>
-            {/* Sticky footer */}
-            <div className="bottom-0 z-10 bg-white px-6 py-4 flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpenDialog(false)}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                form="dua-form"
-                type="submit"
-                className="bg-gradient-primary hover:opacity-90"
-                disabled={loading}
-              >
-                {loading ? "Submitting..." : "Submit Dua"}
-              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -352,9 +460,8 @@ export default function AdminDuaManagement() {
 
       {/* Edit Dua dialog */}
       <Dialog open={editDialog.open} onOpenChange={(open) => setEditDialog({ dua: null, open })}>
-        <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0 bg-white shadow-xl rounded-lg">
-          {/* Sticky header */}
-          <div className="top-0 z-10 bg-white px-6 pt-6 pb-2 border-b flex items-center justify-between">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 border-b flex items-center justify-between">
             <div>
               <DialogTitle className="text-xl font-semibold">Edit Dua</DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
@@ -372,55 +479,51 @@ export default function AdminDuaManagement() {
               <span className="sr-only">Close</span>
             </Button>
           </div>
-          {/* Scrollable form container */}
-          <div className="flex-1 overflow-y-auto px-6 pb-4">
-            <AdminDuaForm
-              onSubmit={handleFormSubmit}
-              onSuccess={() => setEditDialog({ dua: null, open: false })}
-              initialValues={editDialog.dua}
-              editingDua={true}
-              resetForm={() => setEditDialog({ dua: null, open: false })}
-            />
-          </div>
-          {/* Sticky footer */}
-          <div className="bottom-0 z-10 bg-white px-6 py-4 border-t flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setEditDialog({ dua: null, open: false })}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              form="dua-form"
-              type="submit"
-              className="bg-gradient-primary hover:opacity-90"
-              disabled={loading}
-            >
-              {loading ? "Updating..." : "Update Dua"}
-            </Button>
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            {editDialog.dua && (
+              <AdminDuaForm
+                onSubmit={handleFormSubmit}
+                onSuccess={() => setEditDialog({ dua: null, open: false })}
+                initialValues={editDialog.dua}
+                editingDua={true}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Error display */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-300 text-red-700 rounded flex items-center justify-between">
+          <span>{error}</span>
+          <Button
+            variant="link"
+            className="text-red-700 hover:text-red-800"
+            onClick={loadDuas}
+          >
+            Retry
+          </Button>
+        </div>
+      )}
+
       {/* Dua list */}
       <div className="grid gap-6">
         {duas.length === 0 ? (
-          <p className="text-gray-500 italic">No Duas yet. Click "Add Dua" to start.</p>
+          <div className="text-center py-12">
+            <p className="text-gray-500 italic">No Duas yet. Click "Add Dua" to start.</p>
+          </div>
         ) : (
           duas.map((dua) => (
-            <Card key={dua.id} className={dua.visible ? "" : "opacity-40 bg-gray-100"}>
+            <Card key={dua.id} className={dua.status === 'inactive' ? "opacity-40 bg-gray-100" : ""}>
               <CardHeader className="relative">
-                {/* Buttons container */}
                 <div className="absolute top-6 right-6 flex space-x-1.5">
                   <Button
                     size="sm"
                     variant="outline"
-                    title={dua.visible ? "Hide (Soft Delete)" : "Show"}
-                    onClick={() => handleToggleVisibility(dua.id)}
+                    title={dua.status === 'active' ? "Deactivate" : "Activate"}
+                    onClick={() => handleToggleVisibility(dua)}
                   >
-                    {dua.visible ? (
+                    {dua.status === 'active' ? (
                       <ToggleRight className="h-5 w-5 text-green-600" />
                     ) : (
                       <ToggleLeft className="h-5 w-5 text-gray-400" />
@@ -434,22 +537,37 @@ export default function AdminDuaManagement() {
                   </Button>
                 </div>
 
-                {/* Title and Description */}
                 <CardTitle>
                   Week {dua.week}: {dua.title}
                 </CardTitle>
-                <CardDescription>{new Date(dua.createdAt).toLocaleDateString()}</CardDescription>
+                <CardDescription>
+                  {new Date(dua.createdAt).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {dua.status === 'inactive' && <Badge className="ml-2 bg-gray-500">Inactive</Badge>}
+                </CardDescription>
               </CardHeader>
 
-              <CardContent>
-                <p dir="rtl" className="text-xl font-arabic text-gray-800 leading-relaxed mb-2">
-                  {dua.arabic}
+              <CardContent className="space-y-3">
+                <p dir="rtl" className="text-xl text-gray-800 leading-relaxed" style={{ fontFamily: "'Amiri', serif" }}>
+                  {dua.arabicText}
                 </p>
-                {dua.transcriptionEng && (
-                  <p className="text-sm text-gray-600 italic mb-1">{dua.transcriptionEng}</p>
+                {dua.transcription?.english && (
+                  <p className="text-sm text-gray-600 italic">{dua.transcription.english}</p>
                 )}
-                {dua.translationEng && (
-                  <p className="text-sm text-gray-800 mb-1">{dua.translationEng}</p>
+                {dua.translation?.english && (
+                  <p className="text-sm text-gray-800">{dua.translation.english}</p>
+                )}
+                {dua.audio && (
+                  <div className="mt-3">
+                    <audio controls className="w-full max-w-md">
+                      <source src={dua.audio} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
                 )}
               </CardContent>
             </Card>
