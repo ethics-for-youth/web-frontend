@@ -70,7 +70,7 @@ const RegistrationForm = ({ type, relatedId, title, showPaymentConfirmation = fa
           userEmail: formData.email,
           userName: formData.name,
           userPhone: formData.whatsappNumber,
-          notes: `Registration via ${type} form. Age: ${formData.age}, Gender: ${formData.gender}, Education: ${formData.education}${formData.joinCommunity ? ', Wants to join community' : ''}`,
+          // notes: `Registration via ${type} form. Age: ${formData.age}, Gender: ${formData.gender}, Education: ${formData.education}${formData.joinCommunity ? ', Wants to join community' : ''}`,
         };
 
         await createRegistration.mutateAsync(registrationData);

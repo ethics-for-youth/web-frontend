@@ -132,17 +132,21 @@ const AdminRegistrations = () => {
 
   const exportToCSV = () => {
     const csvContent = [
-      ['User Name', 'Email', 'Phone', 'User ID', 'Item Type', 'Item ID', 'Status', 'Registration Date', 'Last Updated', 'Notes'],
+      ['User Name', 'Email', 'Phone', 'Gender', 'Age', 'Education', 'Join Community', 'User ID', 'Item Type', 'Item ID', 'Status', 'Registration Date', 'Last Updated', 'Notes'],
       ...filteredRegistrations.map(reg => [
         reg.userName,
         reg.userEmail,
         reg.userPhone || '',
+        reg.userGender || '',
+        reg.userAge || '',
+        reg.userEducation || '',
+        reg.userJoinCommunity ? 'Yes' : 'No',
         reg.userId,
         reg.itemType,
         reg.itemId,
         reg.status,
-        formatDateForDisplay(reg.registeredAt),
-        formatDateForDisplay(reg.updatedAt),
+        reg.registeredAt,
+        reg.updatedAt,
         reg.notes
           ? typeof reg.notes === "object"
             ? `${reg.notes.purpose || ""} - ${reg.notes.extra_info || ""}`
@@ -300,6 +304,10 @@ const AdminRegistrations = () => {
                                 <p><strong>Email:</strong> {selectedRegistration.userEmail}</p>
                                 {selectedRegistration.userPhone && <p><strong>Phone:</strong> {selectedRegistration.userPhone}</p>}
                                 <p><strong>User ID:</strong> {selectedRegistration.userId}</p>
+                                <p><strong>Gender:</strong>{selectedRegistration.userGender}</p>
+                                <p><strong>Age:</strong>{selectedRegistration.userAge}</p>
+                                <p><strong>Education:</strong>{selectedRegistration.userEducation}</p>
+                                <p><strong>Join Community:</strong>{selectedRegistration.userJoinCommunity ? 'Yes' : 'No'}</p>
                               </div>
                             </div>
 

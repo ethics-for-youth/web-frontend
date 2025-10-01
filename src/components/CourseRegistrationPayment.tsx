@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import PaymentButton from '@/components/PaymentButton';
 import { RazorpayResponse, Course } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import WhatsAppPaymentButton from './WhatsappPaymentButton';
 
 interface CourseRegistrationPaymentProps {
   course: Course & {
@@ -19,7 +20,8 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   course,
   onRegistrationSuccess
 }) => {
-  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isRazorpayEnrolled, setIsRazorpayEnrolled] = useState(false);
+  // const [isEnrolled, setIsEnrolled] = useState(false);
   const [userDetails, setUserDetails] = useState({
     name: '',
     email: '',
@@ -32,10 +34,10 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   const { toast } = useToast();
 
   const handlePaymentSuccess = (response: RazorpayResponse) => {
-    setIsEnrolled(true);
+    setIsRazorpayEnrolled(true);
     toast({
       title: 'Enrollment Successful!',
-      description: `You have successfully enrolled in ${course.title}. Check your email for course access details.`,
+      description: `You have successfully enrolled in ${course.title}.`,
     });
     onRegistrationSuccess?.(response);
   };
@@ -157,19 +159,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   required
                 />
               </div>
-
-
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={userDetails.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your address"
-                />
-              </div>
-
             </div>
 
             <div className="flex items-center space-x-2">
@@ -211,33 +200,78 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
             </span>
           </div>
 
-          {!isEnrolled && course.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
-            <PaymentButton
-              amount={course.registrationFee}
-              currency="INR"
-              userDetails={{
-                id: `user_${Date.now()}`,
-                name: userDetails.name,
-                email: userDetails.email,
-                phone: userDetails.phone,
-                notes: {
-                  details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
-                }
-              }}
-              itemDetails={{
-                id: course.id,
-                name: course.title,
-                itemType: 'course'
-              }}
-              onSuccess={handlePaymentSuccess}
-              onFailure={handlePaymentFailure}
-              onCancel={handlePaymentCancel}
-              className="w-full"
-              disabled={!isFormValid}
-            >
-              Proceed to Checkout - ₹{course.registrationFee}
-            </PaymentButton>
-          ) : isEnrolled ? (
+          {!isRazorpayEnrolled && course.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
+            <div className="flex flex-col gap-4">
+              <PaymentButton
+                amount={course.registrationFee}
+                currency="INR"
+                userDetails={{
+                  id: `user_${Date.now()}`,
+                  name: userDetails.name,
+                  email: userDetails.email,
+                  phone: userDetails.phone,
+                  age: Number(userDetails.age),
+                  gender: userDetails.gender,
+                  education: userDetails.education,
+                  joinCommunity: userDetails.joinCommunity,
+                  notes: {
+                    details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                  }
+                }}
+                itemDetails={{
+                  id: course.id,
+                  name: course.title,
+                  itemType: 'course'
+                }}
+                onSuccess={handlePaymentSuccess}
+                onFailure={handlePaymentFailure}
+                onCancel={handlePaymentCancel}
+                className="w-full"
+                disabled={!isFormValid}
+              >
+                Proceed to Checkout - ₹{course.registrationFee}
+              </PaymentButton>
+
+              <WhatsAppPaymentButton
+                amount={course.registrationFee}
+                userDetails={{
+                  id: `user_${Date.now()}`,
+                  name: userDetails.name,
+                  email: userDetails.email,
+                  phone: userDetails.phone,
+                  age: Number(userDetails.age),
+                  gender: userDetails.gender,
+                  education: userDetails.education,
+                  joinCommunity: userDetails.joinCommunity,
+                  notes: {
+                    details: `Registration via WhatsApp button. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                  }
+                }}
+                itemDetails={{
+                  id: course.id,
+                  name: course.title,
+                  itemType: 'course'
+                }}
+                onSuccess={() => {
+                  toast({
+                    title: 'Registration Submitted via WhatsApp!',
+                    description: 'You will be contacted soon for payment.',
+                  });
+                }}
+                onFailure={(error) => {
+                  toast({
+                    title: 'WhatsApp Registration Failed',
+                    description: error.message || 'Please try again.',
+                    variant: 'destructive',
+                  });
+                }}
+                className="w-full"
+                disabled={!isFormValid}
+              >
+                Register via WhatsApp
+              </WhatsAppPaymentButton>
+            </div>
+          ) : isRazorpayEnrolled ? (
             <div className="text-center py-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800 font-semibold">✅ Successfully Enrolled!</p>

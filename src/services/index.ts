@@ -27,7 +27,8 @@ export type {
   Registration, 
   CreateRegistrationRequest as NewCreateRegistrationRequest,
   UpdateRegistrationRequest,
-  RegistrationFilters 
+  RegistrationFilters ,
+  CreatePendingRegistrationRequest
 } from './registrationsApi';
 
 export type { 
