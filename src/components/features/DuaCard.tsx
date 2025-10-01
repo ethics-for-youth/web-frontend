@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     FaChevronDown,
     FaDownload,
@@ -6,41 +6,88 @@ import {
     FaPause,
     FaShareAlt,
 } from "react-icons/fa";
+import { Loader2 } from "lucide-react";
 import html2canvas from "html2canvas";
-import duaAudio from "@/assets/dua.mp3";
 import icon from "/icon.png";
-// import bgImage from "@/assets/dua-card-2.jpg";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-
-const duaData = {
-    title: "to say in Trouble & Distress",
-    arabic:
-        "حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ",
-    transcription: {
-        None: "",
-        English: "Hasbiyallaahu laa ilaaha illaa Huwa alayhi tawakkaltu wa Huwa Rabbul-Arshil-Adheem",
-        Hindi: "हसबियल्लाहु ला इलाहा इल्ला हुवा, अलैहि तवक्कलतु व हुवा रब्बुल अर्शिल अज़ीम",
-        // Urdu: "حَسبِیَ اللّٰہُ لَا اِلٰہَ اِلَّا ھُوَ عَلَیہِ تَوَکَّلْتُ وَھُوَ رَبُّ الْعَرشِ الْعَظِیمِ",
-    },
-    translation: {
-        English: "Sufficient for me is Allah there is nothing worthy of worship except for Him, I place my trust in Him, He is the Lord of the mighty throne.",
-        Hindi: "अल्लाह मेरे लिए काफी है, उसके सिवा कोई इबादत के लायक नहीं, उसी पर मैंने भरोसा किया, और वही अर्श-ए-अज़ीम का रब है।",
-        Urdu: "اللہ میرے لیے کافی ہے؛ اس کے سوا کوئی عبادت کے لائق نہیں۔ میں نے اسی پر بھروسہ کیا اور وہی عرشِ عظیم کا رب ہے۔",
-        RomanUrdu: "Allah mere liye kaafi hai, uske siwa koi ibadat ke layaq nahin, usi par maine bharosa kiya, aur wahi Arsh-e-Azeem ka Rab hai.",
-    },
-};
+import { duasApi, Dua } from '@/services/duaApi';
 
 export default function DuaCard() {
-    const [transLang, setTransLang] = useState("None");
-    const [tranLang, setTranLang] = useState("English");
+    const [dua, setDua] = useState<Dua | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    
+    const [transLang, setTransLang] = useState<"None" | "English" | "Hindi">("None");
+    const [tranLang, setTranLang] = useState<"English" | "Hindi" | "Urdu" | "RomanUrdu">("English");
     const [isPlaying, setIsPlaying] = useState(false);
-    const [audio] = useState(new Audio(duaAudio));
+    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
-    const optionsTrans = ["None", "English", "Hindi" /*, "Urdu"*/];
-    const optionsTran = ["English", "Hindi", "Urdu", "RomanUrdu"];
+    const optionsTrans: ("None" | "English" | "Hindi")[] = ["None", "English", "Hindi"];
+    const optionsTran: ("English" | "Hindi" | "Urdu" | "RomanUrdu")[] = ["English", "Hindi", "Urdu", "RomanUrdu"];
 
+    // Fetch current week's dua
+    useEffect(() => {
+        const fetchDua = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                // Get all duas
+                const allDuas = await duasApi.getDuas();
+                
+                // Filter active duas
+                const activeDuas = allDuas.filter(d => d.status === 'active');
+                
+                if (activeDuas.length === 0) {
+                    setError('No active duas available');
+                    return;
+                }
+                
+                // Get current week number
+                const now = new Date();
+                const firstDay = new Date(now.getFullYear(), 0, 1);
+                const pastDays = Math.floor((now.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000));
+                const currentWeek = Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
+                
+                // Find dua for current week, or use the most recent one
+                let currentDua = activeDuas.find(d => d.week === currentWeek);
+                
+                if (!currentDua) {
+                    // Sort by createdAt and get the most recent
+                    currentDua = activeDuas.sort((a, b) => 
+                        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    )[0];
+                }
+                
+                setDua(currentDua);
+                
+                // Setup audio if available
+                if (currentDua.audio) {
+                    const audioElement = new Audio(currentDua.audio);
+                    setAudio(audioElement);
+                }
+            } catch (err: any) {
+                console.error('Error fetching dua:', err);
+                setError(err.message || 'Failed to load dua');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDua();
+
+        // Cleanup audio on unmount
+        return () => {
+            if (audio) {
+                audio.pause();
+                audio.src = '';
+            }
+        };
+    }, []);
 
     const togglePlay = () => {
+        if (!audio) return;
+        
         if (isPlaying) {
             audio.pause();
         } else {
@@ -66,9 +113,10 @@ export default function DuaCard() {
             });
     };
 
-    const sourceText = "Shared from Ethics For Youth: https://myduaapp.example.com";
+    const sourceText = "Shared from Ethics For Youth: https://www.efy.org.in";
 
     const handleShare = async () => {
+        if (!dua) return;
         const card = document.getElementById("dua-card-fixed");
         if (!card) return;
 
@@ -78,9 +126,15 @@ export default function DuaCard() {
                 if (!blob) return alert("Image generation failed!");
                 const file = new File([blob], "dua-card.png", { type: "image/png" });
 
+                const transcriptionText = transLang !== "None" && dua.transcription?.[tranLang.toLowerCase() as keyof typeof dua.transcription] 
+                    ? `\n\n${dua.transcription[tranLang.toLowerCase() as keyof typeof dua.transcription]}` 
+                    : "";
+                
+                const translationText = dua.translation?.[tranLang === "RomanUrdu" ? "romanUrdu" : tranLang.toLowerCase() as keyof typeof dua.translation] || "";
+
                 const shareData = {
                     title: "Dua Card",
-                    text: `${duaData.arabic}\n\n${duaData.transcription[transLang] ?? ""}\n\n${duaData.translation[tranLang]}\n\n${sourceText}`,
+                    text: `${dua.arabicText}${transcriptionText}\n\n${translationText}\n\n${sourceText}`,
                     files: [file],
                 };
 
@@ -100,12 +154,47 @@ export default function DuaCard() {
         }
     };
 
+    // Loading state
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#5E7839]" />
+                    <p className="text-gray-600">Loading dua...</p>
+                </div>
+            </div>
+        );
+    }
 
+    // Error state
+    if (error || !dua) {
+        return (
+            <div className="flex items-center justify-center min-h-screen p-4">
+                <div className="text-center max-w-md">
+                    <p className="text-red-600 mb-4">{error || 'No dua available'}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-[#2E4A27] text-white rounded-lg hover:bg-green-800"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Get the text values safely
+    const transcriptionText = transLang !== "None" && dua.transcription?.[transLang.toLowerCase() as keyof typeof dua.transcription]
+        ? dua.transcription[transLang.toLowerCase() as keyof typeof dua.transcription]
+        : "";
+
+    const translationKey = tranLang === "RomanUrdu" ? "romanUrdu" : tranLang.toLowerCase();
+    const translationText = dua.translation?.[translationKey as keyof typeof dua.translation] || "";
 
     return (
         <div className="relative flex flex-col p-4 sm:p-6">
-            <div className="flex flex-col  py-8 sm:py-4 lg:py-4">
-                <div className="absolute top-0 left-4 sm:top-0 sm:left-4 md:top-0 md:left-8  flex flex-row gap-4 z-30">
+            <div className="flex flex-col py-8 sm:py-4 lg:py-4">
+                <div className="absolute top-0 left-4 sm:top-0 sm:left-4 md:top-0 md:left-8 flex flex-row gap-4 z-30">
                     {/* Transcription */}
                     <Menu as="div" className="relative text-left">
                         <MenuButton className="inline-flex justify-between items-center rounded-lg px-3 py-1.5 bg-gradient-primary hover:opacity-90 transition-opacity text-white text-xs font-medium shadow-sm focus:outline-none">
@@ -118,8 +207,9 @@ export default function DuaCard() {
                                     {({ active }) => (
                                         <div
                                             onClick={() => setTransLang(opt)}
-                                            className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
-                                                } px-3 py-1 text-xs cursor-pointer rounded-md`}
+                                            className={`${
+                                                active ? "bg-green-100 text-gray-900" : "text-gray-700"
+                                            } px-3 py-1 text-xs cursor-pointer rounded-md`}
                                         >
                                             {opt}
                                         </div>
@@ -141,8 +231,9 @@ export default function DuaCard() {
                                     {({ active }) => (
                                         <div
                                             onClick={() => setTranLang(opt)}
-                                            className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
-                                                } px-3 py-1 text-xs cursor-pointer rounded-md`}
+                                            className={`${
+                                                active ? "bg-green-100 text-gray-900" : "text-gray-700"
+                                            } px-3 py-1 text-xs cursor-pointer rounded-md`}
                                         >
                                             {opt}
                                         </div>
@@ -152,6 +243,7 @@ export default function DuaCard() {
                         </MenuItems>
                     </Menu>
                 </div>
+
                 <div className="relative w-full max-w-7xl mx-auto">
                     <div className="absolute -inset-x-4 -inset-y-6 rounded-3xl opacity-30 blur-3xl bg-green-300"></div>
 
@@ -159,47 +251,33 @@ export default function DuaCard() {
                         id="dua-card"
                         className="relative flex flex-col justify-between p-6 bg-white rounded-2xl shadow-xl"
                     >
-
                         <p className="text-ms sm:text-base italic text-center mb-6 font-pj text-gray-600">
-                            {duaData.title}
+                            {dua.title}
                         </p>
 
                         {/* Arabic Dua */}
                         <p className="text-2xl sm:text-4xl font-bold text-center text-[#2E4A27] mb-6 font-[Amiri] leading-relaxed">
-                            {duaData.arabic}
+                            {dua.arabicText}
                         </p>
 
                         {/* Transcription */}
-                        {transLang !== "None" && (
+                        {transcriptionText && (
                             <p className="text-md sm:text-base text-center text-gray-700 mb-2">
-                                {duaData.transcription[transLang]}
+                                {transcriptionText}
                             </p>
                         )}
 
                         {/* Translation */}
-                        <p className="text-base sm:text-lg text-center text-gray-800 leading-relaxed mb-8">
-                            {duaData.translation[tranLang]}
-                        </p>
+                        {translationText && (
+                            <p className="text-base sm:text-lg text-center text-gray-800 leading-relaxed mb-8">
+                                {translationText}
+                            </p>
+                        )}
                     </div>
 
                     {/* Action Capsule */}
-                    <div
-                        className="
-                        absolute 
-                        left-1/2 
-                        bottom-0 
-                        -translate-x-1/2 
-                        translate-y-1/2
-                        w-fit 
-                        z-20 
-                        flex 
-                        justify-center
-                        min-w-min
-                        px-2 sm:px-6
-                    "
-                    >
+                    <div className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2 w-fit z-20 flex justify-center min-w-min px-2 sm:px-6">
                         <div className="flex flex-nowrap items-center gap-2 sm:gap-4 bg-white rounded-full px-2 sm:px-6 py-2 shadow-md">
-
                             {/* Download */}
                             <button
                                 onClick={handleDownload}
@@ -209,21 +287,22 @@ export default function DuaCard() {
                                 <FaDownload className="text-white w-4 h-4" />
                             </button>
 
-                            {/* Play/Pause */}
-                            <button
-                                onClick={togglePlay}
-                                className="flex items-center justify-center rounded-full w-12 h-12 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 shadow transition"
-                                title="Play/Pause"
-                            >
-                                {isPlaying ? (
-                                    <FaPause className="text-[#2E4A27] w-5 h-5" />
-                                ) : (
-                                    <FaPlay className="text-[#2E4A27] w-5 h-5" />
-                                )}
-                            </button>
+                            {/* Play/Pause - Only show if audio exists */}
+                            {audio && (
+                                <button
+                                    onClick={togglePlay}
+                                    className="flex items-center justify-center rounded-full w-12 h-12 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 shadow transition"
+                                    title="Play/Pause"
+                                >
+                                    {isPlaying ? (
+                                        <FaPause className="text-[#2E4A27] w-5 h-5" />
+                                    ) : (
+                                        <FaPlay className="text-[#2E4A27] w-5 h-5" />
+                                    )}
+                                </button>
+                            )}
 
                             {/* Share */}
-
                             <button
                                 onClick={handleShare}
                                 className="flex items-center justify-center rounded-full w-10 h-10 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 shadow transition"
@@ -255,13 +334,12 @@ export default function DuaCard() {
                                     boxSizing: "border-box",
                                 }}
                             >
-
                                 <div className="flex flex-col items-center mb-6">
                                     <h2
                                         className="text-6xl sm:text-5xl font-bold text-center mb-22"
                                         style={{
                                             fontFamily: '"Playfair Display", "Merriweather", serif',
-                                            color: "#1f2937", // Use dark color for strong heading
+                                            color: "#1f2937",
                                             letterSpacing: "0.01em"
                                         }}
                                     >
@@ -271,20 +349,18 @@ export default function DuaCard() {
                                         className="text-4xl sm:text-3xl italic text-center"
                                         style={{
                                             fontFamily: '"Georgia", "Times New Roman", serif',
-                                            color: "#4B5563",    // Subtle gray like sample image
+                                            color: "#4B5563",
                                             fontWeight: 400,
                                             marginTop: "5px"
                                         }}
                                     >
-                                        {duaData.title}
+                                        {dua.title}
                                     </p>
                                 </div>
 
-
-                                {/* Clone of the card content */}
                                 <p
                                     style={{
-                                        fontSize: "74px",          // bigger for short text
+                                        fontSize: "74px",
                                         fontWeight: 700,
                                         textAlign: "center",
                                         marginBottom: "2.75rem",
@@ -293,9 +369,10 @@ export default function DuaCard() {
                                         wordBreak: "break-word",
                                     }}
                                 >
-                                    {duaData.arabic}
+                                    {dua.arabicText}
                                 </p>
-                                {transLang !== "None" && (
+                                
+                                {transcriptionText && (
                                     <p
                                         style={{
                                             fontSize: "38px",
@@ -307,24 +384,27 @@ export default function DuaCard() {
                                             wordBreak: "break-word",
                                         }}
                                     >
-                                        {duaData.transcription[transLang]}
+                                        {transcriptionText}
                                     </p>
                                 )}
-                                <p
-                                    style={{
-                                        fontSize: "38px",
-                                        textAlign: "center",
-                                        color: "#1F2937",
-                                        lineHeight: 1.3,
-                                        marginBottom: 0,
-                                        maxWidth: "90%",
-                                        wordBreak: "break-word",
-                                    }}
-                                >
-                                    {duaData.translation[tranLang]}
-                                </p>
+                                
+                                {translationText && (
+                                    <p
+                                        style={{
+                                            fontSize: "38px",
+                                            textAlign: "center",
+                                            color: "#1F2937",
+                                            lineHeight: 1.3,
+                                            marginBottom: 0,
+                                            maxWidth: "90%",
+                                            wordBreak: "break-word",
+                                        }}
+                                    >
+                                        {translationText}
+                                    </p>
+                                )}
 
-                                {/* Footer: Logo (left) + Website (right) */}
+                                {/* Footer: Logo + Website */}
                                 <div
                                     style={{
                                         position: "absolute",
@@ -334,11 +414,10 @@ export default function DuaCard() {
                                         display: "flex",
                                         justifyContent: "space-between",
                                         alignItems: "center",
-                                        background: "transparent",   // ✅ no white patch
+                                        background: "transparent",
                                         pointerEvents: "none",
                                     }}
                                 >
-                                    {/* Logo */}
                                     <div className="flex items-center space-x-3">
                                         <img
                                             src={icon}
@@ -349,13 +428,11 @@ export default function DuaCard() {
                                                 objectFit: "contain",
                                             }}
                                         />
-                                        <span className="text-2xl font-semibold text-gradient-to-r from-[#4B703D] to-[#2E4A27] 
-                                        dark:from-[#F8FAFC] dark:to-[#94A3B8] mb-6">
+                                        <span className="text-2xl font-semibold text-gradient-to-r from-[#4B703D] to-[#2E4A27] dark:from-[#F8FAFC] dark:to-[#94A3B8] mb-6">
                                             Ethics For Youth
                                         </span>
                                     </div>
 
-                                    {/* Website */}
                                     <span
                                         style={{
                                             fontSize: "28px",

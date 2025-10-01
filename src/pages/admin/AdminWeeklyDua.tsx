@@ -105,6 +105,10 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
         ...(audio && { audio }),
       };
 
+      console.log('📤 Submitting Dua Data:', duaData);
+      console.log('📝 Arabic Text:', inputs.arabicText);
+      console.log('📝 Arabic Text Length:', inputs.arabicText.length);
+
       await onSubmit(duaData);
       setSuccessMsg("✅ Dua submitted successfully!");
       
@@ -126,6 +130,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
       
       setTimeout(() => onSuccess(), 1200);
     } catch (error: any) {
+      console.error('❌ Submit Error:', error);
       setErrorMsg(`❌ Failed to submit dua: ${error.message || 'Please try again.'}`);
     } finally {
       setLoading(false);
@@ -184,11 +189,17 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
           name="arabicText"
           value={inputs.arabicText}
           onChange={handleChange}
-          placeholder="Enter Arabic text here..."
+          placeholder="اكتب النص العربي هنا..."
           rows={3}
           required
           dir="rtl"
-          style={{ fontFamily: "'Amiri', serif", fontSize: "1.3rem" }}
+          lang="ar"
+          style={{ 
+            fontFamily: "'Amiri', 'Traditional Arabic', 'Arabic Typesetting', serif", 
+            fontSize: "1.5rem",
+            lineHeight: "2",
+            textAlign: "right"
+          }}
           className="shadow-none bg-transparent focus:ring-0 focus:outline-none mt-1"
         />
       </div>
@@ -315,15 +326,22 @@ export default function AdminDuaManagement() {
     try {
       setInitialLoading(true);
       setError(null);
+      console.log('🔍 Fetching duas from API...');
       const fetchedDuas = await duasApi.getDuas();
+      console.log('✅ Fetched duas:', fetchedDuas);
       // Sort by createdAt descending (newest first)
       const sortedDuas = fetchedDuas.sort((a, b) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setDuas(sortedDuas);
     } catch (err: any) {
-      setError(err.message || 'Failed to load duas');
-      console.error('Error loading duas:', err);
+      console.error('❌ Error loading duas:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response,
+        request: err.request
+      });
+      setError(err.message || 'Failed to load duas. Check console for details.');
     } finally {
       setInitialLoading(false);
     }
