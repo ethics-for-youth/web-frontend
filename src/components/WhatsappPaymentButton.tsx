@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentUserDetails, PaymentItemDetails } from '@/types';
 import { useCreatePendingRegistration } from '@/hooks/useRegistrations';
-import { FaWhatsapp } from 'react-icons/fa';
+// import { FaWhatsapp } from 'react-icons/fa';
 
 interface WhatsAppPaymentButtonProps {
   amount: number;
@@ -19,7 +19,7 @@ interface WhatsAppPaymentButtonProps {
 
 const WhatsAppPaymentButton: React.FC<WhatsAppPaymentButtonProps> = ({
   amount = 0,
-    currency = 'INR',
+  currency = 'INR',
   userDetails,
   itemDetails,
   onSuccess,
@@ -51,14 +51,15 @@ const WhatsAppPaymentButton: React.FC<WhatsAppPaymentButtonProps> = ({
         itemId: itemDetails.id,
         itemType: itemDetails.itemType,
         notes: {
-            customer_id: userDetails.id,
+          customer_id: userDetails.id,
           item_id: itemDetails.id,
           item_name: itemDetails.name,
           item_type: itemDetails.itemType,
           customer_name: userDetails.name,
           customer_email: userDetails.email,
           customer_phone: userDetails.phone,
-           ...userDetails.notes}
+          ...userDetails.notes
+        }
       });
 
       toast({
@@ -96,7 +97,7 @@ const WhatsAppPaymentButton: React.FC<WhatsAppPaymentButtonProps> = ({
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <FaWhatsapp className="text-lg" />
+          {/* <FaWhatsapp className="text-lg" /> */}
           {children}
         </div>
       )}
