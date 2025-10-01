@@ -60,10 +60,10 @@ export default function DuaCard() {
                 }
                 
                 setDua(currentDua);
-                
+                console.log("dd",currentDua.audioUrl)
                 // Setup audio if available
-                if (currentDua.audioKey) {
-                    const audioElement = new Audio(currentDua.audioKey);
+                if (currentDua.audioUrl) {
+                    const audioElement = new Audio(currentDua.audioUrl);
                     setAudio(audioElement);
                 }
             } catch (err: any) {
