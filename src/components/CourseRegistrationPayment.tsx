@@ -20,7 +20,8 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   course,
   onRegistrationSuccess
 }) => {
-  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isRazorpayEnrolled, setIsRazorpayEnrolled] = useState(false);
+  // const [isEnrolled, setIsEnrolled] = useState(false);
   const [userDetails, setUserDetails] = useState({
     name: '',
     email: '',
@@ -33,10 +34,10 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
   const { toast } = useToast();
 
   const handlePaymentSuccess = (response: RazorpayResponse) => {
-    setIsEnrolled(true);
+    setIsRazorpayEnrolled(true);
     toast({
       title: 'Enrollment Successful!',
-      description: `You have successfully enrolled in ${course.title}. Check your email for course access details.`,
+      description: `You have successfully enrolled in ${course.title}.`,
     });
     onRegistrationSuccess?.(response);
   };
@@ -199,8 +200,8 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
             </span>
           </div>
 
-          {!isEnrolled && course.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
-            <div className="flex flex-col md:flex-row gap-4">
+          {!isRazorpayEnrolled && course.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
+            <div className="flex flex-col gap-4">
               <PaymentButton
                 amount={course.registrationFee}
                 currency="INR"
@@ -225,7 +226,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 onSuccess={handlePaymentSuccess}
                 onFailure={handlePaymentFailure}
                 onCancel={handlePaymentCancel}
-                className="flex-1"
+                className="w-full"
                 disabled={!isFormValid}
               >
                 Proceed to Checkout - ₹{course.registrationFee}
@@ -251,8 +252,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   name: course.title,
                   itemType: 'course'
                 }}
-                onSuccess={(data) => {
-                  setIsEnrolled(true);
+                onSuccess={() => {
                   toast({
                     title: 'Registration Submitted via WhatsApp!',
                     description: 'You will be contacted soon for payment.',
@@ -265,13 +265,13 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                     variant: 'destructive',
                   });
                 }}
-                className="flex-1"
+                className="w-full"
                 disabled={!isFormValid}
               >
                 Register via WhatsApp
               </WhatsAppPaymentButton>
             </div>
-          ) : isEnrolled ? (
+          ) : isRazorpayEnrolled ? (
             <div className="text-center py-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800 font-semibold">✅ Successfully Enrolled!</p>

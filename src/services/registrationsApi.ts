@@ -36,6 +36,7 @@ export interface CreateRegistrationRequest {
 
 export interface CreatePendingRegistrationRequest extends CreateRegistrationRequest {
   amount?: number;
+  currency?: string;
   userGender?: string;
   userAge?: number;
   userEducation?: string;
@@ -85,9 +86,9 @@ export const registrationsApi = {
         console.log('Pending Registration API Response:', response.data);
       }
 
-      if (response.data.success && response.data.data && response.data.data.registration) {
+      if (response.data.success && response.data.data && response.data.data.registrationId) {
         return {
-          registrationId: response.data.data.registration.id,
+          registrationId: response.data.data.registrationId,
           message: response.data.message || 'You will be contacted soon for the payment.',
         };
       } else {

@@ -18,7 +18,7 @@ interface WhatsAppPaymentButtonProps {
 }
 
 const WhatsAppPaymentButton: React.FC<WhatsAppPaymentButtonProps> = ({
-  amount = 0,
+  amount,
   currency = 'INR',
   userDetails,
   itemDetails,
@@ -40,6 +40,7 @@ const WhatsAppPaymentButton: React.FC<WhatsAppPaymentButtonProps> = ({
 
       const data = await createPendingRegistration.mutateAsync({
         amount,
+        currency,
         userId: userDetails.id,
         userName: userDetails.name,
         userEmail: userDetails.email,

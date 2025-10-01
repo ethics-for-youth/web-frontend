@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import PaymentButton from '@/components/PaymentButton';
 import { RazorpayResponse } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import WhatsAppPaymentButton from './WhatsappPaymentButton';
 
 interface EventRegistrationPaymentProps {
   event: {
@@ -214,35 +215,76 @@ const EventRegistrationPayment: React.FC<EventRegistrationPaymentProps> = ({
           </div>
 
           {!isRegistered && event.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
-            <PaymentButton
-              amount={event.registrationFee}
-              currency="INR"
-              userDetails={{
-                id: `user_${Date.now()}`,
-                name: userDetails.name,
-                email: userDetails.email,
-                phone: userDetails.phone,
-                age: Number(userDetails.age),
-                gender:userDetails.gender,
-                education: userDetails.education,
-                joinCommunity:userDetails.joinCommunity,
-                notes: {
-                  details: `Registration via event form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
-                }
-              }}
-              itemDetails={{
-                id: event.id,
-                name: event.title,
-                itemType: 'event'
-              }}
-              onSuccess={handlePaymentSuccess}
-              onFailure={handlePaymentFailure}
-              onCancel={handlePaymentCancel}
-              className="w-full"
-              disabled={!isFormValid}
-            >
-              Proceed to Checkout - ₹{event.registrationFee}
-            </PaymentButton>
+            <div className="flex flex-col gap-4">
+              <PaymentButton
+                amount={event.registrationFee}
+                currency="INR"
+                userDetails={{
+                  id: `user_${Date.now()}`,
+                  name: userDetails.name,
+                  email: userDetails.email,
+                  phone: userDetails.phone,
+                  age: Number(userDetails.age),
+                  gender: userDetails.gender,
+                  education: userDetails.education,
+                  joinCommunity: userDetails.joinCommunity,
+                  notes: {
+                    details: `Registration via event form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                  }
+                }}
+                itemDetails={{
+                  id: event.id,
+                  name: event.title,
+                  itemType: 'event'
+                }}
+                onSuccess={handlePaymentSuccess}
+                onFailure={handlePaymentFailure}
+                onCancel={handlePaymentCancel}
+                className="w-full"
+                disabled={!isFormValid}
+              >
+                Proceed to Checkout - ₹{event.registrationFee}
+              </PaymentButton>
+
+              <WhatsAppPaymentButton
+                amount={event.registrationFee}
+                userDetails={{
+                  id: `user_${Date.now()}`,
+                  name: userDetails.name,
+                  email: userDetails.email,
+                  phone: userDetails.phone,
+                  age: Number(userDetails.age),
+                  gender: userDetails.gender,
+                  education: userDetails.education,
+                  joinCommunity: userDetails.joinCommunity,
+                  notes: {
+                    details: `Registration via WhatsApp button. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
+                  }
+                }}
+                itemDetails={{
+                  id: event.id,
+                  name: event.title,
+                  itemType: 'event'
+                }}
+                onSuccess={() => {
+                  toast({
+                    title: 'Registration Submitted via WhatsApp!',
+                    description: 'You will be contacted soon for payment.',
+                  });
+                }}
+                onFailure={(error) => {
+                  toast({
+                    title: 'WhatsApp Registration Failed',
+                    description: error.message || 'Please try again.',
+                    variant: 'destructive',
+                  });
+                }}
+                className="w-full"
+                disabled={!isFormValid}
+              >
+                Register via WhatsApp
+              </WhatsAppPaymentButton>
+            </div>
           ) : isRegistered ? (
             <div className="text-center py-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
