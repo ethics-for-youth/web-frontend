@@ -7,7 +7,7 @@ import { transformDynamoDBArray, transformDynamoDBObject, isDynamoDBFormatted } 
 export interface Dua {
   id: string;
   title: string;
-  arabicText: string;
+  arabic: string;
   week: number;
   transcription?: {
     english?: string;
@@ -20,7 +20,7 @@ export interface Dua {
     urdu?: string;
     romanUrdu?: string;
   };
-  audio?: string; // URL to audio file
+  audioKey?: string; // URL to audio file
 //   image?: string; // URL to image
   status: 'active' | 'inactive';
   createdAt: string;
@@ -29,7 +29,7 @@ export interface Dua {
 
 export interface CreateDuaRequest {
   title: string;
-  arabicText: string;
+  arabic: string;
   week: number;
   transcription?: {
     english?: string;
@@ -42,13 +42,13 @@ export interface CreateDuaRequest {
     urdu?: string;
     romanUrdu?: string;
   };
-  audio?: File;
+  audioKey?: File;
 //   image?: File;
 }
 
 export interface UpdateDuaRequest {
   title?: string;
-  arabicText?: string;
+  arabic?: string;
   week?: number;
   transcription?: {
     english?: string;
@@ -61,7 +61,7 @@ export interface UpdateDuaRequest {
     urdu?: string;
     romanUrdu?: string;
   };
-  audio?: File;
+  audioKey?: File;
 //   image?: File;
   status?: 'active' | 'inactive';
 }

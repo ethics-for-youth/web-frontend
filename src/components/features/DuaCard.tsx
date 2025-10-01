@@ -62,8 +62,8 @@ export default function DuaCard() {
                 setDua(currentDua);
                 
                 // Setup audio if available
-                if (currentDua.audio) {
-                    const audioElement = new Audio(currentDua.audio);
+                if (currentDua.audioKey) {
+                    const audioElement = new Audio(currentDua.audioKey);
                     setAudio(audioElement);
                 }
             } catch (err: any) {
@@ -134,7 +134,7 @@ export default function DuaCard() {
 
                 const shareData = {
                     title: "Dua Card",
-                    text: `${dua.arabicText}${transcriptionText}\n\n${translationText}\n\n${sourceText}`,
+                    text: `${dua.arabic}${transcriptionText}\n\n${translationText}\n\n${sourceText}`,
                     files: [file],
                 };
 
@@ -257,7 +257,7 @@ export default function DuaCard() {
 
                         {/* Arabic Dua */}
                         <p className="text-2xl sm:text-4xl font-bold text-center text-[#2E4A27] mb-6 font-[Amiri] leading-relaxed">
-                            {dua.arabicText}
+                            {dua.arabic}
                         </p>
 
                         {/* Transcription */}
@@ -369,7 +369,7 @@ export default function DuaCard() {
                                         wordBreak: "break-word",
                                     }}
                                 >
-                                    {dua.arabicText}
+                                    {dua.arabic}
                                 </p>
                                 
                                 {transcriptionText && (
