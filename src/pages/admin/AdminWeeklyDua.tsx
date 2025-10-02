@@ -54,7 +54,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
   
   const [inputs, setInputs] = useState<FormInputs>({
     title: initialValues?.title || "",
-    arabicText: initialValues?.arabicText || "",
+    arabicText: initialValues?.arabic || "",
     transcriptionEng: initialValues?.transcription?.english || "",
     transcriptionHindi: initialValues?.transcription?.hindi || "",
     translationEng: initialValues?.translation?.english || "",
@@ -90,7 +90,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
       // Prepare data in API format
       const duaData: CreateDuaRequest | UpdateDuaRequest = {
         title: inputs.title,
-        arabicText: inputs.arabicText,
+        arabic: inputs.arabicText,
         week: getWeekNumber(timestamp),
         transcription: {
           english: inputs.transcriptionEng || undefined,
@@ -571,7 +571,7 @@ export default function AdminDuaManagement() {
 
               <CardContent className="space-y-3">
                 <p dir="rtl" className="text-xl text-gray-800 leading-relaxed" style={{ fontFamily: "'Amiri', serif" }}>
-                  {dua.arabicText}
+                  {dua.arabic}
                 </p>
                 {dua.transcription?.english && (
                   <p className="text-sm text-gray-600 italic">{dua.transcription.english}</p>

@@ -7,7 +7,7 @@ import { transformDynamoDBArray, transformDynamoDBObject, isDynamoDBFormatted } 
 export interface Dua {
   id: string;
   title: string;
-  arabicText: string;
+  arabic: string;
   week: number;
   transcription?: {
     english?: string;
@@ -29,7 +29,7 @@ export interface Dua {
 
 export interface CreateDuaRequest {
   title: string;
-  arabicText: string;
+  arabic: string;
   week: number;
   transcription?: {
     english?: string;
@@ -48,7 +48,7 @@ export interface CreateDuaRequest {
 
 export interface UpdateDuaRequest {
   title?: string;
-  arabicText?: string;
+  arabic?: string;
   week?: number;
   transcription?: {
     english?: string;
