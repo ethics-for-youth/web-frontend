@@ -12,7 +12,6 @@ export interface Dua {
   transcription?: {
     english?: string;
     hindi?: string;
-    // urdu?: string;
   };
   translation?: {
     english?: string;
@@ -20,8 +19,7 @@ export interface Dua {
     urdu?: string;
     romanUrdu?: string;
   };
-  audioUrl?: string; // URL to audio file
-//   image?: string; // URL to image
+  audioUrl?: string;
   status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
@@ -34,7 +32,6 @@ export interface CreateDuaRequest {
   transcription?: {
     english?: string;
     hindi?: string;
-    // urdu?: string;
   };
   translation?: {
     english?: string;
@@ -43,7 +40,6 @@ export interface CreateDuaRequest {
     romanUrdu?: string;
   };
   audioKey?: File;
-//   image?: File;
 }
 
 export interface UpdateDuaRequest {
@@ -53,7 +49,6 @@ export interface UpdateDuaRequest {
   transcription?: {
     english?: string;
     hindi?: string;
-    // urdu?: string;
   };
   translation?: {
     english?: string;
@@ -62,9 +57,38 @@ export interface UpdateDuaRequest {
     romanUrdu?: string;
   };
   audioKey?: File;
-//   image?: File;
   status?: 'active' | 'inactive';
 }
+
+// 🔑 Utility: normalize response from API
+const normalizeDua = (dua: any): Dua => {
+  if (isDynamoDBFormatted(dua)) {
+    dua = transformDynamoDBObject(dua);
+  }
+  // Map arabicText -> arabic
+  if (dua.arabicText && !dua.arabic) {
+    dua.arabic = dua.arabicText;
+  }
+  return dua as Dua;
+};
+
+// 🔑 Utility: build FormData with arabic → arabicText mapping
+const buildFormData = (data: any): FormData => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      let fieldKey = key;
+      if (key === 'arabic') fieldKey = 'arabicText'; // map for backend
+
+      if (typeof value === 'object' && !(value instanceof File)) {
+        formData.append(fieldKey, JSON.stringify(value));
+      } else {
+        formData.append(fieldKey, value as any);
+      }
+    }
+  });
+  return formData;
+};
 
 export const duasApi = {
   // Get all duas
@@ -76,110 +100,61 @@ export const duasApi = {
         console.log('Duas API Response:', response.data);
       }
 
-      let duas: Dua[] = [];
-
-      if (response.data.success && response.data.data && Array.isArray(response.data.data.duas)) {
+      let duas: any[] = [];
+      if (response.data.success && response.data.data?.duas) {
         duas = response.data.data.duas;
       } else if (Array.isArray(response.data)) {
         duas = response.data;
-      } else {
-        console.error('Unexpected duas API response:', response.data);
-        return [];
       }
 
-      if (duas.length > 0 && isDynamoDBFormatted(duas[0])) {
-        return transformDynamoDBArray(duas);
-      }
-
-      return duas;
+      return duas.map(normalizeDua);
     } catch (error) {
       throw new Error(handleApiError(error));
     }
   },
 
-  // Get single dua by ID
+  // Get single dua
   getDua: async (id: string): Promise<Dua> => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.DUA_DETAIL(id));
-      let dua: Dua;
-
-      if (response.data.success && response.data.data && response.data.data.dua) {
-        dua = response.data.data.dua;
-      } else if (response.data.dua) {
-        dua = response.data.dua;
-      } else {
-        dua = response.data;
-      }
-
-      if (isDynamoDBFormatted(dua)) {
-        return transformDynamoDBObject(dua);
-      }
-
-      return dua;
+      let dua: any = response.data?.data?.dua || response.data.dua || response.data;
+      return normalizeDua(dua);
     } catch (error) {
       throw new Error(handleApiError(error));
     }
   },
 
-  // Create new dua (multipart/form-data)
+  // Create dua
   createDua: async (duaData: CreateDuaRequest): Promise<Dua> => {
     try {
-      const formData = new FormData();
-      Object.entries(duaData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (typeof value === 'object' && !(value instanceof File)) {
-            formData.append(key, JSON.stringify(value));
-          } else {
-            formData.append(key, value as any);
-          }
-        }
-      });
+      const formData = buildFormData(duaData);
 
       const response = await apiClient.post(API_ENDPOINTS.DUAS, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (response.data.success && response.data.data && response.data.data.dua) {
-        const dua = response.data.data.dua;
-        if (isDynamoDBFormatted(dua)) {
-          return transformDynamoDBObject(dua);
-        }
-        return dua;
-      } else {
-        throw new Error('Invalid response format from server');
+      if (response.data.success && response.data.data?.dua) {
+        return normalizeDua(response.data.data.dua);
       }
+      throw new Error('Invalid response format from server');
     } catch (error) {
       throw new Error(handleApiError(error));
     }
   },
 
-  // Update dua (multipart/form-data for file support)
+  // Update dua
   updateDua: async (id: string, duaData: UpdateDuaRequest): Promise<Dua> => {
     try {
-      const formData = new FormData();
-      Object.entries(duaData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (typeof value === 'object' && !(value instanceof File)) {
-            formData.append(key, JSON.stringify(value));
-          } else {
-            formData.append(key, value as any);
-          }
-        }
-      });
+      const formData = buildFormData(duaData);
 
       const response = await apiClient.put(API_ENDPOINTS.DUA_DETAIL(id), formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (response.data.success && response.data.data && response.data.data.dua) {
-        const dua = response.data.data.dua;
-        if (isDynamoDBFormatted(dua)) {
-          return transformDynamoDBObject(dua);
-        }
-        return dua;
-      } else {
-        throw new Error('Invalid response format from server');
+      if (response.data.success && response.data.data?.dua) {
+        return normalizeDua(response.data.data.dua);
       }
+      throw new Error('Invalid response format from server');
     } catch (error) {
       throw new Error(handleApiError(error));
     }
