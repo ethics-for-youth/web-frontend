@@ -93,7 +93,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
       const duaData: CreateDuaRequest | UpdateDuaRequest = {
         title: inputs.title,
         arabic: inputs.arabicText,
-        week: getWeekNumber(timestamp),
+        week: getWeekNumber(timestamp).toString(),
         transcription: {
           english: inputs.transcriptionEng || undefined,
           hindi: inputs.transcriptionHindi || undefined,

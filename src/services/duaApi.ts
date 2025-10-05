@@ -28,7 +28,7 @@ export interface Dua {
 export interface CreateDuaRequest {
   title: string;
   arabic: string;
-  week: number;
+  week: string;
   transcription?: {
     english?: string;
     hindi?: string;
@@ -46,7 +46,7 @@ export interface UpdateDuaRequest {
   id: string;
   title?: string;
   arabic?: string;
-  week?: number;
+  week?: string;
   transcription?: {
     english?: string;
     hindi?: string;
