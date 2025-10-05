@@ -52,7 +52,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
   const [timestamp, setTimestamp] = useState(
     initialValues?.createdAt ? new Date(initialValues.createdAt) : new Date()
   );
-  
+
   const [inputs, setInputs] = useState<FormInputs>({
     id: initialValues?.id || "",
     title: initialValues?.title || "",
@@ -64,16 +64,16 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
     translationHindi: initialValues?.translation?.hindi || "",
     translationRoman: initialValues?.translation?.romanUrdu || "",
   });
-  
+
   const [audio, setAudio] = useState<File | null>(null);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(initialValues?.audioUrl || null);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setInputs({ ...inputs, [e.target.name]: e.target.value });
-  
+
   const handleAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -104,12 +104,12 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
           hindi: inputs.translationHindi || undefined,
           romanUrdu: inputs.translationRoman || undefined,
         },
-       ...(audio && { audioKey: audio }),
+        ...(audio && { audioKey: audio }),
       };
 
-        if (initialValues?.id) {
-      (duaData as UpdateDuaRequest).id = initialValues.id;
-    }
+      if (initialValues?.id) {
+        (duaData as UpdateDuaRequest).id = initialValues.id;
+      }
 
       console.log('📤 Submitting Dua Data:', duaData);
       console.log('📝 Arabic Text:', inputs.arabicText);
@@ -117,7 +117,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
 
       await onSubmit(duaData);
       setSuccessMsg("✅ Dua submitted successfully!");
-      
+
       // Reset form if creating new
       if (!initialValues) {
         setInputs({
@@ -134,7 +134,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
         setAudio(null);
         setCurrentAudioUrl(null);
       }
-      
+
       setTimeout(() => onSuccess(), 1200);
     } catch (error: any) {
       console.error('❌ Submit Error:', error);
@@ -201,8 +201,8 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
           required
           dir="rtl"
           lang="ar"
-          style={{ 
-            fontFamily: "'Amiri', 'Traditional Arabic', 'Arabic Typesetting', serif", 
+          style={{
+            fontFamily: "'Amiri', 'Traditional Arabic', 'Arabic Typesetting', serif",
             fontSize: "1.5rem",
             lineHeight: "2",
             textAlign: "right"
@@ -337,7 +337,7 @@ export default function AdminDuaManagement() {
       const fetchedDuas = await duasApi.getDuas();
       console.log('✅ Fetched duas:', fetchedDuas);
       // Sort by createdAt descending (newest first)
-      const sortedDuas = fetchedDuas.sort((a, b) => 
+      const sortedDuas = fetchedDuas.sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setDuas(sortedDuas);
@@ -368,9 +368,9 @@ export default function AdminDuaManagement() {
   // Handle update existing dua
   const handleUpdateDua = async (formData: UpdateDuaRequest) => {
     if (!editDialog.dua) return;
-    
+
     try {
-      const updatedDua = await duasApi.updateDua(editDialog.dua.id, formData);
+      const updatedDua = await duasApi.updateDua({ ...formData, id: editDialog.dua.id });
       setDuas((prev) =>
         prev.map((dua) => (dua.id === editDialog.dua!.id ? updatedDua : dua))
       );
@@ -391,23 +391,13 @@ export default function AdminDuaManagement() {
 
   // Toggle visibility (status change) using PATCH endpoint
   const handleToggleVisibility = async (dua: Dua) => {
-    try {
-      const newStatus = dua.status === 'active' ? 'inactive' : 'active';
-      
-      // Use PATCH endpoint for status update
-      await apiClient.patch(API_ENDPOINTS.DUAS, {
-        id: dua.id,
-        status: newStatus
-      });
-      
-      // Update local state
-      setDuas((prev) =>
-        prev.map((d) => (d.id === dua.id ? { ...d, status: newStatus } : d))
-      );
-    } catch (err: any) {
-      alert(`Failed to update dua status: ${err.message}`);
-    }
+    const newStatus = dua.status === 'active' ? 'inactive' : 'active';
+    await duasApi.updateDua({ id: dua.id, status: newStatus });
+    setDuas(prev =>
+      prev.map(d => (d.id === dua.id ? { ...d, status: newStatus } : d))
+    );
   };
+
 
   // Delete dua after confirmation
   const handleDelete = async (id: string) => {

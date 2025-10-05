@@ -144,16 +144,9 @@ export const duasApi = {
   },
 
   // Update dua
-  updateDua: async (id: string, duaData: UpdateDuaRequest): Promise<Dua> => {
+  updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
     try {
-      const dataWithId = { ...duaData, id };
-      const formData = buildFormData(dataWithId);
-
-      if (API_CONFIG.enableLogging) {
-        console.log('Updating dua:', id, 'with data:', duaData);
-      }
-
-     const response = await apiClient.patch(API_ENDPOINTS.DUA_DETAIL(id), dataWithId, {
+      const response = await apiClient.patch(API_ENDPOINTS.DUAS, duaData, {
         headers: { 'Content-Type': 'application/json' },
       });
 
