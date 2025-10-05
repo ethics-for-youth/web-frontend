@@ -29,6 +29,7 @@ function formatDateForInput(dateString: string): string {
 }
 
 interface FormInputs {
+  id: string;
   title: string;
   arabicText: string;
   transcriptionEng: string;
@@ -53,6 +54,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
   );
   
   const [inputs, setInputs] = useState<FormInputs>({
+    id: initialValues?.id || "",
     title: initialValues?.title || "",
     arabicText: initialValues?.arabic || "",
     transcriptionEng: initialValues?.transcription?.english || "",
@@ -102,8 +104,12 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
           hindi: inputs.translationHindi || undefined,
           romanUrdu: inputs.translationRoman || undefined,
         },
-        ...(audio && { audio }),
+       ...(audio && { audioKey: audio }),
       };
+
+        if (initialValues?.id) {
+      (duaData as UpdateDuaRequest).id = initialValues.id;
+    }
 
       console.log('📤 Submitting Dua Data:', duaData);
       console.log('📝 Arabic Text:', inputs.arabicText);
@@ -115,6 +121,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
       // Reset form if creating new
       if (!initialValues) {
         setInputs({
+          id: "",
           title: "",
           arabicText: "",
           transcriptionEng: "",

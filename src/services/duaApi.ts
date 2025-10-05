@@ -43,6 +43,7 @@ export interface CreateDuaRequest {
 }
 
 export interface UpdateDuaRequest {
+  id: string;
   title?: string;
   arabic?: string;
   week?: number;
@@ -145,9 +146,14 @@ export const duasApi = {
   // Update dua
   updateDua: async (id: string, duaData: UpdateDuaRequest): Promise<Dua> => {
     try {
-      const formData = buildFormData(duaData);
+      const dataWithId = { ...duaData, id };
+      const formData = buildFormData(dataWithId);
 
-      const response = await apiClient.put(API_ENDPOINTS.DUA_DETAIL(id), formData, {
+      if (API_CONFIG.enableLogging) {
+        console.log('Updating dua:', id, 'with data:', duaData);
+      }
+
+     const response = await apiClient.put(API_ENDPOINTS.DUA_DETAIL(id), formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

@@ -44,6 +44,8 @@ export const API_ENDPOINTS = {
   DUA_DETAIL: (id: string) => `/duas/${id}`,
 } as const;
 
+
+
 // API Configuration
 export const API_CONFIG = {
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '10000'), // Default 10 seconds
