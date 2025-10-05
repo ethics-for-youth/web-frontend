@@ -54,15 +54,15 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
   );
 
   const [inputs, setInputs] = useState<FormInputs>({
-    id: initialValues?.id || "",
-    title: initialValues?.title || "",
-    arabicText: initialValues?.arabic || "",
-    transcriptionEng: initialValues?.transcription?.english || "",
-    transcriptionHindi: initialValues?.transcription?.hindi || "",
-    translationEng: initialValues?.translation?.english || "",
-    translationUrdu: initialValues?.translation?.urdu || "",
-    translationHindi: initialValues?.translation?.hindi || "",
-    translationRoman: initialValues?.translation?.romanUrdu || "",
+    id: initialValues?.id ?? "",
+    title: initialValues?.title ?? "",
+    arabicText: initialValues?.arabic ?? "",
+    transcriptionEng: initialValues?.transcription?.english ?? "",
+    transcriptionHindi: initialValues?.transcription?.hindi ?? "",
+    translationEng: initialValues?.translation?.english ?? "",
+    translationUrdu: initialValues?.translation?.urdu ?? "",
+    translationHindi: initialValues?.translation?.hindi ?? "",
+    translationRoman: initialValues?.translation?.romanUrdu ?? "",
   });
 
   const [audio, setAudio] = useState<File | null>(null);
