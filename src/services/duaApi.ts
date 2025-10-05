@@ -153,8 +153,8 @@ export const duasApi = {
         console.log('Updating dua:', id, 'with data:', duaData);
       }
 
-     const response = await apiClient.put(API_ENDPOINTS.DUA_DETAIL(id), formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+     const response = await apiClient.patch(API_ENDPOINTS.DUA_DETAIL(id), dataWithId, {
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.data.success && response.data.data?.dua) {
