@@ -66,11 +66,14 @@ const normalizeDua = (dua: any): Dua => {
   if (isDynamoDBFormatted(dua)) {
     dua = transformDynamoDBObject(dua);
   }
-  // Map arabicText -> arabic
-  if (dua.arabicText && !dua.arabic) {
-    dua.arabic = dua.arabicText;
-  }
-  return dua as Dua;
+
+  return {
+    ...dua,
+    arabic: dua.arabic || '',
+    status: dua.status || 'active',
+    createdAt: dua.createdAt || new Date().toISOString(),
+    updatedAt: dua.updatedAt || new Date().toISOString(),
+  } as Dua;
 };
 
 // 🔑 Utility: build FormData with arabic → arabicText mapping
