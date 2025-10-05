@@ -134,7 +134,7 @@ export const duasApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (response.data.success && response.data.data?.dua) {
+      if (response.data.success) {
         return normalizeDua(response.data.data.dua);
       }
       throw new Error('Invalid response format from server');
@@ -145,18 +145,15 @@ export const duasApi = {
 
   // Update dua
   updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
-    try {
-      const response = await apiClient.patch(API_ENDPOINTS.DUAS, duaData, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+    const response = await apiClient.patch(API_ENDPOINTS.DUAS, duaData, {
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-      if (response.data.success && response.data.data?.dua) {
-        return normalizeDua(response.data.data.dua);
-      }
-      throw new Error('Invalid response format from server');
-    } catch (error) {
-      throw new Error(handleApiError(error));
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to update dua');
     }
+
+    return normalizeDua(response.data.data.dua);
   },
 
   // Delete dua
