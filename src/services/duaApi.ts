@@ -138,7 +138,7 @@ export const duasApi = {
       });
 
       if (response.data.success) {
-        return normalizeDua(response.data.data.dua);
+        return response.data.data;
       }
       throw new Error('Invalid response format from server');
     } catch (error) {
@@ -156,7 +156,7 @@ export const duasApi = {
       throw new Error(response.data.message || 'Failed to update dua');
     }
 
-    return normalizeDua(response.data.data.dua);
+    return response.data.data;
   },
 
   // Delete dua
