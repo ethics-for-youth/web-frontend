@@ -75,7 +75,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
     setInputs({ ...inputs, [e.target.name]: e.target.value });
 
 
-   // Update handleAudio (disable in edit)
+  // Update handleAudio (disable in edit)
   const handleAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (editingDua && file) {
@@ -116,7 +116,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
       const duaData: CreateDuaRequest | UpdateDuaRequest = {
         title: inputs.title,
         arabic: inputs.arabicText, // Map back to arabic for API
-        week: getWeekNumber(timestamp).toString(),
+        week: getWeekNumber(timestamp),
         transcription: {
           english: inputs.transcriptionEng || undefined,
           hindi: inputs.transcriptionHindi || undefined,
@@ -342,178 +342,151 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
 }
 
 
-  // Main Admin Dua Management component
-  export default function AdminDuaManagement() {
-    const [duas, setDuas] = useState<Dua[]>([]);
-    const [openDialog, setOpenDialog] = useState(false);
-    const [editDialog, setEditDialog] = useState<{ open: boolean; dua: Dua | null }>({ open: false, dua: null });
-    const [initialLoading, setInitialLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+// Main Admin Dua Management component
+export default function AdminDuaManagement() {
+  const [duas, setDuas] = useState<Dua[]>([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editDialog, setEditDialog] = useState<{ open: boolean; dua: Dua | null }>({ open: false, dua: null });
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    // Load duas on mount
-    useEffect(() => {
-      loadDuas();
-    }, []);
+  // Load duas on mount
+  useEffect(() => {
+    loadDuas();
+  }, []);
 
-    const loadDuas = async () => {
-      try {
-        setInitialLoading(true);
-        setError(null);
-        console.log('🔍 Fetching duas from API...');
-        const fetchedDuas = await duasApi.getDuas();
-        console.log('✅ Fetched duas:', fetchedDuas);
-        // Sort by createdAt descending (newest first)
-        const sortedDuas = fetchedDuas.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        setDuas(sortedDuas);
-      } catch (err: any) {
-        console.error('❌ Error loading duas:', err);
-        console.error('Error details:', {
-          message: err.message,
-          response: err.response,
-          request: err.request
-        });
-        setError(err.message || 'Failed to load duas. Check console for details.');
-      } finally {
-        setInitialLoading(false);
-      }
-    };
+  const loadDuas = async () => {
+    try {
+      setInitialLoading(true);
+      setError(null);
+      console.log('🔍 Fetching duas from API...');
+      const fetchedDuas = await duasApi.getDuas();
+      console.log('✅ Fetched duas:', fetchedDuas);
+      // Sort by createdAt descending (newest first)
+      const sortedDuas = fetchedDuas.sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setDuas(sortedDuas);
+    } catch (err: any) {
+      console.error('❌ Error loading duas:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response,
+        request: err.request
+      });
+      setError(err.message || 'Failed to load duas. Check console for details.');
+    } finally {
+      setInitialLoading(false);
+    }
+  };
 
-    // Handle create new dua
-    const handleCreateDua = async (formData: CreateDuaRequest) => {
-      try {
-        const newDua = await duasApi.createDua(formData);
-        setDuas((prev) => [newDua, ...prev]);
-        setOpenDialog(false);
-      } catch (err: any) {
-        throw new Error(err.message || 'Failed to create dua');
-      }
-    };
+  // Handle create new dua
+  const handleCreateDua = async (formData: CreateDuaRequest) => {
+    try {
+      const newDua = await duasApi.createDua(formData);
+      setDuas((prev) => [newDua, ...prev]);
+      setOpenDialog(false);
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to create dua');
+    }
+  };
 
-    // Handle update existing dua
-    const handleUpdateDua = async (formData: UpdateDuaRequest) => {
-      if (!editDialog.dua) return;
+  // Handle update existing dua
+  const handleUpdateDua = async (formData: UpdateDuaRequest) => {
+    if (!editDialog.dua) return;
 
-      try {
-        const updatedDua = await duasApi.updateDua({ ...formData, id: editDialog.dua.id });
-        setDuas((prev) =>
-          prev.map((dua) => (dua.id === editDialog.dua!.id ? updatedDua : dua))
-        );
-        setEditDialog({ open: false, dua: null });
-      } catch (err: any) {
-        throw new Error(err.message || 'Failed to update dua');
-      }
-    };
+    try {
+      const updatedDua = await duasApi.updateDua({ ...formData, id: editDialog.dua.id });
+      setDuas((prev) =>
+        prev.map((dua) => (dua.id === editDialog.dua!.id ? updatedDua : dua))
+      );
+      setEditDialog({ open: false, dua: null });
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to update dua');
+    }
+  };
 
-    // Handle form submission (routes to create or update)
-    const handleFormSubmit = async (formData: CreateDuaRequest | UpdateDuaRequest) => {
-      if (editDialog.open && editDialog.dua) {
-        await handleUpdateDua(formData as UpdateDuaRequest);
-      } else {
-        await handleCreateDua(formData as CreateDuaRequest);
-      }
-    };
+  // Handle form submission (routes to create or update)
+  const handleFormSubmit = async (formData: CreateDuaRequest | UpdateDuaRequest) => {
+    if (editDialog.open && editDialog.dua) {
+      await handleUpdateDua(formData as UpdateDuaRequest);
+    } else {
+      await handleCreateDua(formData as CreateDuaRequest);
+    }
+  };
 
-    // Toggle visibility (status change) using PATCH endpoint
-    const handleToggleVisibility = async (dua: Dua) => {
+  // Toggle visibility (status change) using PATCH endpoint
+  const handleToggleVisibility = async (dua: Dua) => {
+    try {
       const newStatus = dua.status === 'active' ? 'inactive' : 'active';
       await duasApi.updateDua({ id: dua.id, status: newStatus });
       setDuas(prev =>
         prev.map(d => (d.id === dua.id ? { ...d, status: newStatus } : d))
       );
-    };
-
-
-    // Delete dua after confirmation
-    const handleDelete = async (id: string) => {
-      if (window.confirm("Are you sure you want to delete this Dua?")) {
-        try {
-          await duasApi.deleteDua(id);
-          setDuas((prev) => prev.filter((dua) => dua.id !== id));
-        } catch (err: any) {
-          alert(`Failed to delete dua: ${err.message}`);
-        }
-      }
-    };
-
-    // Open edit dialog with selected dua
-    const handleEditOpen = (dua: Dua) => {
-      setEditDialog({ open: true, dua });
-    };
-
-    if (initialLoading) {
-      return (
-        <div className="max-w-6xl mx-auto p-8 flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#5E7839]" />
-            <p className="text-gray-600">Loading duas...</p>
-          </div>
-        </div>
-      );
+    } catch (err: any) {
+      console.error('Toggle error:', err);
+      alert(`Failed to ${dua.status === 'active' ? 'deactivate' : 'activate'} dua: ${err.message}`);
     }
+  };
 
+
+  // Delete dua after confirmation
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this Dua?")) {
+      try {
+        await duasApi.deleteDua(id);
+        setDuas((prev) => prev.filter((dua) => dua.id !== id));
+      } catch (err: any) {
+        alert(`Failed to delete dua: ${err.message}`);
+      }
+    }
+  };
+
+  // Open edit dialog with selected dua
+  const handleEditOpen = (dua: Dua) => {
+    setEditDialog({ open: true, dua });
+  };
+
+  if (initialLoading) {
     return (
-      <div className="max-w-6xl mx-auto p-8 space-y-8">
-        {/* Header and Add Dua button */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Dua Management</h1>
-            <p className="text-muted-foreground">Manage all duas</p>
-          </div>
+      <div className="max-w-6xl mx-auto p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[#5E7839]" />
+          <p className="text-gray-600">Loading duas...</p>
+        </div>
+      </div>
+    );
+  }
 
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-[#5E7839] to-[#4a5f2e] hover:opacity-90">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Dua
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 bg-white shadow-xl rounded-lg overflow-hidden">
-              <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 flex items-center justify-between border-b">
-                <div>
-                  <DialogTitle className="text-xl font-semibold">Add New Dua</DialogTitle>
-                  <DialogDescription className="text-sm text-muted-foreground">
-                    Fill out the fields below to add a new weekly dua.
-                  </DialogDescription>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
-                  onClick={() => setOpenDialog(false)}
-                  tabIndex={0}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
-                </Button>
-              </div>
-              <div className="flex-1 overflow-y-auto px-6 py-4">
-                <AdminDuaForm
-                  onSubmit={handleFormSubmit}
-                  onSuccess={() => setOpenDialog(false)}
-                  editingDua={false}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+  return (
+    <div className="max-w-6xl mx-auto p-8 space-y-8">
+      {/* Header and Add Dua button */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dua Management</h1>
+          <p className="text-muted-foreground">Manage all duas</p>
         </div>
 
-        {/* Edit Dua dialog */}
-        <Dialog open={editDialog.open} onOpenChange={(open) => setEditDialog({ dua: null, open })}>
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-to-r from-[#5E7839] to-[#4a5f2e] hover:opacity-90">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Dua
+            </Button>
+          </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 bg-white shadow-xl rounded-lg overflow-hidden">
-            <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 border-b flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 flex items-center justify-between border-b">
               <div>
-                <DialogTitle className="text-xl font-semibold">Edit Dua</DialogTitle>
+                <DialogTitle className="text-xl font-semibold">Add New Dua</DialogTitle>
                 <DialogDescription className="text-sm text-muted-foreground">
-                  Update the dua details below.
+                  Fill out the fields below to add a new weekly dua.
                 </DialogDescription>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
-                onClick={() => setEditDialog({ dua: null, open: false })}
+                onClick={() => setOpenDialog(false)}
                 tabIndex={0}
               >
                 <X className="h-4 w-4" />
@@ -521,100 +494,132 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              {editDialog.dua && (
-                <AdminDuaForm
-                  onSubmit={handleFormSubmit}
-                  onSuccess={() => setEditDialog({ dua: null, open: false })}
-                  initialValues={editDialog.dua}
-                  editingDua={true}
-                />
-              )}
+              <AdminDuaForm
+                onSubmit={handleFormSubmit}
+                onSuccess={() => setOpenDialog(false)}
+                editingDua={false}
+              />
             </div>
           </DialogContent>
         </Dialog>
+      </div>
 
-        {/* Error display */}
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-300 text-red-700 rounded flex items-center justify-between">
-            <span>{error}</span>
+      {/* Edit Dua dialog */}
+      <Dialog open={editDialog.open} onOpenChange={(open) => setEditDialog({ dua: null, open })}>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 border-b flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-xl font-semibold">Edit Dua</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                Update the dua details below.
+              </DialogDescription>
+            </div>
             <Button
-              variant="link"
-              className="text-red-700 hover:text-red-800"
-              onClick={loadDuas}
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none h-4 w-4 active:bg-transparent hover:bg-transparent"
+              onClick={() => setEditDialog({ dua: null, open: false })}
+              tabIndex={0}
             >
-              Retry
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
             </Button>
           </div>
-        )}
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            {editDialog.dua && (
+              <AdminDuaForm
+                onSubmit={handleFormSubmit}
+                onSuccess={() => setEditDialog({ dua: null, open: false })}
+                initialValues={editDialog.dua}
+                editingDua={true}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        {/* Dua list */}
-        <div className="grid gap-6">
-          {duas.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 italic">No Duas yet. Click "Add Dua" to start.</p>
-            </div>
-          ) : (
-            duas.map((dua) => (
-              <Card key={dua.id} className={dua.status === 'inactive' ? "opacity-40 bg-gray-100" : ""}>
-                <CardHeader className="relative">
-                  <div className="absolute top-6 right-6 flex space-x-1.5">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      title={dua.status === 'active' ? "Deactivate" : "Activate"}
-                      onClick={() => handleToggleVisibility(dua)}
-                    >
-                      {dua.status === 'active' ? (
-                        <ToggleRight className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <ToggleLeft className="h-5 w-5 text-gray-400" />
-                      )}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleEditOpen(dua)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleDelete(dua.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  <CardTitle>
-                    Week {dua.week}: {dua.title}
-                  </CardTitle>
-                  <CardDescription>
-                    {new Date(dua.createdAt).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                    {dua.status === 'inactive' && <Badge className="ml-2 bg-gray-500">Inactive</Badge>}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="space-y-3">
-                  <p dir="rtl" className="text-xl text-gray-800 leading-relaxed" style={{ fontFamily: "'Amiri', serif" }}>
-                    {dua.arabic}
-                  </p>
-                  {dua.transcription?.english && (
-                    <p className="text-sm text-gray-600 italic">{dua.transcription.english}</p>
-                  )}
-                  {dua.translation?.english && (
-                    <p className="text-sm text-gray-800">{dua.translation.english}</p>
-                  )}
-                  {dua.audioUrl && (
-                    <div className="mt-3">
-                      <audio controls className="w-full max-w-md">
-                        <source src={dua.audioUrl} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          )}
+      {/* Error display */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-300 text-red-700 rounded flex items-center justify-between">
+          <span>{error}</span>
+          <Button
+            variant="link"
+            className="text-red-700 hover:text-red-800"
+            onClick={loadDuas}
+          >
+            Retry
+          </Button>
         </div>
+      )}
+
+      {/* Dua list */}
+      <div className="grid gap-6">
+        {duas.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 italic">No Duas yet. Click "Add Dua" to start.</p>
+          </div>
+        ) : (
+          duas.map((dua) => (
+            <Card key={dua.id} className={dua.status === 'inactive' ? "opacity-40 bg-gray-100" : ""}>
+              <CardHeader className="relative">
+                <div className="absolute top-6 right-6 flex space-x-1.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    title={dua.status === 'active' ? "Deactivate" : "Activate"}
+                    onClick={() => handleToggleVisibility(dua)}
+                  >
+                    {dua.status === 'active' ? (
+                      <ToggleRight className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <ToggleLeft className="h-5 w-5 text-gray-400" />
+                    )}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleEditOpen(dua)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(dua.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <CardTitle>
+                  Week {dua.week}: {dua.title}
+                </CardTitle>
+                <CardDescription>
+                  {new Date(dua.createdAt).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {dua.status === 'inactive' && <Badge className="ml-2 bg-gray-500">Inactive</Badge>}
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-3">
+                <p dir="rtl" className="text-xl text-gray-800 leading-relaxed" style={{ fontFamily: "'Amiri', serif" }}>
+                  {dua.arabic}
+                </p>
+                {dua.transcription?.english && (
+                  <p className="text-sm text-gray-600 italic">{dua.transcription.english}</p>
+                )}
+                {dua.translation?.english && (
+                  <p className="text-sm text-gray-800">{dua.translation.english}</p>
+                )}
+                {dua.audioUrl && (
+                  <div className="mt-3">
+                    <audio controls className="w-full max-w-md">
+                      <source src={dua.audioUrl} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
-    );
-  }
+    </div>
+  );
+}

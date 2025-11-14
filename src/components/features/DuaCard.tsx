@@ -64,6 +64,17 @@ export default function DuaCard() {
                 // Setup audio if available
                 if (currentDua.audioUrl) {
                     const audioElement = new Audio(currentDua.audioUrl);
+
+                    // Add event handlers
+                    audioElement.addEventListener('ended', () => {
+                        setIsPlaying(false);
+                    });
+
+                    audioElement.addEventListener('error', (e) => {
+                        console.error('Audio error:', e);
+                        setIsPlaying(false);
+                    });
+
                     setAudio(audioElement);
                 }
             } catch (err: any) {
@@ -80,6 +91,8 @@ export default function DuaCard() {
         return () => {
             if (audio) {
                 audio.pause();
+                audio.removeEventListener('ended', () => { });
+                audio.removeEventListener('error', () => { });
                 audio.src = '';
             }
         };

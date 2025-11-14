@@ -1,9 +1,12 @@
-// Duas API Service
+// Duas API Service - FINAL VERSION
 import apiClient, { handleApiError } from '@/lib/apiClient';
 import { API_ENDPOINTS, API_CONFIG } from '@/config/api';
 import { transformDynamoDBArray, transformDynamoDBObject, isDynamoDBFormatted } from '@/utils/dynamoDbTransform';
 
-// Dua data types
+// ============================================
+// EXPORTED TYPE DEFINITIONS
+// ============================================
+
 export interface Dua {
   id: string;
   title: string;
@@ -28,7 +31,7 @@ export interface Dua {
 export interface CreateDuaRequest {
   title: string;
   arabic: string;
-  week: string;
+  week: number;
   transcription?: {
     english?: string;
     hindi?: string;
@@ -46,7 +49,7 @@ export interface UpdateDuaRequest {
   id: string;
   title?: string;
   arabic?: string;
-  week?: string;
+  week?: number;
   transcription?: {
     english?: string;
     hindi?: string;
@@ -61,17 +64,14 @@ export interface UpdateDuaRequest {
   status?: 'active' | 'inactive';
 }
 
-// 🔑 Utility: normalize response from API
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
 const normalizeDua = (dua: any): Dua => {
   if (isDynamoDBFormatted(dua)) {
     dua = transformDynamoDBObject(dua);
   }
-
-  // // Construct audioUrl from key
-  // if (dua.audioKey) {
-  //   dua.audioUrl = `${API_CONFIG.s3PublicUrl}/${dua.audioKey}`;
-  //   delete dua.audioKey;
-  // }
 
   return {
     ...dua,
@@ -83,13 +83,12 @@ const normalizeDua = (dua: any): Dua => {
   } as Dua;
 };
 
-// 🔑 Utility: build FormData with arabic → arabicText mapping
 const buildFormData = (data: any): FormData => {
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       let fieldKey = key;
-      if (key === 'arabic') fieldKey = 'arabicText'; // map for backend
+      if (key === 'arabic') fieldKey = 'arabicText';
 
       if (typeof value === 'object' && !(value instanceof File)) {
         formData.append(fieldKey, JSON.stringify(value));
@@ -101,8 +100,11 @@ const buildFormData = (data: any): FormData => {
   return formData;
 };
 
+// ============================================
+// API FUNCTIONS
+// ============================================
+
 export const duasApi = {
-  // Get all duas
   getDuas: async (): Promise<Dua[]> => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.DUAS);
@@ -124,7 +126,6 @@ export const duasApi = {
     }
   },
 
-  // Get single dua
   getDua: async (id: string): Promise<Dua> => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.DUA_DETAIL(id));
@@ -135,68 +136,81 @@ export const duasApi = {
     }
   },
 
-  // Create dua
   createDua: async (duaData: CreateDuaRequest): Promise<Dua> => {
-  try {
-    const formData = buildFormData(duaData);
-    // Log FormData for debug (remove in prod)
-    if (API_CONFIG.enableLogging) {
-      for (const [k, v] of formData.entries()) {
-        console.log(`FormData ${k}:`, v);
+    try {
+      const formData = buildFormData(duaData);
+      
+      if (API_CONFIG.enableLogging) {
+        console.log('📤 Creating Dua with FormData:');
+        for (const [k, v] of formData.entries()) {
+          console.log(`  ${k}:`, v instanceof File ? `File(${v.name}, ${v.size} bytes)` : v);
+        }
       }
-    }
 
-    const response = await apiClient.post(API_ENDPOINTS.DUAS, formData); // No headers—auto multipart
+      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData);
 
-    if (response.data.success && response.data.data?.dua) {
-      return normalizeDua(response.data.data.dua);
-    }
-    throw new Error('Invalid response format from server');
-  } catch (error) {
-    throw new Error(handleApiError(error));
-  }
-},
-
-  // Update dua
-  updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
-    let payload: any = { ...duaData };
-    let headers = { 'Content-Type': 'application/json' };
-
-    // If audio is updated, send FormData instead
-    if (duaData.audioKey instanceof File) {
-      const formData = new FormData();
-      Object.entries(duaData).forEach(([k, v]) => {
-        if (v === undefined || v === null) return;
-        const key = k === 'arabic' ? 'arabicText' : k;
-        formData.append(
-          key,
-          v instanceof File ? v : typeof v === 'object' ? JSON.stringify(v) : v
-        );
-      });
-      payload = formData;
-      headers = { 'Content-Type': 'multipart/form-data' };
-    } else {
-      // JSON payload – map arabic → arabicText
-      if ('arabic' in payload) {
-        payload.arabicText = payload.arabic;
-        delete payload.arabic;
+      if (API_CONFIG.enableLogging) {
+        console.log('✅ Create Response:', response.data);
       }
-    }
 
-    const response = await apiClient.put(
-      API_ENDPOINTS.DUA_DETAIL(duaData.id),
-      payload,
-      { headers } 
-    );
-
-    if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to update dua');
+      if (response.data.success && response.data.data?.dua) {
+        return normalizeDua(response.data.data.dua);
+      }
+      
+      throw new Error(response.data.message || 'Invalid response format from server');
+    } catch (error: any) {
+      console.error('❌ Create Dua Error:', error);
+      throw new Error(handleApiError(error));
     }
-    return response.data.data;
   },
 
+  updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
+    try {
+      let payload: any;
+      let config: any = {};
 
-  // Delete dua
+      if (duaData.audioKey instanceof File) {
+        const formData = new FormData();
+        Object.entries(duaData).forEach(([k, v]) => {
+          if (v === undefined || v === null) return;
+          const key = k === 'arabic' ? 'arabicText' : k;
+          formData.append(
+            key,
+            v instanceof File ? v : typeof v === 'object' ? JSON.stringify(v) : v
+          );
+        });
+        payload = formData;
+      } else {
+        payload = { ...duaData };
+        if ('arabic' in payload) {
+          payload.arabicText = payload.arabic;
+          delete payload.arabic;
+        }
+        config.headers = { 'Content-Type': 'application/json' };
+      }
+
+      if (API_CONFIG.enableLogging) {
+        console.log('📤 Updating Dua:', duaData.id, payload instanceof FormData ? 'FormData' : 'JSON');
+      }
+
+      const response = await apiClient.put(
+        API_ENDPOINTS.DUA_DETAIL(duaData.id),
+        payload,
+        config
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to update dua');
+      }
+
+      let updatedDua = response.data.data?.dua || response.data.data;
+      return normalizeDua(updatedDua);
+    } catch (error: any) {
+      console.error('❌ Update Dua Error:', error);
+      throw new Error(handleApiError(error));
+    }
+  },
+
   deleteDua: async (id: string): Promise<void> => {
     try {
       await apiClient.delete(API_ENDPOINTS.DUA_DETAIL(id));
