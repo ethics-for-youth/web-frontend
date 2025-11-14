@@ -141,7 +141,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
       // ... reset unchanged
       setTimeout(() => onSuccess(), 1200);
     } catch (error: any) {
-      console.error('❌ Submit Error:', error);
+      console.error('❌ Full Submit Error:', error.response?.data || error);
       setErrorMsg(`❌ Failed to submit dua: ${error.message || 'Please try again.'}`);
     } finally {
       setLoading(false);
@@ -419,24 +419,43 @@ export default function AdminDuaManagement() {
   const handleToggleVisibility = async (dua: Dua) => {
     try {
       const newStatus = dua.status === 'active' ? 'inactive' : 'active';
-      await duasApi.updateDua({ id: dua.id, status: newStatus });
+
+      // Fetch current to merge (ensures full payload for backend validation)
+      const currentDua = await duasApi.getDua(dua.id);
+
+      const updateData: UpdateDuaRequest = {
+        id: dua.id,
+        ...currentDua,  // Full fields (title, arabic, etc.)
+        status: newStatus,
+      };
+
+      if (API_ENDPOINTS.enableLogging) {
+        console.log('🔄 Toggle full payload:', updateData);
+      }
+
+      await duasApi.updateDua(updateData);
       setDuas(prev =>
         prev.map(d => (d.id === dua.id ? { ...d, status: newStatus } : d))
       );
     } catch (err: any) {
-      console.error('Toggle error:', err);
+      // Better error logging
+      if (API_ENDPOINTS.enableLogging) {
+        console.error('❌ Toggle Error Details:', err.response?.data || err.message);
+      }
       alert(`Failed to ${dua.status === 'active' ? 'deactivate' : 'activate'} dua: ${err.message}`);
     }
   };
 
-
-  // Delete dua after confirmation
+  // Updated handleDelete (better logging)
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this Dua?")) {
       try {
         await duasApi.deleteDua(id);
         setDuas((prev) => prev.filter((dua) => dua.id !== id));
       } catch (err: any) {
+        if (API_ENDPOINTS.enableLogging) {
+          console.error('❌ Delete Error Details:', err.response?.data || err.message);
+        }
         alert(`Failed to delete dua: ${err.message}`);
       }
     }

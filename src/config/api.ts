@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
   // Duas
   DUAS: '/duas',
   DUA_DETAIL: (id: string) => `/duas/${id}`,
+  enableLogging: true,
 } as const;
 
 

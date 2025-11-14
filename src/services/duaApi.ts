@@ -1,12 +1,10 @@
-// Duas API Service - FINAL VERSION
+// Duas API Service
+import axios from 'axios';
 import apiClient, { handleApiError } from '@/lib/apiClient';
 import { API_ENDPOINTS, API_CONFIG } from '@/config/api';
 import { transformDynamoDBArray, transformDynamoDBObject, isDynamoDBFormatted } from '@/utils/dynamoDbTransform';
 
-// ============================================
-// EXPORTED TYPE DEFINITIONS
-// ============================================
-
+// Dua data types
 export interface Dua {
   id: string;
   title: string;
@@ -64,10 +62,7 @@ export interface UpdateDuaRequest {
   status?: 'active' | 'inactive';
 }
 
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
+// 🔑 Utility: normalize response from API
 const normalizeDua = (dua: any): Dua => {
   if (isDynamoDBFormatted(dua)) {
     dua = transformDynamoDBObject(dua);
@@ -83,12 +78,13 @@ const normalizeDua = (dua: any): Dua => {
   } as Dua;
 };
 
+// 🔑 Utility: build FormData with arabic → arabicText mapping
 const buildFormData = (data: any): FormData => {
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       let fieldKey = key;
-      if (key === 'arabic') fieldKey = 'arabicText';
+      if (key === 'arabic') fieldKey = 'arabicText'; // map for backend
 
       if (typeof value === 'object' && !(value instanceof File)) {
         formData.append(fieldKey, JSON.stringify(value));
@@ -100,11 +96,8 @@ const buildFormData = (data: any): FormData => {
   return formData;
 };
 
-// ============================================
-// API FUNCTIONS
-// ============================================
-
 export const duasApi = {
+  // Get all duas (unchanged)
   getDuas: async (): Promise<Dua[]> => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.DUAS);
@@ -126,6 +119,7 @@ export const duasApi = {
     }
   },
 
+  // Get single dua (unchanged)
   getDua: async (id: string): Promise<Dua> => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.DUA_DETAIL(id));
@@ -136,85 +130,116 @@ export const duasApi = {
     }
   },
 
+  // Create dua (added status default + logging)
   createDua: async (duaData: CreateDuaRequest): Promise<Dua> => {
     try {
-      const formData = buildFormData(duaData);
-      
+      // Ensure status for create
+      const dataWithStatus = { ...duaData, status: 'active' };
+      const formData = buildFormData(dataWithStatus);
+
+      // Log FormData for debug (remove in prod)
       if (API_CONFIG.enableLogging) {
-        console.log('📤 Creating Dua with FormData:');
+        console.log('📤 Create FormData payload:');
         for (const [k, v] of formData.entries()) {
-          console.log(`  ${k}:`, v instanceof File ? `File(${v.name}, ${v.size} bytes)` : v);
+          console.log(`  ${k}:`, v);
         }
       }
 
-      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData);
-
-      if (API_CONFIG.enableLogging) {
-        console.log('✅ Create Response:', response.data);
-      }
+      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData); // No headers—auto multipart
 
       if (response.data.success && response.data.data?.dua) {
         return normalizeDua(response.data.data.dua);
       }
-      
-      throw new Error(response.data.message || 'Invalid response format from server');
-    } catch (error: any) {
-      console.error('❌ Create Dua Error:', error);
+      throw new Error('Invalid response format from server');
+    } catch (error) {
+      // Log full error for debugging
+      if (API_CONFIG.enableLogging && axios.isAxiosError(error)) {
+        console.error('❌ Full Create Error Response:', error.response?.data);
+      }
       throw new Error(handleApiError(error));
     }
   },
 
+  // Update dua (strip id + log payload)
   updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
-    try {
-      let payload: any;
-      let config: any = {};
+    let payload: any = { ...duaData };
 
-      if (duaData.audioKey instanceof File) {
-        const formData = new FormData();
-        Object.entries(duaData).forEach(([k, v]) => {
-          if (v === undefined || v === null) return;
-          const key = k === 'arabic' ? 'arabicText' : k;
-          formData.append(
-            key,
-            v instanceof File ? v : typeof v === 'object' ? JSON.stringify(v) : v
-          );
-        });
-        payload = formData;
-      } else {
-        payload = { ...duaData };
-        if ('arabic' in payload) {
-          payload.arabicText = payload.arabic;
-          delete payload.arabic;
+    // 🔧 FIX: Always strip id from body (redundant, can cause validation 400s)
+    delete payload.id;
+
+    let headers = { 'Content-Type': 'application/json' };
+
+    // If audio is updated, send FormData instead
+    if (duaData.audioKey instanceof File) {
+      const formData = new FormData();
+      Object.entries(payload).forEach(([k, v]) => {
+        if (v === undefined || v === null || v === '') return; // Skip empties
+        const key = k === 'arabic' ? 'arabicText' : k;
+
+        // 🔧 FIXED: Type-safe append with narrowing
+        if (v instanceof File) {
+          formData.append(key, v);
+        } else if (typeof v === 'object') {
+          try {
+            formData.append(key, JSON.stringify(v));
+          } catch (stringifyErr) {
+            console.warn(`⚠️ Skipped appending ${key}: JSON.stringify failed`, stringifyErr);
+          }
+        } else if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+          formData.append(key, String(v)); // Coerce to string
+        } else {
+          console.warn(`⚠️ Skipped invalid append for ${key}:`, typeof v);
         }
-        config.headers = { 'Content-Type': 'application/json' };
-      }
+      });
+      payload = formData;
+      headers = { 'Content-Type': 'multipart/form-data' };
 
+      // Log FormData (now works for non-create too)
       if (API_CONFIG.enableLogging) {
-        console.log('📤 Updating Dua:', duaData.id, payload instanceof FormData ? 'FormData' : 'JSON');
+        console.log('📤 Update FormData payload:');
+        for (const [key, value] of formData.entries()) {
+          console.log(`  ${key}:`, value);
+        }
+      }
+    } else {
+      // JSON payload – map arabic → arabicText
+      if ('arabic' in payload) {
+        payload.arabicText = payload.arabic;
+        delete payload.arabic;
       }
 
-      const response = await apiClient.put(
-        API_ENDPOINTS.DUA_DETAIL(duaData.id),
-        payload,
-        config
-      );
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Failed to update dua');
+      // Log JSON payload
+      if (API_CONFIG.enableLogging) {
+        console.log('📤 Update JSON payload:', payload);
       }
-
-      let updatedDua = response.data.data?.dua || response.data.data;
-      return normalizeDua(updatedDua);
-    } catch (error: any) {
-      console.error('❌ Update Dua Error:', error);
-      throw new Error(handleApiError(error));
     }
+
+    const response = await apiClient.put(
+      API_ENDPOINTS.DUA_DETAIL(duaData.id),
+      payload,
+      { headers }
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to update dua');
+    }
+    let updatedDua = response.data.data?.dua || response.data.data;
+    return normalizeDua(updatedDua);
   },
 
+  // Delete dua (added optional empty body + logging)
   deleteDua: async (id: string): Promise<void> => {
     try {
-      await apiClient.delete(API_ENDPOINTS.DUA_DETAIL(id));
+      if (API_CONFIG.enableLogging) {
+        console.log(`🗑️ Deleting Dua ID: ${id}`);
+      }
+      // 🔧 Some backends expect a body for DELETE (rare, but fixes weird 400s)
+      await apiClient.delete(API_ENDPOINTS.DUA_DETAIL(id), { data: {} });
     } catch (error) {
+      // Log full error
+      if (API_CONFIG.enableLogging && axios.isAxiosError(error)) {
+        console.error('❌ Full Delete Error Response:', error.response?.data);
+      }
       throw new Error(handleApiError(error));
     }
   },
