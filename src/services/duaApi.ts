@@ -39,7 +39,7 @@ export interface CreateDuaRequest {
     urdu?: string;
     romanUrdu?: string;
   };
-  audioKey?: File;
+  audio?: File;
 }
 
 export interface UpdateDuaRequest {
@@ -67,9 +67,16 @@ const normalizeDua = (dua: any): Dua => {
     dua = transformDynamoDBObject(dua);
   }
 
+  // // Construct audioUrl from key
+  // if (dua.audioKey) {
+  //   dua.audioUrl = `${API_CONFIG.s3PublicUrl}/${dua.audioKey}`;
+  //   delete dua.audioKey;
+  // }
+
   return {
     ...dua,
     arabic: dua.arabic || '',
+    week: parseInt(dua.week) || 0,
     status: dua.status || 'active',
     createdAt: dua.createdAt || new Date().toISOString(),
     updatedAt: dua.updatedAt || new Date().toISOString(),
@@ -130,21 +137,25 @@ export const duasApi = {
 
   // Create dua
   createDua: async (duaData: CreateDuaRequest): Promise<Dua> => {
-    try {
-      const formData = buildFormData(duaData);
-
-      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      if (response.data.success) {
-        return response.data.data;
+  try {
+    const formData = buildFormData(duaData);
+    // Log FormData for debug (remove in prod)
+    if (API_CONFIG.enableLogging) {
+      for (const [k, v] of formData.entries()) {
+        console.log(`FormData ${k}:`, v);
       }
-      throw new Error('Invalid response format from server');
-    } catch (error) {
-      throw new Error(handleApiError(error));
     }
-  },
+
+    const response = await apiClient.post(API_ENDPOINTS.DUAS, formData); // No headers—auto multipart
+
+    if (response.data.success && response.data.data?.dua) {
+      return normalizeDua(response.data.data.dua);
+    }
+    throw new Error('Invalid response format from server');
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+},
 
   // Update dua
   updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
@@ -172,10 +183,10 @@ export const duasApi = {
       }
     }
 
-    const response = await apiClient.patch(
+    const response = await apiClient.put(
       API_ENDPOINTS.DUA_DETAIL(duaData.id),
       payload,
-      { headers }
+      { headers } 
     );
 
     if (!response.data.success) {
