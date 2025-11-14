@@ -16,7 +16,7 @@ export default function DuaCard() {
     const [dua, setDua] = useState<Dua | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
+
     const [transLang, setTransLang] = useState<"None" | "English" | "Hindi">("None");
     const [tranLang, setTranLang] = useState<"English" | "Hindi" | "Urdu" | "RomanUrdu">("English");
     const [isPlaying, setIsPlaying] = useState(false);
@@ -31,36 +31,36 @@ export default function DuaCard() {
             try {
                 setLoading(true);
                 setError(null);
-                
+
                 // Get all duas
                 const allDuas = await duasApi.getDuas();
-                
+
                 // Filter active duas
                 const activeDuas = allDuas.filter(d => d.status === 'active');
-                
+
                 if (activeDuas.length === 0) {
                     setError('No active duas available');
                     return;
                 }
-                
+
                 // Get current week number
                 const now = new Date();
                 const firstDay = new Date(now.getFullYear(), 0, 1);
                 const pastDays = Math.floor((now.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000));
                 const currentWeek = Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
-                
+
                 // Find dua for current week, or use the most recent one
                 let currentDua = activeDuas.find(d => d.week === currentWeek);
-                
+
                 if (!currentDua) {
                     // Sort by createdAt and get the most recent
-                    currentDua = activeDuas.sort((a, b) => 
+                    currentDua = activeDuas.sort((a, b) =>
                         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                     )[0];
                 }
-                
+
                 setDua(currentDua);
-                
+
                 // Setup audio if available
                 if (currentDua.audioUrl) {
                     const audioElement = new Audio(currentDua.audioUrl);
@@ -87,7 +87,7 @@ export default function DuaCard() {
 
     const togglePlay = () => {
         if (!audio) return;
-        
+
         if (isPlaying) {
             audio.pause();
         } else {
@@ -126,10 +126,10 @@ export default function DuaCard() {
                 if (!blob) return alert("Image generation failed!");
                 const file = new File([blob], "dua-card.png", { type: "image/png" });
 
-                const transcriptionText = transLang !== "None" && dua.transcription?.[tranLang.toLowerCase() as keyof typeof dua.transcription] 
-                    ? `\n\n${dua.transcription[tranLang.toLowerCase() as keyof typeof dua.transcription]}` 
-                    : "";
-                
+                const transcriptionText =
+                    transLang !== "None"
+                        ? dua.transcription?.[transLang.toLowerCase() as 'english' | 'hindi'] ?? ''
+                        : '';
                 const translationText = dua.translation?.[tranLang === "RomanUrdu" ? "romanUrdu" : tranLang.toLowerCase() as keyof typeof dua.translation] || "";
 
                 const shareData = {
@@ -207,9 +207,8 @@ export default function DuaCard() {
                                     {({ active }) => (
                                         <div
                                             onClick={() => setTransLang(opt)}
-                                            className={`${
-                                                active ? "bg-green-100 text-gray-900" : "text-gray-700"
-                                            } px-3 py-1 text-xs cursor-pointer rounded-md`}
+                                            className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
+                                                } px-3 py-1 text-xs cursor-pointer rounded-md`}
                                         >
                                             {opt}
                                         </div>
@@ -231,9 +230,8 @@ export default function DuaCard() {
                                     {({ active }) => (
                                         <div
                                             onClick={() => setTranLang(opt)}
-                                            className={`${
-                                                active ? "bg-green-100 text-gray-900" : "text-gray-700"
-                                            } px-3 py-1 text-xs cursor-pointer rounded-md`}
+                                            className={`${active ? "bg-green-100 text-gray-900" : "text-gray-700"
+                                                } px-3 py-1 text-xs cursor-pointer rounded-md`}
                                         >
                                             {opt}
                                         </div>
@@ -371,7 +369,7 @@ export default function DuaCard() {
                                 >
                                     {dua.arabic}
                                 </p>
-                                
+
                                 {transcriptionText && (
                                     <p
                                         style={{
@@ -387,7 +385,7 @@ export default function DuaCard() {
                                         {transcriptionText}
                                     </p>
                                 )}
-                                
+
                                 {translationText && (
                                     <p
                                         style={{

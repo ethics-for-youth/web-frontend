@@ -148,16 +148,42 @@ export const duasApi = {
 
   // Update dua
   updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
-    const response = await apiClient.patch(API_ENDPOINTS.DUAS, duaData, {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    let payload: any = { ...duaData };
+    let headers = { 'Content-Type': 'application/json' };
+
+    // If audio is updated, send FormData instead
+    if (duaData.audioKey instanceof File) {
+      const formData = new FormData();
+      Object.entries(duaData).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        const key = k === 'arabic' ? 'arabicText' : k;
+        formData.append(
+          key,
+          v instanceof File ? v : typeof v === 'object' ? JSON.stringify(v) : v
+        );
+      });
+      payload = formData;
+      headers = { 'Content-Type': 'multipart/form-data' };
+    } else {
+      // JSON payload – map arabic → arabicText
+      if ('arabic' in payload) {
+        payload.arabicText = payload.arabic;
+        delete payload.arabic;
+      }
+    }
+
+    const response = await apiClient.patch(
+      API_ENDPOINTS.DUA_DETAIL(duaData.id),
+      payload,
+      { headers }
+    );
 
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to update dua');
     }
-
     return response.data.data;
   },
+
 
   // Delete dua
   deleteDua: async (id: string): Promise<void> => {

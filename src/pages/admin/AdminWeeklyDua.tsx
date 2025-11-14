@@ -74,13 +74,23 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setInputs({ ...inputs, [e.target.name]: e.target.value });
 
+
   const handleAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAudio(file);
-      setCurrentAudioUrl(null);
+  const file = e.target.files?.[0];
+
+  // If user chooses a new file
+  if (file) {
+    setAudio(file);
+    setCurrentAudioUrl(null); // hide old audio
+  } else {
+    // User cleared the file input or cancelled
+    setAudio(null);
+    // Restore original audio (only during edit mode)
+    if (initialValues?.audioUrl) {
+      setCurrentAudioUrl(initialValues.audioUrl);
     }
-  };
+  }
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +163,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
   const formattedDate = formatDateForInput(timestamp.toISOString());
 
   return (
+    <form onSubmit={handleSubmit} className="space-y-4">
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       {/* Display Success/Error messages */}
       <div className="col-span-full space-y-2">
@@ -279,6 +290,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
           type="file"
           accept="audio/*"
           onChange={handleAudio}
+          value=""
           className="shadow-none bg-transparent file:bg-white file:text-green-700 focus:ring-0 focus:outline-none mt-1"
         />
         {audio && (
@@ -297,8 +309,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
           Cancel
         </Button>
         <Button
-          type="button"
-          onClick={handleSubmit}
+          type="submit"
           className="bg-gradient-to-r from-[#5E7839] to-[#4a5f2e] hover:opacity-90"
           disabled={loading}
         >
@@ -313,6 +324,7 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
         </Button>
       </div>
     </div>
+    </form>
   );
 }
 
