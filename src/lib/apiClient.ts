@@ -55,19 +55,29 @@ apiClient.interceptors.response.use(
 );
 
 // Helper function to handle API errors consistently
+// ✅ MORE SPECIFIC:
 export const handleApiError = (error: unknown): string => {
-  if (axios.isAxiosError(error)) {
-    if (error.response?.data?.message) {
-      return error.response.data.message;
+    if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message;
+        
+        // Specific error messages by status
+        switch (status) {
+            case 400:
+                return message || 'Invalid request. Please check your input.';
+            case 401:
+                return 'Authentication required. Please log in.';
+            case 403:
+                return 'You don\'t have permission to perform this action.';
+            case 404:
+                return 'The requested resource was not found.';
+            case 500:
+                return 'Server error. Please try again later.';
+            default:
+                return message || error.message || 'An unexpected error occurred';
+        }
     }
-    if (error.response?.statusText) {
-      return error.response.statusText;
-    }
-    if (error.message) {
-      return error.message;
-    }
-  }
-  return 'An unexpected error occurred';
+    return 'An unexpected error occurred';
 };
 
 export default apiClient;

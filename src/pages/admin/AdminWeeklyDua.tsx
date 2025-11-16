@@ -76,77 +76,127 @@ function AdminDuaForm({ onSubmit, onSuccess, initialValues = null, editingDua }:
 
 
   // Update handleAudio (disable in edit)
-  const handleAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (editingDua && file) {
-      alert("Audio updates not supported yet. Keeping existing audio.");
-      e.target.value = ""; // Clear input
-      return;
-    }
     if (file) {
-      // Optional: Client-side validation (MP3 ≤5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Audio must be ≤5MB");
-        e.target.value = "";
-        return;
-      }
-      if (!file.name.toLowerCase().endsWith('.mp3')) {
-        alert("Only MP3 allowed");
-        e.target.value = "";
-        return;
-      }
-      setAudio(file);
-      setCurrentAudioUrl(null);
-    } else {
-      setAudio(null);
-      if (initialValues?.audioUrl) {
-        setCurrentAudioUrl(initialValues.audioUrl);
-      }
+        // Validate file
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Audio must be ≤5MB");
+            e.target.value = "";
+            return;
+        }
+        if (!file.name.toLowerCase().endsWith('.mp3')) {
+            alert("Only MP3 allowed");
+            e.target.value = "";
+            return;
+        }
+        setAudio(file);
+        setCurrentAudioUrl(null); // Will be replaced
     }
-  };
-
+};
   // Update handleSubmit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setSuccessMsg("");
-    setErrorMsg("");
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setSuccessMsg("");
+  setErrorMsg("");
 
-    try {
-      const duaData: CreateDuaRequest | UpdateDuaRequest = {
+  try {
+    // 1️⃣ Build transcription object (only if has values)
+    const transcription = {
+      english: inputs.transcriptionEng || undefined,
+      hindi: inputs.transcriptionHindi || undefined,
+      // urdu: inputs.transcriptionUrdu || undefined, // ✅ ADDED
+    };
+    const hasTranscription = Object.values(transcription).some(v => v);
+
+    // 2️⃣ Build translation object (only if has values)
+    const translation = {
+      english: inputs.translationEng || undefined,
+      urdu: inputs.translationUrdu || undefined,
+      hindi: inputs.translationHindi || undefined,
+      romanUrdu: inputs.translationRoman || undefined,
+    };
+    const hasTranslation = Object.values(translation).some(v => v);
+
+    // 3️⃣ Build payload based on mode (create vs update)
+    let duaData: CreateDuaRequest | UpdateDuaRequest;
+
+    if (editingDua && initialValues?.id) {
+      // 🔧 UPDATE MODE
+      duaData = {
+        id: initialValues.id,
         title: inputs.title,
-        arabic: inputs.arabicText, // Map back to arabic for API
+        arabic: inputs.arabicText,
         week: getWeekNumber(timestamp),
-        transcription: {
-          english: inputs.transcriptionEng || undefined,
-          hindi: inputs.transcriptionHindi || undefined,
-        },
-        translation: {
-          english: inputs.translationEng || undefined,
-          urdu: inputs.translationUrdu || undefined,
-          hindi: inputs.translationHindi || undefined,
-          romanUrdu: inputs.translationRoman || undefined,
-        },
-        ...(audio && !editingDua && { audio }), // Only for create
-      };
-
-      if (initialValues?.id) {
-        (duaData as UpdateDuaRequest).id = initialValues.id;
-      }
-
-      console.log('📤 Submitting Dua Data:', duaData);
-
-      await onSubmit(duaData);
-      setSuccessMsg("✅ Dua submitted successfully!");
-      // ... reset unchanged
-      setTimeout(() => onSuccess(), 1200);
-    } catch (error: any) {
-      console.error('❌ Full Submit Error:', error.response?.data || error);
-      setErrorMsg(`❌ Failed to submit dua: ${error.message || 'Please try again.'}`);
-    } finally {
-      setLoading(false);
+        ...(hasTranscription && { transcription }),
+        ...(hasTranslation && { translation }),
+        // Audio update: currently disabled, but structure is ready
+        // ...(audio && { audioKey: audio }), // Use when backend supports it
+      } as UpdateDuaRequest;
+    } else {
+      // ✨ CREATE MODE
+      duaData = {
+        title: inputs.title,
+        arabic: inputs.arabicText,
+        week: getWeekNumber(timestamp),
+        ...(hasTranscription && { transcription }),
+        ...(hasTranslation && { translation }),
+        ...(audio && { audio }), // ✅ Include audio for create
+      } as CreateDuaRequest;
     }
-  };
+
+    console.log('📤 Submitting Dua Data:', duaData);
+    console.log('📋 Mode:', editingDua ? 'UPDATE' : 'CREATE');
+
+    // 4️⃣ Submit to API
+    await onSubmit(duaData);
+
+    // 5️⃣ Success handling
+    setSuccessMsg("✅ Dua submitted successfully!");
+    
+    // Reset form if creating new
+    if (!editingDua) {
+      setInputs({
+        id: "",
+        title: "",
+        arabicText: "",
+        transcriptionEng: "",
+        transcriptionHindi: "",
+        // transcriptionUrdu: "", // ✅ Reset urdu too
+        translationEng: "",
+        translationUrdu: "",
+        translationHindi: "",
+        translationRoman: "",
+      });
+      setAudio(null);
+    }
+
+    // Close dialog/form after short delay
+    setTimeout(() => onSuccess(), 1200);
+
+  } catch (error: any) {
+    // 6️⃣ Enhanced error handling
+    console.error('❌ Full Submit Error:', error);
+    
+    // Extract meaningful error message
+    const errorMessage = 
+      error.response?.data?.message || 
+      error.message || 
+      'An unexpected error occurred. Please check your input and try again.';
+    
+    // Show specific errors for common issues
+    if (error.response?.status === 400) {
+      setErrorMsg(`❌ Invalid input: ${errorMessage}`);
+    } else if (error.response?.status === 413) {
+      setErrorMsg(`❌ File too large. Audio must be under 5MB.`);
+    } else {
+      setErrorMsg(`❌ Failed to submit dua: ${errorMessage}`);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const interval = setInterval(() => setTimestamp(new Date()), 60000);
@@ -416,35 +466,30 @@ export default function AdminDuaManagement() {
   };
 
   // Toggle visibility (status change) using PATCH endpoint
-  const handleToggleVisibility = async (dua: Dua) => {
+const handleToggleVisibility = async (dua: Dua) => {
     try {
-      const newStatus = dua.status === 'active' ? 'inactive' : 'active';
+        const newStatus = dua.status === 'active' ? 'inactive' : 'active';
 
-      // Fetch current to merge (ensures full payload for backend validation)
-      const currentDua = await duasApi.getDua(dua.id);
-
-      const updateData: UpdateDuaRequest = {
-        id: dua.id,
-        ...currentDua,  // Full fields (title, arabic, etc.)
-        status: newStatus,
-      };
-
-      if (API_ENDPOINTS.enableLogging) {
-        console.log('🔄 Toggle full payload:', updateData);
-      }
-
-      await duasApi.updateDua(updateData);
-      setDuas(prev =>
-        prev.map(d => (d.id === dua.id ? { ...d, status: newStatus } : d))
-      );
-    } catch (err: any) {
-      // Better error logging
-      if (API_ENDPOINTS.enableLogging) {
-        console.error('❌ Toggle Error Details:', err.response?.data || err.message);
-      }
-      alert(`Failed to ${dua.status === 'active' ? 'deactivate' : 'activate'} dua: ${err.message}`);
+        if (newStatus === 'inactive' && 
+        !window.confirm('Deactivate this dua? Users won\'t see it anymore.')) {
+        return;
     }
-  };
+        
+        // Send ONLY changed fields
+        const updateData: UpdateDuaRequest = {
+            id: dua.id,
+            status: newStatus,
+            // Backend should handle partial updates
+        };
+        
+        await duasApi.updateDua(updateData);
+        setDuas(prev =>
+            prev.map(d => (d.id === dua.id ? { ...d, status: newStatus } : d))
+        );
+    } catch (err: any) {
+        alert(`Failed to toggle status: ${err.message}`);
+    }
+};
 
   // Updated handleDelete (better logging)
   const handleDelete = async (id: string) => {
@@ -457,7 +502,7 @@ export default function AdminDuaManagement() {
           console.error('❌ Delete Error Details:', err.response?.data || err.message);
         }
         alert(`Failed to delete dua: ${err.message}`);
-      }
+      } 
     }
   };
 

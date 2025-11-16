@@ -80,19 +80,27 @@ const normalizeDua = (dua: any): Dua => {
 
 // 🔑 Utility: build FormData with arabic → arabicText mapping
 const buildFormData = (data: any): FormData => {
+  // Validate required fields for create
+  if (!data.title || !data.arabic || !data.week) {
+    throw new Error('Missing required fields: title, arabic, week');
+  }
+
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      let fieldKey = key;
-      if (key === 'arabic') fieldKey = 'arabicText'; // map for backend
+    if (value === undefined || value === null) return;
 
-      if (typeof value === 'object' && !(value instanceof File)) {
-        formData.append(fieldKey, JSON.stringify(value));
-      } else {
-        formData.append(fieldKey, value as any);
-      }
+    let fieldKey = key;
+    if (key === 'arabic') fieldKey = 'arabicText';
+
+    if (value instanceof File) {
+      formData.append(fieldKey, value);
+    } else if (typeof value === 'object') {
+      formData.append(fieldKey, JSON.stringify(value));
+    } else {
+      formData.append(fieldKey, String(value));
     }
   });
+
   return formData;
 };
 
@@ -234,7 +242,8 @@ export const duasApi = {
         console.log(`🗑️ Deleting Dua ID: ${id}`);
       }
       // 🔧 Some backends expect a body for DELETE (rare, but fixes weird 400s)
-      await apiClient.delete(API_ENDPOINTS.DUA_DETAIL(id), { data: {} });
+      // ✅ STANDARD DELETE:
+      await apiClient.delete(API_ENDPOINTS.DUA_DETAIL(id));
     } catch (error) {
       // Log full error
       if (API_CONFIG.enableLogging && axios.isAxiosError(error)) {
