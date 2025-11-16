@@ -80,26 +80,28 @@ const normalizeDua = (dua: any): Dua => {
 
 // 🔑 Utility: build FormData with arabic → arabicText mapping
 const buildFormData = (data: any): FormData => {
-  // Validate required fields for create
-  if (!data.title || !data.arabic || !data.week) {
-    throw new Error('Missing required fields: title, arabic, week');
+  const requiredFields = ['title', 'arabic', 'week'];
+  for (const field of requiredFields) {
+    if (!data[field]) {
+      throw new Error(`Missing required field: ${field}`);
+    }
   }
 
   const formData = new FormData();
-  Object.entries(data).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
 
-    let fieldKey = key;
-    if (key === 'arabic') fieldKey = 'arabicText';
+  for (const [key, value] of Object.entries(data)) {
+    if (value == null) continue;
+
+    const mappedKey = key === 'arabic' ? 'arabicText' : key;
 
     if (value instanceof File) {
-      formData.append(fieldKey, value);
+      formData.append(mappedKey, value);
     } else if (typeof value === 'object') {
-      formData.append(fieldKey, JSON.stringify(value));
+      formData.append(mappedKey, JSON.stringify(value));
     } else {
-      formData.append(fieldKey, String(value));
+      formData.append(mappedKey, String(value));
     }
-  });
+  }
 
   return formData;
 };
@@ -141,28 +143,39 @@ export const duasApi = {
   // Create dua (added status default + logging)
   createDua: async (duaData: CreateDuaRequest): Promise<Dua> => {
     try {
-      // Ensure status for create
       const dataWithStatus = { ...duaData, status: 'active' };
       const formData = buildFormData(dataWithStatus);
 
-      // Log FormData for debug (remove in prod)
+      // ✅ Log exact payload
       if (API_CONFIG.enableLogging) {
-        console.log('📤 Create FormData payload:');
-        for (const [k, v] of formData.entries()) {
-          console.log(`  ${k}:`, v);
-        }
+        console.log('📤 Create Dua - Full Payload:');
+        console.log('  Title:', duaData.title);
+        console.log('  Arabic:', duaData.arabic);
+        console.log('  Week:', duaData.week);
+        console.log('  Transcription:', duaData.transcription);
+        console.log('  Translation:', duaData.translation);
+        console.log('  Audio:', duaData.audio ? `File: ${duaData.audio.name}` : 'None');
       }
 
-      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData); // No headers—auto multipart
+      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData);
 
       if (response.data.success && response.data.data?.dua) {
         return normalizeDua(response.data.data.dua);
       }
       throw new Error('Invalid response format from server');
     } catch (error) {
-      // Log full error for debugging
+      // ✅ Enhanced error logging
       if (API_CONFIG.enableLogging && axios.isAxiosError(error)) {
-        console.error('❌ Full Create Error Response:', error.response?.data);
+        console.error('❌ Create Dua Failed:');
+        console.error('  Status:', error.response?.status);
+        console.error('  Error:', error.response?.data);
+        console.error('  Request URL:', error.config?.url);
+        console.error('  Request Method:', error.config?.method);
+        
+        // Log what backend actually received (if available in error)
+        if (error.response?.data?.received) {
+          console.error('  Backend received:', error.response.data.received);
+        }
       }
       throw new Error(handleApiError(error));
     }
