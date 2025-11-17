@@ -51,7 +51,7 @@ export const API_ENDPOINTS = {
 export const API_CONFIG = {
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '10000'), // Default 10 seconds
   headers: {
-    'Content-Type': 'application/json',
+    // 'Content-Type': 'application/json',
   },
   enableLogging: import.meta.env.VITE_API_LOGGING === 'true',
 } as const;

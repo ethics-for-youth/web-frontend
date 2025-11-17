@@ -58,7 +58,7 @@ export interface UpdateDuaRequest {
     urdu?: string;
     romanUrdu?: string;
   };
-  audioKey?: File;
+  audio?: File;
   status?: 'active' | 'inactive';
 }
 
@@ -188,10 +188,10 @@ export const duasApi = {
     // 🔧 FIX: Always strip id from body (redundant, can cause validation 400s)
     delete payload.id;
 
-    let headers = { 'Content-Type': 'application/json' };
+    let headers = {};
 
     // If audio is updated, send FormData instead
-    if (duaData.audioKey instanceof File) {
+    if (duaData.audio instanceof File) {
       const formData = new FormData();
       Object.entries(payload).forEach(([k, v]) => {
         if (v === undefined || v === null || v === '') return; // Skip empties
@@ -213,7 +213,7 @@ export const duasApi = {
         }
       });
       payload = formData;
-      headers = { 'Content-Type': 'multipart/form-data' };
+      headers = {};
 
       // Log FormData (now works for non-create too)
       if (API_CONFIG.enableLogging) {
@@ -238,7 +238,7 @@ export const duasApi = {
     const response = await apiClient.put(
       API_ENDPOINTS.DUA_DETAIL(duaData.id),
       payload,
-      { headers }
+      { headers } 
     );
 
     if (!response.data.success) {
