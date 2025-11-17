@@ -184,34 +184,33 @@ export const duasApi = {
 
   // Update dua (strip id + log payload)
   updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
-  try {
-    // Backend requires the ID to be present in the JSON body
-    if (!duaData.id) {
-      throw new Error("ID is required for update");
+    try {
+      // Backend requires the ID to be present in the JSON body
+      if (!duaData.id) {
+        throw new Error("ID is required for update");
+      }
+
+      // Optional logging
+      if (API_CONFIG.enableLogging) {
+        console.log("📤 Final Update Payload Sent to Backend:", duaData);
+      }
+
+      // Always send JSON (no FormData / no headers override)
+      const response = await apiClient.put(
+        API_ENDPOINTS.DUAS, duaData
+      );
+
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Failed to update dua");
+      }
+
+      const updated = response.data.data?.dua || response.data.data;
+      return normalizeDua(updated);
+    } catch (error) {
+      console.error("❌ Update Dua Error:", error);
+      throw new Error(handleApiError(error));
     }
-
-    // Optional logging
-    if (API_CONFIG.enableLogging) {
-      console.log("📤 Final Update Payload Sent to Backend:", duaData);
-    }
-
-    // Always send JSON (no FormData / no headers override)
-    const response = await apiClient.put(
-      API_ENDPOINTS.DUA_DETAIL(duaData.id),
-      duaData
-    );
-
-    if (!response.data?.success) {
-      throw new Error(response.data?.message || "Failed to update dua");
-    }
-
-    const updated = response.data.data?.dua || response.data.data;
-    return normalizeDua(updated);
-  } catch (error) {
-    console.error("❌ Update Dua Error:", error);
-    throw new Error(handleApiError(error));
-  }
-},
+  },
 
 
   // Delete dua (added optional empty body + logging)
