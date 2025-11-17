@@ -8,7 +8,7 @@ import { transformDynamoDBArray, transformDynamoDBObject, isDynamoDBFormatted } 
 export interface Dua {
   id: string;
   title: string;
-  arabic: string;
+  arabicText: string;
   week: number;
   transcription?: {
     english?: string;
@@ -28,7 +28,7 @@ export interface Dua {
 
 export interface CreateDuaRequest {
   title: string;
-  arabic: string;
+  arabicText: string;
   week: number;
   transcription?: {
     english?: string;
@@ -46,7 +46,7 @@ export interface CreateDuaRequest {
 export interface UpdateDuaRequest {
   id: string;
   title?: string;
-  arabic?: string;
+  arabicText?: string;
   week?: number;
   transcription?: {
     english?: string;
@@ -70,7 +70,7 @@ const normalizeDua = (dua: any): Dua => {
 
   return {
     ...dua,
-    arabic: dua.arabic || '',
+    arabicText: dua.arabicText || '',
     week: parseInt(dua.week) || 0,
     status: dua.status || 'active',
     createdAt: dua.createdAt || new Date().toISOString(),
@@ -80,7 +80,7 @@ const normalizeDua = (dua: any): Dua => {
 
 // 🔑 Utility: build FormData with arabic → arabicText mapping
 const buildFormData = (data: any): FormData => {
-  const requiredFields = ['title', 'arabic', 'week'];
+  const requiredFields = ['title', 'arabicText', 'week'];
   for (const field of requiredFields) {
     if (!data[field]) {
       throw new Error(`Missing required field: ${field}`);
@@ -92,7 +92,8 @@ const buildFormData = (data: any): FormData => {
   for (const [key, value] of Object.entries(data)) {
     if (value == null) continue;
 
-    const mappedKey = key === 'arabic' ? 'arabicText' : key;
+    const mappedKey = key;
+
 
     if (value instanceof File) {
       formData.append(mappedKey, value);
@@ -150,7 +151,7 @@ export const duasApi = {
       if (API_CONFIG.enableLogging) {
         console.log('📤 Create Dua - Full Payload:');
         console.log('  Title:', duaData.title);
-        console.log('  Arabic:', duaData.arabic);
+        console.log('  Arabic:', duaData.arabicText);
         console.log('  Week:', duaData.week);
         console.log('  Transcription:', duaData.transcription);
         console.log('  Translation:', duaData.translation);
@@ -171,7 +172,7 @@ export const duasApi = {
         console.error('  Error:', error.response?.data);
         console.error('  Request URL:', error.config?.url);
         console.error('  Request Method:', error.config?.method);
-        
+
         // Log what backend actually received (if available in error)
         if (error.response?.data?.received) {
           console.error('  Backend received:', error.response.data.received);
@@ -183,70 +184,35 @@ export const duasApi = {
 
   // Update dua (strip id + log payload)
   updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
-    let payload: any = { ...duaData };
-
-    // 🔧 FIX: Always strip id from body (redundant, can cause validation 400s)
-    delete payload.id;
-
-    let headers = {};
-
-    // If audio is updated, send FormData instead
-    if (duaData.audio instanceof File) {
-      const formData = new FormData();
-      Object.entries(payload).forEach(([k, v]) => {
-        if (v === undefined || v === null || v === '') return; // Skip empties
-        const key = k === 'arabic' ? 'arabicText' : k;
-
-        // 🔧 FIXED: Type-safe append with narrowing
-        if (v instanceof File) {
-          formData.append(key, v);
-        } else if (typeof v === 'object') {
-          try {
-            formData.append(key, JSON.stringify(v));
-          } catch (stringifyErr) {
-            console.warn(`⚠️ Skipped appending ${key}: JSON.stringify failed`, stringifyErr);
-          }
-        } else if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
-          formData.append(key, String(v)); // Coerce to string
-        } else {
-          console.warn(`⚠️ Skipped invalid append for ${key}:`, typeof v);
-        }
-      });
-      payload = formData;
-      headers = {};
-
-      // Log FormData (now works for non-create too)
-      if (API_CONFIG.enableLogging) {
-        console.log('📤 Update FormData payload:');
-        for (const [key, value] of formData.entries()) {
-          console.log(`  ${key}:`, value);
-        }
-      }
-    } else {
-      // JSON payload – map arabic → arabicText
-      if ('arabic' in payload) {
-        payload.arabicText = payload.arabic;
-        delete payload.arabic;
-      }
-
-      // Log JSON payload
-      if (API_CONFIG.enableLogging) {
-        console.log('📤 Update JSON payload:', payload);
-      }
+  try {
+    // Backend requires the ID to be present in the JSON body
+    if (!duaData.id) {
+      throw new Error("ID is required for update");
     }
 
+    // Optional logging
+    if (API_CONFIG.enableLogging) {
+      console.log("📤 Final Update Payload Sent to Backend:", duaData);
+    }
+
+    // Always send JSON (no FormData / no headers override)
     const response = await apiClient.put(
       API_ENDPOINTS.DUA_DETAIL(duaData.id),
-      payload,
-      { headers } 
+      duaData
     );
 
-    if (!response.data.success) {
-      throw new Error(response.data.message || 'Failed to update dua');
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || "Failed to update dua");
     }
-    let updatedDua = response.data.data?.dua || response.data.data;
-    return normalizeDua(updatedDua);
-  },
+
+    const updated = response.data.data?.dua || response.data.data;
+    return normalizeDua(updated);
+  } catch (error) {
+    console.error("❌ Update Dua Error:", error);
+    throw new Error(handleApiError(error));
+  }
+},
+
 
   // Delete dua (added optional empty body + logging)
   deleteDua: async (id: string): Promise<void> => {

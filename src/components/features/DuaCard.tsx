@@ -147,7 +147,7 @@ export default function DuaCard() {
 
                 const shareData = {
                     title: "Dua Card",
-                    text: `${dua.arabic}${transcriptionText}\n\n${translationText}\n\n${sourceText}`,
+                    text: `${dua.arabicText}${transcriptionText}\n\n${translationText}\n\n${sourceText}`,
                     files: [file],
                 };
 
@@ -268,7 +268,7 @@ export default function DuaCard() {
 
                         {/* Arabic Dua */}
                         <p className="text-2xl sm:text-4xl font-bold text-center text-[#2E4A27] mb-6 font-[Amiri] leading-relaxed">
-                            {dua.arabic}
+                            {dua.arabicText}
                         </p>
 
                         {/* Transcription */}
@@ -380,7 +380,7 @@ export default function DuaCard() {
                                         wordBreak: "break-word",
                                     }}
                                 >
-                                    {dua.arabic}
+                                    {dua.arabicText}
                                 </p>
 
                                 {transcriptionText && (
