@@ -70,7 +70,7 @@ const normalizeDua = (dua: any): Dua => {
 
   return {
     ...dua,
-    arabicText: dua.arabicText || '',
+     arabicText: dua.arabicText || dua.arabic || '',
     week: parseInt(dua.week) || 0,
     status: dua.status || 'active',
     createdAt: dua.createdAt || new Date().toISOString(),
@@ -92,7 +92,8 @@ const buildFormData = (data: any): FormData => {
   for (const [key, value] of Object.entries(data)) {
     if (value == null) continue;
 
-    const mappedKey = key;
+    const mappedKey = key === 'arabicText' ? 'arabic' : key;
+
 
 
     if (value instanceof File) {
@@ -184,34 +185,41 @@ export const duasApi = {
 
   // Update dua (strip id + log payload)
   updateDua: async (duaData: UpdateDuaRequest): Promise<Dua> => {
-    try {
-      // Backend requires the ID to be present in the JSON body
-      if (!duaData.id) {
-        throw new Error("ID is required for update");
-      }
-
-      // Optional logging
-      if (API_CONFIG.enableLogging) {
-        console.log("📤 Final Update Payload Sent to Backend:", duaData);
-      }
-
-      // Always send JSON (no FormData / no headers override)
-      const response = await apiClient.put(
-        API_ENDPOINTS.DUAS, duaData
-      );
-
-      if (!response.data?.success) {
-        throw new Error(response.data?.message || "Failed to update dua");
-      }
-
-      const updated = response.data.data?.dua || response.data.data;
-      return normalizeDua(updated);
-    } catch (error) {
-      console.error("❌ Update Dua Error:", error);
-      throw new Error(handleApiError(error));
+  try {
+    if (!duaData.id) {
+      throw new Error("ID is required for update");
     }
-  },
 
+    // Build payload for backend
+    const payload: any = { ...duaData };
+
+    // 🔥 Backend expects: arabic  NOT arabicText
+    if (payload.arabicText) {
+      payload.arabic = payload.arabicText;
+      delete payload.arabicText;
+    }
+
+    if (API_CONFIG.enableLogging) {
+      console.log("📤 Final Update Payload Sent to Backend:", payload);
+    }
+
+    // Correct endpoint: /duas/{id}
+    const response = await apiClient.put(
+      API_ENDPOINTS.DUA_DETAIL(duaData.id),
+      payload
+    );
+
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || "Failed to update dua");
+    }
+
+    const updated = response.data.data?.dua || response.data.data;
+    return normalizeDua(updated);
+  } catch (error) {
+    console.error("❌ Update Dua Error:", error);
+    throw new Error(handleApiError(error));
+  }
+},
 
   // Delete dua (added optional empty body + logging)
   deleteDua: async (id: string): Promise<void> => {
