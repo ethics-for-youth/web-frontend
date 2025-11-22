@@ -7,12 +7,12 @@ import RegistrationForm from '@/components/RegistrationForm';
 import TripRegistrationPayment from '@/components/TripRegistrationPayment';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { RazorpayResponse, Trip } from '@/types';
-import TripPoster from '@/assets/TripPoster.webp';
+import TripPoster from '@/assets/Trip.png';
 
 // DUMMY DATA FOR POC - Replace with API call later
 const dummyTrip: Trip = {
   id: '1',
-  title: 'DEENI CAMP 2023',
+  title: 'DEENI CAMP 2025 - A Spiritual Retreat for Youth',
   description: 'A spiritual and deeni camp like no other! For the youth, by the youth. This transformative journey combines Islamic education with practical worship experiences, designed specifically for young Muslims seeking to strengthen their faith and build lasting connections with their peers.',
   startDate: '2024-10-01T12:00:00',
   endDate: '2024-10-02T14:00:00',
@@ -119,12 +119,12 @@ const TripDetail = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <div className="mb-6">
-          <Button asChild variant="ghost">
+          {/* <Button asChild variant="ghost">
             <Link to="/trips">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Trips
             </Link>
-          </Button>
+          </Button> */}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -132,11 +132,11 @@ const TripDetail = () => {
           <div className="lg:col-span-2">
             {/* Trip Poster */}
             <div className="flex justify-center mb-6">
-              <Card className="shadow-card bg-gradient-card overflow-hidden max-w-md w-full">
+              <Card className="shadow-card bg-gradient-card overflow-hidden max-w-screen-sm w-full">
                 <img
                   src={trip.imageUrl || TripPoster}
                   alt={trip.title}
-                  className="w-full h-auto object-contain"
+                  className="w-full h-full object-contain"
                 />
               </Card>
             </div>
@@ -144,7 +144,7 @@ const TripDetail = () => {
             <Card className="shadow-card bg-gradient-card">
               <CardContent className="p-8">
                 <div className="flex items-start justify-between mb-6">
-                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                     {trip.title}
                   </h1>
                   <Badge variant={trip.status === 'active' ? "default" : "secondary"} className="ml-4">
