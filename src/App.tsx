@@ -23,6 +23,7 @@ import AdminMessages from "./pages/admin/AdminMessages";
 import AdminWeeklyDua from "./pages/admin/AdminWeeklyDua";
 import PaymentDemo from "./pages/PaymentDemo";
 import DuaCard from "./components/features/DuaCard";
+import DeeniCamp from "./pages/DeeniCamp";
 
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
             <Route path="/payment-demo" element={<Layout><PaymentDemo /></Layout>} />
             <Route path="/dua" element= {<Layout><DuaCard /></Layout>} />
+            <Route path="/deeni-camp" element= {<Layout><DeeniCamp /></Layout>} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
