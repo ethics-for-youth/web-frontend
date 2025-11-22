@@ -22,6 +22,8 @@ import AdminRegistrations from "./pages/admin/AdminRegistrations";
 import AdminMessages from "./pages/admin/AdminMessages";
 import PaymentDemo from "./pages/PaymentDemo";
 
+import DeeniCamp from "./pages/DeeniCamp";
+
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -54,6 +56,8 @@ const App = () => (
             <Route path="/volunteer" element={<Layout><Volunteer /></Layout>} />
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
             <Route path="/payment-demo" element={<Layout><PaymentDemo /></Layout>} />
+            
+            <Route path="/deeni-camp" element= {<Layout><DeeniCamp /></Layout>} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
