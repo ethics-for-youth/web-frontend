@@ -92,16 +92,12 @@ const buildFormData = (data: any): FormData => {
   for (const [key, value] of Object.entries(data)) {
     if (value == null) continue;
 
-    const mappedKey = key === 'arabicText' ? 'arabic' : key;
-
-
-
     if (value instanceof File) {
-      formData.append(mappedKey, value);
+      formData.append(key, value);
     } else if (typeof value === 'object') {
-      formData.append(mappedKey, JSON.stringify(value));
+      formData.append(key, JSON.stringify(value));
     } else {
-      formData.append(mappedKey, String(value));
+      formData.append(key, String(value));
     }
   }
 
@@ -147,6 +143,9 @@ export const duasApi = {
     try {
       const dataWithStatus = { ...duaData, status: 'active' };
       const formData = buildFormData(dataWithStatus);
+      for (const pair of formData.entries()) {
+          console.log(pair[0], pair[1]);
+        }
 
       // ✅ Log exact payload
       if (API_CONFIG.enableLogging) {
@@ -159,7 +158,10 @@ export const duasApi = {
         console.log('  Audio:', duaData.audio ? `File: ${duaData.audio.name}` : 'None');
       }
 
-      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData);
+      const response = await apiClient.post(API_ENDPOINTS.DUAS, formData, {
+  timeout: 60000, //  1 minute for uploads
+});
+
 
       if (response.data.success && response.data.data?.dua) {
         return normalizeDua(response.data.data.dua);

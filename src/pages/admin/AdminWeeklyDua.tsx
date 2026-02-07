@@ -85,10 +85,10 @@ const handleAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
             e.target.value = "";
             return;
         }
-        if (!file.name.toLowerCase().endsWith('.mp3')) {
-            alert("Only MP3 allowed");
-            e.target.value = "";
-            return;
+        if (!file.type.startsWith("audio/")) {
+          alert("Only audio files are allowed");
+          e.target.value = "";
+          return;
         }
         setAudio(file);
         setCurrentAudioUrl(null); // Will be replaced
