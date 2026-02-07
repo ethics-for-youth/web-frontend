@@ -192,23 +192,23 @@ export const duasApi = {
       throw new Error("ID is required for update");
     }
 
-    // Build payload for backend
-    const payload: any = { ...duaData };
-
-    // 🔥 Backend expects: arabic  NOT arabicText
-    if (payload.arabicText) {
-      payload.arabic = payload.arabicText;
-      delete payload.arabicText;
-    }
+    // ✅ Build payload EXACTLY as backend expects
+    const payload: any = {
+      ...duaData,
+      week: duaData.week ? String(duaData.week) : undefined,
+      status: duaData.status,
+    };
 
     if (API_CONFIG.enableLogging) {
       console.log("📤 Final Update Payload Sent to Backend:", payload);
     }
 
-    // Correct endpoint: /duas/{id}
-    const response = await apiClient.put(
-      API_ENDPOINTS.DUA_DETAIL(duaData.id),
-      payload
+    const response = await apiClient.patch(
+      API_ENDPOINTS.DUAS, 
+      payload,
+      {
+        headers: { "Content-Type": "application/json" },
+      }
     );
 
     if (!response.data?.success) {
@@ -218,7 +218,7 @@ export const duasApi = {
     const updated = response.data.data?.dua || response.data.data;
     return normalizeDua(updated);
   } catch (error) {
-    console.error("❌ Update Dua Error:", error);
+    console.error("❌ Patch Dua Error:", error);
     throw new Error(handleApiError(error));
   }
 },
