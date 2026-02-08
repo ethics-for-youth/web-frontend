@@ -27,6 +27,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     age: '',
     gender: '',
     education: '',
+    address: '',
     joinCommunity: false
   });
   const { toast } = useToast();
@@ -89,7 +90,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address *</Label>
                 <Input
@@ -157,6 +157,15 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 />
               </div>
 
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={userDetails.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="Enter your address"
+                />
+              </div>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -197,7 +206,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
               ₹{course.registrationFee.toFixed(2)}
             </span>
           </div>
-
           {!isEnrolled && course.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
             <PaymentButton
               amount={course.registrationFee}
