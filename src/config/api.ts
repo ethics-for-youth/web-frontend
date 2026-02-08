@@ -16,7 +16,7 @@ export const API_ENDPOINTS = {
   COMPETITION_RESULTS: (id: string) => `/competitions/${id}/results`,
 
   // Volunteers
-  VOLUNTEER_JOIN: '/volunteers/join',
+  VOLUNTEER_JOIN: '/volunteers/apply',
   VOLUNTEERS: '/volunteers',
   VOLUNTEER_DETAIL: (id: string) => `/volunteers/${id}`,
 

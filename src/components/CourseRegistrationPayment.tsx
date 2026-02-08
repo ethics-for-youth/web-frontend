@@ -27,6 +27,7 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     age: '',
     gender: '',
     education: '',
+    address: '',
     joinCommunity: false
   });
   const { toast } = useToast();
@@ -71,7 +72,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
     Number(userDetails.age) <= 50 &&
     userDetails.gender &&
     userDetails.education;
-
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -157,8 +157,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 />
               </div>
 
-
-
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address">Address</Label>
                 <Input
@@ -168,7 +166,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   placeholder="Enter your address"
                 />
               </div>
-
             </div>
 
             <div className="flex items-center space-x-2">
