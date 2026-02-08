@@ -51,6 +51,13 @@ export interface GetCompetitionResultsResponse extends ApiResponse<{
 export interface VolunteerJoinRequest extends Omit<Volunteer, 'id' | 'appliedAt' | 'updatedAt'> {}
 export interface VolunteerJoinResponse extends ApiResponse<{ applicationId: string }> {}
 export interface GetVolunteersResponse extends ApiResponse<Volunteer[]> {}
+export interface UpdateVolunteerRequest {
+  status?: 'pending' | 'approved' | 'active' | 'inactive';
+  assignedRole?: string;
+  team?: string;
+  notes?: string;
+  approvedBy?: string;
+}
 
 // Suggestions API Types
 export interface CreateSuggestionRequest extends Omit<Suggestion, 'id' | 'votes' | 'submittedAt' | 'updatedAt'> {}

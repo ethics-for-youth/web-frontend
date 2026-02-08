@@ -19,8 +19,12 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
+import AdminVolunteers from "./pages/admin/AdminVolunteers";
 import AdminMessages from "./pages/admin/AdminMessages";
+import AdminWeeklyDua from "./pages/admin/AdminWeeklyDua";
 import PaymentDemo from "./pages/PaymentDemo";
+import DuaCard from "./components/features/DuaCard";
+import DeeniCamp from "./pages/DeeniCamp";
 
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -54,6 +58,8 @@ const App = () => (
             <Route path="/volunteer" element={<Layout><Volunteer /></Layout>} />
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
             <Route path="/payment-demo" element={<Layout><PaymentDemo /></Layout>} />
+            <Route path="/dua" element= {<Layout><DuaCard /></Layout>} />
+            <Route path="/deeni-camp" element= {<Layout><DeeniCamp /></Layout>} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -85,11 +91,29 @@ const App = () => (
                 </AdminLayout>
               </ProtectedRoute>
             } />
+            <Route path="/admin/volunteers" element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminVolunteers />
+                  </ErrorBoundary>
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/admin/messages" element={
               <ProtectedRoute>
                 <AdminLayout>
                   <ErrorBoundary>
                     <AdminMessages />
+                  </ErrorBoundary>
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/weeklyDua" element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminWeeklyDua />
                   </ErrorBoundary>
                 </AdminLayout>
               </ProtectedRoute>

@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   // Volunteers
   VOLUNTEER_JOIN: '/volunteers/apply',
   VOLUNTEERS: '/volunteers',
+  VOLUNTEER_DETAIL: (id: string) => `/volunteers/${id}`,
 
   // Suggestions
   SUGGESTIONS: '/suggestions',
@@ -38,13 +39,19 @@ export const API_ENDPOINTS = {
 
   // Payments
   PAYMENTS_CREATE_ORDER: '/payments/create-order',
+
+  // Duas
+  DUAS: '/duas',
+  DUA_DETAIL: (id: string) => `/duas/${id}`,
 } as const;
+
+
 
 // API Configuration
 export const API_CONFIG = {
   timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '10000'), // Default 10 seconds
   headers: {
-    'Content-Type': 'application/json',
+    // 'Content-Type': 'application/json',
   },
   enableLogging: import.meta.env.VITE_API_LOGGING === 'true',
 } as const;
