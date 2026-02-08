@@ -90,7 +90,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address *</Label>
                 <Input
@@ -210,7 +209,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
               ₹{course.registrationFee.toFixed(2)}
             </span>
           </div>
-
           {!isEnrolled && course.status === 'active' && (!spotsLeft || spotsLeft > 0) ? (
             <PaymentButton
               amount={course.registrationFee}
