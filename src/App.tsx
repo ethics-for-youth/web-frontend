@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
+import AdminVolunteers from "./pages/admin/AdminVolunteers";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminWeeklyDua from "./pages/admin/AdminWeeklyDua";
 import PaymentDemo from "./pages/PaymentDemo";
@@ -86,6 +87,15 @@ const App = () => (
                 <AdminLayout>
                   <ErrorBoundary>
                     <AdminRegistrations />
+                  </ErrorBoundary>
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/volunteers" element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ErrorBoundary>
+                    <AdminVolunteers />
                   </ErrorBoundary>
                 </AdminLayout>
               </ProtectedRoute>

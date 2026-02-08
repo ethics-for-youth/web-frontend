@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   // Volunteers
   VOLUNTEER_JOIN: '/volunteers/join',
   VOLUNTEERS: '/volunteers',
+  VOLUNTEER_DETAIL: (id: string) => `/volunteers/${id}`,
 
   // Suggestions
   SUGGESTIONS: '/suggestions',
@@ -42,7 +43,6 @@ export const API_ENDPOINTS = {
   // Duas
   DUAS: '/duas',
   DUA_DETAIL: (id: string) => `/duas/${id}`,
-  enableLogging: true,
 } as const;
 
 
