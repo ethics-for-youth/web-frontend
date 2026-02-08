@@ -18,9 +18,12 @@ export type {
   GetCompetitionResponse,
   CompetitionRegistrationRequest,
   VolunteerJoinRequest,
+  UpdateVolunteerRequest,
   CreateSuggestionRequest,
   ListQueryParams,
 } from '@/types/api';
+
+export type { VolunteersListResponse } from './volunteersApi';
 
 // Re-export new service types
 export type { 

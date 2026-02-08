@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   // Volunteers
   VOLUNTEER_JOIN: '/volunteers/join',
   VOLUNTEERS: '/volunteers',
+  VOLUNTEER_DETAIL: (id: string) => `/volunteers/${id}`,
   
   // Suggestions
   SUGGESTIONS: '/suggestions',

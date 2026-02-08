@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, BookOpen, Users, MessageSquare, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Calendar, BookOpen, Users, HandHelping, MessageSquare, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -21,6 +21,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (open
     { name: 'Events', path: '/admin/events', icon: Calendar },
     { name: 'Courses', path: '/admin/courses', icon: BookOpen },
     { name: 'Registrations', path: '/admin/registrations', icon: Users },
+    { name: 'Volunteers', path: '/admin/volunteers', icon: HandHelping },
     { name: 'Messages', path: '/admin/messages', icon: MessageSquare },
   ];
 
