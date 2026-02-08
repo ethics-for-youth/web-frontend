@@ -109,6 +109,50 @@ export interface ContactForm {
   message: string;
 }
 
+// Add these types to your existing types/index.ts file
+
+export interface Trip {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  meetingPoint?: string;
+  maxParticipants?: number;
+  ageLimit?: string;
+  registrationFee?: number;
+  status: 'active' | 'inactive' | 'completed';
+  imageUrl?: string;
+  organizer?: string;
+  chiefMentor?: string;
+  duration?: string;
+  activities?: string[];
+  transportInfo?: string;
+  contact?: {
+    instagram?: string;
+    whatsapp?: string;
+    email?: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TripRegistration {
+  id: string;
+  tripId: string;
+  name: string;
+  email: string;
+  phone: string;
+  age: number;
+  gender: 'male' | 'female';
+  emergencyContact: string;
+  emergencyPhone: string;
+  specialRequirements?: string;
+  paymentStatus?: 'pending' | 'completed' | 'failed';
+  paymentId?: string;
+  registrationDate: string;
+}
 // Payment related types
 export interface PaymentUserDetails {
   id: string;

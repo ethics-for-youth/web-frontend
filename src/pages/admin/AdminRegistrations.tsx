@@ -53,8 +53,7 @@ const AdminRegistrations = () => {
       .filter(reg =>
         searchTerm
           ? reg.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (reg.notes && reg.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+          reg.userEmail.toLowerCase().includes(searchTerm.toLowerCase())
           : true
       )
       .filter(reg =>
@@ -80,6 +79,20 @@ const AdminRegistrations = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return 'bg-gray-100 text-gray-800';          // Order/payment created
+      case 'authorized': return 'bg-purple-100 text-purple-800';  // Payment authorized
+      case 'captured': return 'bg-green-100 text-green-800';      // Payment success
+      case 'failed': return 'bg-red-100 text-red-800';            // Payment failed
+      case 'refunded': return 'bg-blue-100 text-blue-800';        // Full refund
+      case 'paid': return 'bg-green-200 text-green-900';          // Order paid 
+      default: return 'bg-gray-200 text-gray-900';               // Fallback
+    }
+  };
+
+
 
   const toggleRegistrationStatus = async (registrationId: string, currentStatus: string) => {
     try {
@@ -242,6 +255,9 @@ const AdminRegistrations = () => {
                       <span><strong>Item ID:</strong> {registration.itemId}</span>
                       <span><strong>Item Title:</strong> {registration.itemTitle}</span>
                       <span><strong>Submitted:</strong> {formatDateForDisplay(registration.registeredAt)}</span>
+                      <span><strong>Payment Status:</strong>  <Badge className={getPaymentStatusColor(registration?.paymentStatus)}>
+                        {registration?.paymentStatus}
+                      </Badge></span>
                     </div>
                     {registration.notes && (
                       <div className="mt-2 text-sm">
@@ -294,6 +310,7 @@ const AdminRegistrations = () => {
                                 <p><strong>Item ID:</strong> {selectedRegistration.itemId}</p>
                                 <p><strong>Item Title:</strong> {selectedRegistration.itemTitle}</p>
                                 <p><strong>Status:</strong> {selectedRegistration.status.charAt(0).toUpperCase() + selectedRegistration.status.slice(1)}</p>
+                                <p><strong>Payment Status:</strong> {selectedRegistration?.paymentStatus}</p>
                                 <p><strong>Registered:</strong> {formatDateForDisplay(selectedRegistration.registeredAt)}</p>
                                 <p><strong>Last Updated:</strong> {formatDateForDisplay(selectedRegistration.updatedAt)}</p>
                               </div>
@@ -303,11 +320,7 @@ const AdminRegistrations = () => {
                           {selectedRegistration.notes && (
                             <div>
                               <h4 className="font-semibold text-foreground">Notes</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {selectedRegistration.notes && typeof selectedRegistration.notes === "object"
-                                  ? `${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).purpose || ""} ${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).extra_info ? `- ${(selectedRegistration.notes as { purpose?: string; extra_info?: string }).extra_info}` : ""}`
-                                  : selectedRegistration.notes}
-                              </p>
+                              <p className="text-sm text-muted-foreground">{selectedRegistration?.notes}</p>
                             </div>
                           )}
 

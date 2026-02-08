@@ -14,6 +14,7 @@ export interface Registration {
   userName: string;
   userPhone?: string;
   status: 'registered' | 'cancelled' | 'completed';
+  paymentStatus: string,
   notes?: string;
   registeredAt: string;
   updatedAt: string;
