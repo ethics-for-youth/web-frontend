@@ -97,51 +97,51 @@ const Events = () => {
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
-            <Card key={event.id} className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-primary group-hover:text-primary-light transition-colors">
-                      {event.title}
-                    </CardTitle>
-                    <CardDescription className="mt-2">
-                      <span className="space-y-2 block">
-                        <span className="flex items-center space-x-2 text-sm">
-                          <Calendar className="w-4 h-4 text-primary" />
-                          <span>{formatDateForDisplay(event.date)}</span>
+            <Link to={`/events/${event.id}`} key={event.id} className="block">
+              <Card className="shadow-card hover:shadow-lg transition-shadow bg-gradient-card group flex flex-col h-full cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-primary group-hover:text-primary-light transition-colors">
+                        {event.title}
+                      </CardTitle>
+                      <CardDescription className="mt-2">
+                        <span className="space-y-2 block">
+                          <span className="flex items-center space-x-2 text-sm">
+                            <Calendar className="w-4 h-4 text-primary" />
+                            <span>{formatDateForDisplay(event.date)}</span>
+                          </span>
+                          <span className="flex items-center space-x-2 text-sm block mt-1">
+                            <MapPin className="w-4 h-4 text-primary" />
+                            <span>{event.location}</span>
+                          </span>
+                          <span className="flex items-center space-x-2 text-sm block mt-1">
+                            <User className="w-4 h-4 text-primary" />
+                            <span>Category: {event.category}</span>
+                          </span>
                         </span>
-                        <span className="flex items-center space-x-2 text-sm block mt-1">
-                          <MapPin className="w-4 h-4 text-primary" />
-                          <span>{event.location}</span>
-                        </span>
-                        <span className="flex items-center space-x-2 text-sm block mt-1">
-                          <User className="w-4 h-4 text-primary" />
-                          <span>Category: {event.category}</span>
-                        </span>
-                      </span>
-                    </CardDescription>
+                      </CardDescription>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col flex-1">
-                <p className="text-muted-foreground mb-6 line-clamp-4">
-                  {event.description}
-                </p>
-                <div className="mt-auto">
-                  <Button asChild className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
-                    <Link to={`/events/${event.id}`}>
+                </CardHeader>
+                <CardContent className="flex flex-col flex-1">
+                  <p className="text-muted-foreground mb-6 line-clamp-4">
+                    {event.description}
+                  </p>
+                  <div className="mt-auto">
+                    <Button className="w-full bg-gradient-primary hover:opacity-90 transition-opacity group-hover:bg-primary-dark">
                       View Details & Register
                       <ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
         {/* No Events Fallback */}
-                  {events.length === 0 && (
+        {events.length === 0 && (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">No Events Available</h3>
