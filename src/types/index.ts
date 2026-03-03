@@ -159,6 +159,10 @@ export interface PaymentUserDetails {
   name: string;
   email: string;
   phone: string;
+  age:number;
+  gender:string;
+  education:string;
+  joinCommunity:boolean;
   notes?: Record<string, string>;
 }
 

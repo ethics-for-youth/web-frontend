@@ -156,19 +156,6 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                   required
                 />
               </div>
-
-
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={userDetails.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Enter your address"
-                />
-              </div>
-
             </div>
 
             <div className="flex items-center space-x-2">
@@ -218,6 +205,10 @@ const CourseRegistrationPayment: React.FC<CourseRegistrationPaymentProps> = ({
                 name: userDetails.name,
                 email: userDetails.email,
                 phone: userDetails.phone,
+                age: Number(userDetails.age),
+                gender:userDetails.gender,
+                education: userDetails.education,
+                joinCommunity:userDetails.joinCommunity,
                 notes: {
                   details: `Registration via course form. Age: ${userDetails.age}, Gender: ${userDetails.gender}, Education: ${userDetails.education || 'Not provided'}${userDetails.joinCommunity ? ', Wants to join community' : ''}`
                 }
